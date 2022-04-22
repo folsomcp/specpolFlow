@@ -4,8 +4,10 @@
 
 Some prerequisite list here
 
-* requirement 1
-* requirement 2
+* numpy
+* matplotlib for plotting
+* LSDpy (not required but useful for calculating LSD profiles)
+* requirement 3
 
 ## Installation instructions
 
