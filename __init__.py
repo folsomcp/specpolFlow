@@ -1,3 +1,3 @@
 print("loading specpolFlow package")
-import specpolFlow.io
+import specpolFlow.iolsd
 import specpolFlow.bz
