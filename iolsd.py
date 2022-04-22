@@ -6,12 +6,6 @@
 import numpy as np
 
 class lsd_prof:
-    """
-    Contains the information that makes up an LSD profile.
-
-    This include a function for writing LSD profiles,
-    using Donati's usual format.
-    """
     def __init__(self, velStart=None, velEnd=None, pixVel=None):
         """
         Initialize an empty LSD profile.
