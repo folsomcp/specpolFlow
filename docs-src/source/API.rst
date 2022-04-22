@@ -1,13 +1,14 @@
-MyPackage 1
-============
+spFlow Package
+==============
 
-io
+iolsd module
 ####################
 
-.. automodule:: specpolFlow.io
+.. automodule:: specpolFlow.iolsd
     :members:
-    
-bz
+    :special-members: __init__
+
+bz module
 ####################
 
 .. automodule:: specpolFlow.bz

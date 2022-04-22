@@ -1,11 +1,27 @@
 ## @module iolsd.py
 # Documentation for iolsd.py
 #
-# More information can come here.
+# Tools for reading and writing files, related to calculating
+# and analysing LSD profiles.
 
 import numpy as np
 
 class lsd_prof:
+    """
+    Holds the LSD profile data.
+
+    This usually includes numpy arrays:
+    
+    * vel - velocity grid for the LSD profile
+    * specI - the Stokes I profile)
+    * specSigI - the uncertainties on Stokes I
+    * specV - the polarization profile, most often Stokes V
+    * specSigI - the uncertainties on the polarization profile
+    * specN1 - the Null1 profile
+    * specSigN1 - the uncertainties on specN1
+    * specN2 - the Null2 profile, if it exists, otherwise zeros
+    * specSigN2 - the uncertainties on Null2 if they exist
+    """
     def __init__(self, velStart=None, velEnd=None, pixVel=None):
         """
         Initialize an empty LSD profile.
@@ -39,7 +55,7 @@ class lsd_prof:
         This saves to a text file in Donati's format.
         
         :param fname: the name of the file the LSD profile to save to.
-        :param header: optionally, one line of header text for the output file.  This text string should end with \n.
+        :param header: optionally, one line of header text for the output file.  This text string should end with a newline.
         """
         
         oFile = open(fname, 'w')
@@ -101,6 +117,17 @@ def read_lsd(fname):
 
 
 class mask:
+    """
+    The data for the LSD line mask.
+
+    This usually contains arrays:
+    
+    * wl - wavelengths of lines
+    * element - the element+ion code for the line
+    * depth - the depth of the line
+    * lande - the effective Lande factor of the line
+    * iuse - a flag for whether the line is used
+    """
     def __init__(self, fname=None):
         """
         Read in an LSD mask file and save it to an instance of the mask class.
@@ -188,6 +215,18 @@ class mask:
 
 
 class observation:
+    """
+    Contains an observed spectrum, usually spectropolarimetric data.
+
+    Usually contains arrays:
+    
+    * wl - wavelengths
+    * specI - Stokes I spectrum
+    * specV - polarized spectrum, usually Stokes V
+    * specN1 - the first polarimetric null spectrum
+    * specN2 - the second polarimetric null spectrum
+    * specSig - the formal uncertainties, which apply to the other spectra
+    """
     def __init__(self, fname, sortByWavelength=False):
         """
         Read in the observed spectrum and save it.
