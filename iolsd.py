@@ -128,20 +128,22 @@ class mask:
     * lande - the effective Lande factor of the line
     * iuse - a flag for whether the line is used
     """
-    def __init__(self, fname=None):
+    def __init__(self, fname=None, nLines=0):
         """
         Read in an LSD mask file and save it to an instance of the mask class.
         
         The mask files are in the format for Donati's LSD and LSDpy.
         
         :param fname: the name of the file containing the mask
+        :paral nLines: if no file name is given, initialize arrays of zeros, for nLines of data.
         """
         if fname == None:
-            self.wl = np.zeros(0)
-            self.element = np.zeros(0)
-            self.depth = np.zeros(0)
-            self.lande = np.zeros(0)
-            self.iuse = np.zeros(0)
+            self.wl = np.zeros(nLines)
+            self.element = np.zeros(nLines)
+            self.depth = np.zeros(nLines)
+            self.excite = np.zeros(nLines)
+            self.lande = np.zeros(nLines)
+            self.iuse = np.zeros(nLines, dtype=int)
             
         else:
             #Columns are: wavelength (nm),
@@ -338,3 +340,101 @@ class observation:
             self.specSig = self.specSig[self.ind]
         
         return
+
+
+class line_list:
+    """
+    Container for a set of spectral line data, usually from VALD.
+
+    This usually contains:
+    * nLines - number of lines in the line list
+    * ion - list of species identifiers (element or molecule and ionizaion)
+    * wl - array of wavelengths
+    * loggf - array of oscillator strengths (log gf)
+    * Elo - array of excitation potentials for the lower level in the transition (in eV)
+    * Jlo - array of J quantum numbers for the lower level
+    * Eu - array of excitation potentials for the upper level in the transition (in eV)
+    * Jup - array of J quantum numbers for the upper level
+    * landeLo - array of Lande factors for the lower level
+    * landeUp - array of Lande factors for the upper level
+    * landeEff - array of effective Lande factors for the transition
+    * rad - array of radiative damping coefficients
+    * stark - array of quadratic Stark damping coefficients
+    * waals - array of van der Waals damping coefficients
+    * depth - depth at the centre of the spectral line, as estimated by VALD
+    * configLo - list of strings with the electron configuration and term symbols for the lower level
+    * configUp - list of strings with the electron configuration and term symbols for the upper level
+    """
+    def __init__(self, nLines = 0):
+        """
+        Initialize an empty line_list to be populated later
+        
+        :param nLines: optional, initialize arrays for this many lines (initializes values to 0)
+        """
+        self.nLines   = nLines
+        self.ion      = ['' for i in range(nLines)]
+        self.wl      = np.zeros(nLines)
+        self.loggf    = np.zeros(nLines)
+        self.Elo      = np.zeros(nLines)
+        self.Jlo      = np.zeros(nLines)
+        self.Eup      = np.zeros(nLines)
+        self.Jup      = np.zeros(nLines)
+        self.landeLo  = np.zeros(nLines)
+        self.landeUp  = np.zeros(nLines)
+        self.landeEff = np.zeros(nLines)
+        self.rad      = np.zeros(nLines)
+        self.stark    = np.zeros(nLines)
+        self.waals    = np.zeros(nLines)
+        self.depth    = np.zeros(nLines)
+        self.configLo = ['' for i in range(nLines)]
+        self.configUp = ['' for i in range(nLines)]
+    
+
+def read_VALD(fname):
+    """
+    Read a line list from VALD
+
+    This expects VALD version 3, in an 'extract stellar' 'long' format.
+
+    :param fname: the file name for the VALD line list.
+    :rtype: arrays or lists of line data
+    """
+    fVald = open(fname, 'r')
+    i = 0
+    j = 0
+    nLines = 0
+    for txtLine in fVald:
+        if i == 0:
+            nLines = int(txtLine.split(',')[2])
+            llist = line_list(nLines)
+        #There should be 3 lines of header,
+        #then 4 file lines for each set of spectra line data.
+        if i > 2 and i < nLines*4+3:
+            ii = (i-3)%4
+            if ii == 0:
+                #The line data are: Spec Ion, Wl(A), log gf, E_lower(eV), 
+                #J_lower, E_upper(eV), J_upper, Lande factor lower, 
+                #Lande factor upper, effective Lande factor, Rad. damping, 
+                #Stark damping, van der Waals damping, central depth
+                vals = txtLine.split(',')
+                llist.ion[j]      = vals[0].strip('\'')
+                llist.wl[j]      = float(vals[1])
+                llist.loggf[j]    = float(vals[2])
+                llist.Elo[j]      = float(vals[3])
+                llist.Jlo[j]      = float(vals[4])
+                llist.Eup[j]      = float(vals[5])
+                llist.Jup[j]      = float(vals[6])
+                llist.landeLo[j]  = float(vals[7])
+                llist.landeUp[j]  = float(vals[8])
+                llist.landeEff[j] = float(vals[9])
+                llist.rad[j]      = float(vals[10])
+                llist.stark[j]    = float(vals[11])
+                llist.waals[j]    = float(vals[12])
+                llist.depth[j]    = float(vals[13])
+            if ii == 1:
+                llist.configLo[j] = txtLine.strip(' \n\'')
+            if ii == 2:
+                llist.configUp[j] = txtLine.strip(' \n\'')
+                j += 1
+        i += 1
+    return llist
