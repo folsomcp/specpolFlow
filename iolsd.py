@@ -2,7 +2,7 @@
 # Documentation for iolsd.py
 #
 # Tools for reading and writing files, related to calculating
-# and analysing LSD profiles.
+# and analyzing LSD profiles.
 
 import numpy as np
 
@@ -328,7 +328,7 @@ class observation:
                 
         fObs.close()
         
-        #Optionaly, sort the observation so wavelength is always increasing
+        #Optionally, sort the observation so wavelength is always increasing
         if sortByWavelength:
             self.ind = np.argsort(self.wl)
             
@@ -348,7 +348,7 @@ class line_list:
 
     This usually contains:
     * nLines - number of lines in the line list
-    * ion - list of species identifiers (element or molecule and ionizaion)
+    * ion - list of species identifiers (element or molecule and ionization)
     * wl - array of wavelengths
     * loggf - array of oscillator strengths (log gf)
     * Elo - array of excitation potentials for the lower level in the transition (in eV)
@@ -437,4 +437,6 @@ def read_VALD(fname):
                 llist.configUp[j] = txtLine.strip(' \n\'')
                 j += 1
         i += 1
+    
+    fVald.close()
     return llist
