@@ -131,11 +131,12 @@ class mask:
     def __init__(self, fname=None, nLines=0):
         """
         Read in an LSD mask file and save it to an instance of the mask class.
+        If no file is given an empty line mask can be generated.
         
         The mask files are in the format for Donati's LSD and LSDpy.
         
         :param fname: the name of the file containing the mask
-        :paral nLines: if no file name is given, initialize arrays of zeros, for nLines of data.
+        :param nLines: if no file name is given, initialize arrays of zeros, for nLines of data.
         """
         if fname == None:
             self.wl = np.zeros(nLines)
@@ -347,6 +348,7 @@ class line_list:
     Container for a set of spectral line data, usually from VALD.
 
     This usually contains:
+    
     * nLines - number of lines in the line list
     * ion - list of species identifiers (element or molecule and ionization)
     * wl - array of wavelengths
@@ -369,7 +371,7 @@ class line_list:
         """
         Initialize an empty line_list to be populated later
         
-        :param nLines: optional, initialize arrays for this many lines (initializes values to 0)
+        :param nLines: optional, make arrays for this many lines (initial values are all 0)
         """
         self.nLines   = nLines
         self.ion      = ['' for i in range(nLines)]
@@ -392,12 +394,12 @@ class line_list:
 
 def read_VALD(fname):
     """
-    Read a line list from VALD
+    Read a list of spectral line data from VALD
 
-    This expects VALD version 3, in an 'extract stellar' 'long' format.
+    This expects VALD version 3 line list, in an 'extract stellar' 'long' format.
 
     :param fname: the file name for the VALD line list.
-    :rtype: arrays or lists of line data
+    :rtype: line_list object, containing arrays of line data
     """
     fVald = open(fname, 'r')
     i = 0
