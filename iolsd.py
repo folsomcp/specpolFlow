@@ -22,32 +22,45 @@ class lsd_prof:
     * specN2 - the Null2 profile, if it exists, otherwise zeros
     * specSigN2 - the uncertainties on Null2 if they exist
     """
-    def __init__(self, velStart=None, velEnd=None, pixVel=None):
+    def __init__(self, vel, specI, specSigI, specV, specSigV, specN1, specSigN1, specN2=[], specSigN2=[], header=None):
         """
-        Initialize an empty LSD profile.
+        Initialize an LSD profile, using data from an existing profile. 
+
+        :param self: lsd_prof being created
+        :param vel: velocity grid for the LSD profile
+        :param specI: the Stokes I profile
+        :param specSigI: the uncertainties on Stokes I
+        :param specV: the polarization profile, usually Stokes V
+        :param specSigV: the uncertainties on the polarization profile 
+        :param specN1: the Null1 profile
+        :param specSigN1: the uncertainties on Null1
+        :param specN2: the Null2 profile, if it exists, otherwise it is all 0s (optional)
+        :param specSigN2: the uncertainties on Null2 if there are any, otherwise all 0s (optional)
+        :param header: the header of the LSD profile file, if it exists (optional) 
+        """
+        self.vel = vel
+        self.specI = specI
+        self.specSigI = specSigI
+        self.specV = specV
+        self.specSigV = specSigV
+        self.specN1 = specN1
+        self.specSigN1 = specSigN1
         
-        Optionally this can set up the grid in velocity for the profile.
-
-        :param velStart: the velocity for the start (blue side) of the LSD profile
-        :param velEnd: the velocity for the end (red side) of the the LSD profile
-        :param pixVel: the step in velocity between pixels in the LSD profile
-        """
-        if velStart != None and velEnd != None and pixVel != None:
-            self.vel = np.arange(velStart, velEnd+pixVel, pixVel)
-            self.npix = self.vel.shape[0]
+        self.npix = vel.shape[0]
+        if(specN2 != [] and specSigN2 != []):
+          self.specN2 = specN2
+          self.specSigN2 = specSigN2
         else:
-            self.npix = 0
-            self.vel = np.zeros(self.npix)
-        self.specI = np.ones(self.npix)
-        self.specSigI = np.zeros(self.npix)
-        self.specV = np.zeros(self.npix)
-        self.specSigV = np.zeros(self.npix)
-        self.specN1 = np.zeros(self.npix)
-        self.specSigN1 = np.zeros(self.npix)
-        self.specN2 = np.zeros(self.npix)
-        self.specSigN2 = np.zeros(self.npix)
-        self.header = None
+          self.specN2 = np.zeros(self.npix)
+          self.specSigN2 = np.zeros(self.npix)
+        
+        if(header != None):
+          self.header = header
+        else:
+          self.header = ""
 
+    
+    
     def save(self, fname):
         """
         Save the LSD profile to a file.
@@ -70,6 +83,99 @@ class lsd_prof:
         oFile.close()
         return
 
+    #overloaded functions
+    def __len__(self):
+        """
+        Return the length of each array in an LSD profile. They should all be the same length, so it just returns the length of the velocity array. 
+
+        :param self: lsd_prof whose length is being checked
+
+        :rtype: int
+        """
+        return len(self.vel)
+
+    def __getitem__(self, key):
+        """Overloaded getitem function. Returns an lsd_prof with only the values at the specified index(s).
+
+        :param self: lsd_prof being queried
+        :param key: the index or slice being checked
+
+        :rtype: lsd_prof_robin
+        """
+        vel_s = self.vel[key]
+        specI_s = self.specI[key]
+        specSigI_s = self.specSigI[key]
+        specV_s = self.specV[key]
+        specSigV_s = self.specSigV[key]
+        specN1_s = self.specN1[key]
+        specSigN1_s = self.specSigN1[key]
+        specN2_s = self.specN2[key]
+        specSigN2_s = self.specSigN2[key]
+        if(self.header != None):
+            header_s = self.header
+        else:
+            header_s = ""
+        slice_prof = lsd_prof_robin(vel_s, specI_s, specSigI_s, specV_s, specSigV_s, specN1_s, specSigN1_s, specN2_s, specSigN2_s, header_s)
+        return slice_prof
+
+    def __setitem__(self, key, newval):
+        """
+        Overloaded setitem function. Sets all values of the lsd_prof at the specified location equal to the input profile's values.
+
+        :param self: lsd_prof object being edited
+        :param key: the index or slice being overwritten
+        :param newval: lsd_prof whose values are to replace the overwritten ones
+        """
+        if not(isinstance(newval, lsd_prof_robin)):
+            raise TypeError()
+        else:
+            self.vel[key] = newval.vel[:]
+            self.specI[key] = newval.specI[:]
+            self.specSigI[key] = newval.specSigI[:]
+            self.specV[key] = newval.specV[:]
+            self.specSigV[key] = newval.specSigV[:]
+            self.specN1[key] = newval.specN1[:]
+            self.specSigN1[key] = newval.specSigN1[:]
+            self.specN2[key] = newval.specN2[:]
+            self.specSigN2[key] = newval.specSigN2[:]
+
+    def __mul__(self, other):
+        """
+        Overloaded multiplication function. Allows you to do lsd * n and multiply all values in the lsd, other than the velocity, by n.
+
+        :param self: lsd_prof being scaled
+        :param other: number to multiply by
+
+        :rtype: lsd_prof_robin
+        """  
+        self.specI = np.multiply(self.specI, other)
+        self.specSigI = np.multiply(self.specSigI, other)
+        self.specV = np.multiply(self.specV, other)
+        self.specSigV = np.multiply(self.specSigV, other)
+        self.specN1 = np.multiply(self.specN1, other)
+        self.specSigN1 = np.multiply(self.specSigN1, other)
+        self.specN2 = np.multiply(self.specN2, other)
+        self.specSigN2 = np.multiply(self.specSigN2, other)
+        return self
+
+    def __rmul__(self, other):
+        """
+        Overloaded reverse multiplication function. Allows you to do n * lsd and multiply all values in the lsd, other than the velocity, by n.
+
+        :param self: lsd_prof being scaled
+        :param other: number to multiply by
+
+        :rtype: lsd_prof_robin
+        """    
+        self.specI = np.multiply(self.specI, other)
+        self.specSigI = np.multiply(self.specSigI, other)
+        self.specV = np.multiply(self.specV, other)
+        self.specSigV = np.multiply(self.specSigV, other)
+        self.specN1 = np.multiply(self.specN1, other)
+        self.specSigN1 = np.multiply(self.specSigN1, other)
+        self.specN2 = np.multiply(self.specN2, other)
+        self.specSigN2 = np.multiply(self.specSigN2, other)
+        return self
 
 def read_lsd(fname):
     """
@@ -96,23 +202,20 @@ def read_lsd(fname):
     except(ValueError):
         nskip = 2
     
-    #Read the LSD profile, skipping header lines
+    #Read the profile, skipping the header
     __prof = np.loadtxt(fname, skiprows=nskip, unpack=True)
+    vel = __prof[0,:]
+    specI = __prof[1,:]
+    specSigI = __prof[2,:]
+    specV = __prof[3,:]
+    specSigV = __prof[4,:]
+    specN1 = __prof[5,:]
+    specSigN1 = __prof[6,:]
+  
+    header = None
+    if(nskip > 0): header = head1txt
 
-    prof = lsd_prof()
-    prof.vel       = __prof[0,:]
-    prof.specI     = __prof[1,:]
-    prof.specSigI  = __prof[2,:]
-    prof.specV     = __prof[3,:]
-    prof.specSigV  = __prof[4,:]
-    prof.specN1    = __prof[5,:]
-    prof.specSigN1 = __prof[6,:]
-    
-    prof.npix = prof.vel.shape[0]
-    prof.specN2 = np.zeros(prof.npix)
-    prof.specSigN2 = np.zeros(prof.npix)
-    if (nskip > 0): prof.header = head1txt
-    
+    prof = lsd_prof(vel, specI, specSigI, specV, specSigV, specN1, specSigN1, [], [], header)
     return prof
 
 
