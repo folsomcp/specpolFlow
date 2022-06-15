@@ -4,6 +4,7 @@
 # Tools for reading and writing files, related to calculating
 # and analyzing LSD profiles.
 
+print('importing specpolFlow.iolsd')
 import numpy as np
 
 class lsd_prof:
@@ -100,7 +101,7 @@ class lsd_prof:
         :param self: lsd_prof being queried
         :param key: the index or slice being checked
 
-        :rtype: lsd_prof_robin
+        :rtype: lsd_prof
         """
         vel_s = self.vel[key]
         specI_s = self.specI[key]
@@ -115,7 +116,7 @@ class lsd_prof:
             header_s = self.header
         else:
             header_s = ""
-        slice_prof = lsd_prof_robin(vel_s, specI_s, specSigI_s, specV_s, specSigV_s, specN1_s, specSigN1_s, specN2_s, specSigN2_s, header_s)
+        slice_prof = lsd_prof(vel_s, specI_s, specSigI_s, specV_s, specSigV_s, specN1_s, specSigN1_s, specN2_s, specSigN2_s, header_s)
         return slice_prof
 
     def __setitem__(self, key, newval):
@@ -126,7 +127,7 @@ class lsd_prof:
         :param key: the index or slice being overwritten
         :param newval: lsd_prof whose values are to replace the overwritten ones
         """
-        if not(isinstance(newval, lsd_prof_robin)):
+        if not(isinstance(newval, lsd_prof)):
             raise TypeError()
         else:
             self.vel[key] = newval.vel[:]
@@ -146,7 +147,7 @@ class lsd_prof:
         :param self: lsd_prof being scaled
         :param other: number to multiply by
 
-        :rtype: lsd_prof_robin
+        :rtype: lsd_prof
         """  
         self.specI = np.multiply(self.specI, other)
         self.specSigI = np.multiply(self.specSigI, other)
@@ -165,7 +166,7 @@ class lsd_prof:
         :param self: lsd_prof being scaled
         :param other: number to multiply by
 
-        :rtype: lsd_prof_robin
+        :rtype: lsd_prof
         """    
         self.specI = np.multiply(self.specI, other)
         self.specSigI = np.multiply(self.specSigI, other)

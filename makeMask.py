@@ -3,7 +3,7 @@
 # Generate an LSD line mask from a VALD line list.
 
 import numpy as np
-import iolsd
+import specpolFlow.iolsd
 
 def make_mask(lineListFile, maskFile, depthCutoff = 0.0, atomsOnly = True,
                          includeNoLande = False, defaultLande = 1.0):
