@@ -6,6 +6,7 @@
 
 print('importing specpolFlow.iolsd')
 import numpy as np
+import matplotlib.pyplot as plt
 
 class lsd_prof:
     """
@@ -177,6 +178,28 @@ class lsd_prof:
         self.specN2 = np.multiply(self.specN2, other)
         self.specSigN2 = np.multiply(self.specSigN2, other)
         return self
+
+    def plot(self, figsize=(10,10), **kwargs):
+        '''Plot the LSD profile
+        
+        :param self: the lsd object to plot 
+        :param figsize: the size of the figure being created  
+        :rtype: returns an fig, ax matplotlib container. 
+        '''
+        
+        fig, ax = plt.subplots(4,1,figsize=figsize,sharex=True)
+
+        ax[3].errorbar(self.vel, self.specI, yerr=self.specSigI, xerr=None, fmt='o', ms=3,ecolor='0.5',c='k',**kwargs)
+        ax[2].errorbar(self.vel, self.specN1, yerr=self.specSigN1, xerr=None, fmt='o', ms=3,ecolor='0.5',c='k',**kwargs)
+        ax[1].errorbar(self.vel, self.specN2, yerr=self.specSigN2, xerr=None, fmt='o', ms=3,ecolor='0.5',c='k',**kwargs)
+        ax[0].errorbar(self.vel, self.specV, yerr=self.specSigV, xerr=None, fmt='o', ms=3, ecolor='0.5',c='k',**kwargs)
+        plt.subplots_adjust(hspace=.0)
+        ax[3].set_xlabel('Velocity (km/s)')
+        ax[3].set_ylabel('I')
+        ax[2].set_ylabel('N1')
+        ax[1].set_ylabel('N2')
+        ax[0].set_ylabel('V')
+        return(fig, ax)
 
 def read_lsd(fname):
     """
