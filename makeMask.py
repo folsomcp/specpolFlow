@@ -8,8 +8,9 @@ try:
 except ModuleNotFoundError:
     import iolsd
 
-def make_mask(lineListFile, maskFile, depthCutoff = 0.0, atomsOnly = True,
-                         includeNoLande = False, defaultLande = 1.0):
+def make_mask(lineListFile, maskFile, depthCutoff=0.0, wlStart=0.0, wlEnd=1e10, 
+              landeStart=-1e10, landeEnd=1e10, elementsUsed=[], elementsExclude=[],
+              atomsOnly = True, includeNoLande = False, defaultLande=1.0):
     """
     Generate an LSD line mask from a VALD line list and save it.
     The main interface for generating new line masks with Python scrips.
@@ -21,23 +22,37 @@ def make_mask(lineListFile, maskFile, depthCutoff = 0.0, atomsOnly = True,
     :param lineListFile: The name of the file containing the line list
     :param maskFile: The name of the to write the mask to
     :param depthCutoff: Only include lines in the mask deeper than this value (defaults to 0, all lines included)
+    :param wlStart: Optionally, only use lines with wavelengths above this (note: value in nm!)
+    :param wlEnd: Optionally, only use lines with wavelengths below this (note: value in nm!)
+    :param landeStart:  Optionally, only use lines with effective Lande factors above this
+    :param landeEnd: Optionally, only use lines with effective Lande factors below this
+    :param elementsUsed: Optionally, provide a list of elements to include in the line mask. This should be a list of strings with the element symbols, e.g. ['C', 'O', 'Si', 'Fe'] (an empty list or a list starting with 'all' will include all elements)
+    :param elementsExclude: Optionally, provide a list of elements to exclude from the line mask. Also a list of strings with the element symbols.
     :param atomsOnly: Only include atomic lines (no molecular lines) and exclude H lines (defaults to True)
     :param includeNoLande: Include lines in the mask even if no Lande factor can be estimated for them (defaults to False)
     :param defaultLande: The value of the effective Lande factor to use if no value can be estimated (only used if includeNoLande = True)
     :rtype: The mask object, in case further processing is desired
     """
     lineList = iolsd.read_VALD(lineListFile)
+    
     mask = convert_list_to_mask(lineList, depthCutoff=depthCutoff,
                                 atomsOnly=atomsOnly,
                                 includeNoLande=includeNoLande,
                                 defaultLande=defaultLande)
+    
+    mask = filter_mask(mask, depthCutoff=depthCutoff,
+                       wlStart=wlStart, wlEnd=wlEnd,
+                       landeStart=landeStart, landeEnd=landeEnd,
+                       elementsUsed=elementsUsed,
+                       elementsExclude=elementsExclude)
+    
     mask.save(maskFile)
 
     return mask
 
     
-def convert_list_to_mask(lineList, depthCutoff = 0.0, atomsOnly = True,
-                         includeNoLande = False, defaultLande = 1.0):
+def convert_list_to_mask(lineList, depthCutoff=0.0, atomsOnly = True,
+                         includeNoLande = False, defaultLande=1.0):
     """
     Convert a VALD line list to an LSD line mask.
     
@@ -72,8 +87,8 @@ def convert_list_to_mask(lineList, depthCutoff = 0.0, atomsOnly = True,
         element = lineList.ion[i].split()[0]
         ion = lineList.ion[i].split()[1]
 
-        if (lineList.depth[i] >= depthCutoff) and ((atomsOnly == False)
-            or (element in elements and element != 'H')):
+        if (lineList.depth[i] >= depthCutoff) and (
+            (atomsOnly == False) or (element in elements and element != 'H')):
             #Estimate an effective Lande factor if necessary, VALD flags 
             #levels without a known Lande factor using the value 99.0
             landeEff = lineList.landeEff[i]
@@ -127,7 +142,7 @@ def convert_list_to_mask(lineList, depthCutoff = 0.0, atomsOnly = True,
     if len(skippedIon) > 0:
         print('skipped all lines for species:')
         print(skippedIon)
-            
+    
     #Convert wavelengths from A to values in nm
     mask.wl = mask.wl*0.1
     #Remove blank entries in the line mask
@@ -311,7 +326,7 @@ def get_JJ_numbers(config):
     if not ',' in termSym:
         print('Failed to parse J1, J2 in JJ coupling, from:\n', termSym)
         return -1, -1., -1., -1, -1., -1.
-    sJ1, sJ2 = termSym.strip('()').split(',')
+    sJ1, sJ2 = termSym.strip('*').strip('()').split(',')
     #Often J1 and J2 are fractions and need to be converted
     J1 = parseFraction(sJ1, errMsg='Failed to parse J1 in JJ coupling:')
     J2 = parseFraction(sJ2, errMsg='Failed to parse J2 in JJ coupling:')
@@ -525,23 +540,118 @@ def getEffectiveLande(landeLo, landeUp, Jlo, Jup):
     return landeEff
 
 
+def filter_mask(mask, depthCutoff = 0.0, wlStart = 0.0, wlEnd = 1e10,
+               landeStart = -1e10, landeEnd = 1e10,
+               elementsUsed = [], elementsExclude = []):
+    """
+    Remove lines from an LSD line mask, based on their depth, wavelength,
+    effective Lande factor, or element.
+
+    Usually, only one of elementsUsed and elementsExclude should be used.
+    Both can be used, in that case only elements in elementsUsed are included,
+    and then any elements in elementsExclude are removed from that.
+    (Filtering by element currently only works for atomic lines,
+    not molecular lines)
+
+    :param mask: The line mask object to filter lines out of.
+    :param depthCutoff: Only include lines in the mask deeper than this value (defaults to 0, all lines included)
+    :param wlStart: Optionally, only use lines with wavelengths above this (note: value in nm!)
+    :param wlEnd: Optionally, only use lines with wavelengths below this (note: value in nm!)
+    :param landeStart:  Optionally, only use lines with effective Lande factors above this
+    :param landeEnd: Optionally, only use lines with effective Lande factors below this
+    :param elementsUsed: Optionally, provide a list of elements to include in the line mask. This should be a list of strings with the element symbols, e.g. ['C', 'O', 'Si', 'Fe'] (an empty list or a list starting with 'all' will include all elements)
+    :param elementsExclude: Optionally, provide a list of elements to exclude from the line mask. Also a list of strings with the element symbols.
+    :rtype: The line mask object, with the requested lines removed.
+    """
+    
+    elements=('H' ,'He','Li','Be','B' ,'C' ,'N' ,'O' ,'F' ,'Ne','Na','Mg',
+              'Al','Si','P' ,'S' ,'Cl','Ar','K' ,'Ca','Sc','Ti','V' ,'Cr',
+              'Mn','Fe','Co','Ni','Cu','Zn','Ga','Ge','As','Se','Br','Kr',
+              'Rb','Sr','Y' ,'Zr','Nb','Mo','Tc','Ru','Rh','Pd','Ag','Cd',
+              'In','Sn','Sb','Te','I' ,'Xe','Cs','Ba','La','Ce','Pr','Nd',
+              'Pm','Sm','Eu','Gd','Tb','Dy','Ho','Er','Tm','Yb','Lu','Hf',
+              'Ta','W' ,'Re','Os','Ir','Pt','Au','Hg','Tl','Pb','Bi','Po',
+              'At','Rn','Fr','Ra','Ac','Th','Pa','U' )
+    
+    #Remove lines that are outside the requested range in wavelength, Lande factor, or depth.
+    indRemove = (mask.depth < depthCutoff) | (mask.wl < wlStart) | (mask.wl > wlEnd) \
+        | (mask.lande < landeStart) | (mask.lande > landeEnd)
+    
+    #If there is also a list of specific elements to use
+    if type(elementsUsed) != type([]): print('ERROR: list of elements to include not of type list')
+    if elementsUsed != [] and elementsUsed[0].lower() != 'all':
+        indKeep = np.zeros_like(mask.iuse, dtype=bool)
+        #Set a flag to only keep elements in the requested list
+        for elUse in elementsUsed:
+            try:
+                elNumber = elements.index(elUse.strip())+1
+            except ValueError:
+                print('ERROR: Unrecognized element ', elUse, ' aborting!')
+                import sys
+                sys.exit()
+            indKeep = indKeep | (mask.element.astype(int) == elNumber)
+        indRemove = indRemove | np.logical_not(indKeep)
+    
+    #Or if there is also a list of specific elements to exclude from the mask
+    if type(elementsExclude) != type([]): print('ERROR: list of elements to exclude not of type list')
+    if elementsExclude != [] :
+        #if elementsUsed != [] and elementsUsed[0].lower() != 'all':
+        #    print('Warning: got both a list of elements to include and to exclude. ')
+        indExclude = np.zeros_like(mask.iuse, dtype=bool)
+        #Set a flag to remove elements in the exclude list
+        for elCut in elementsExclude:
+            try:
+                elNumber = elements.index(elCut.strip())+1
+            except ValueError:
+                print('ERROR: Unrecognized element ', elCut, ' aborting!')
+                import sys
+                sys.exit()
+            indExclude = indExclude | (mask.element.astype(int) == elNumber)
+        indRemove = indRemove | indExclude
+    
+    #Apply the filtering
+    mask.iuse[indRemove] = 0
+    
+    #Remove blank entries in the line mask
+    mask.prune()
+    
+    return mask
+
+
+
 ###############################################################
-#For running this as a terminal program
+#For running makeMask as a terminal program
 if __name__ == "__main__":
-    #Take input and output file names as command line arguments
+    #Take input and output file names as command line arguments,
+    #with some additional optional control parameters.
     import argparse
     parser = argparse.ArgumentParser(description='Generate an LSD line mask from a VALD line list. When Lande factors are not in the line list they will be estimated if possible.')
-    parser.add_argument("lineList", nargs='?', default='lines.dat', help="Line list from VALD. This should be an 'extract stellar' line list in the 'long' format.")
+    parser.add_argument("lineList", help="Line list from VALD. This file should be an 'extract stellar' line list in the 'long' format.")
     parser.add_argument("mask", nargs='?', default='mask.dat', help='Save the line mask to this file.')
     parser.add_argument("-d", "--depth", default='0', help='Optional number, only include lines deeper than this depth cutoff in the mask (defaults to 0, all lines included)')
+    parser.add_argument("-w1", default='0', help='Optional number, starting wavelength for lines included in the mask (in nm)')
+    parser.add_argument("-w2", default='1e10', help='Optional number, ending wavelength for lines included in the mask (in nm)')
+    parser.add_argument("-g1", default='-1e10', help='Optional number, lower cutoff in effective Lande factor for lines included in the mask')
+    parser.add_argument("-g2", default='1e10', help='Optional number, upper cutoff in effective Lande factor')
+    parser.add_argument("-e", "--elements", default='', help="Optional, elements to include in the mask, as list symbols. For multiple elements enclose in quotes, e.g. 'C O Fe Ni'. By default all elements are used.")
+    parser.add_argument("-ex", "--excludeEl", default='', help="Optional, elements to exclude from the mask, as a list symbols. For multiple elements enclose in quotes, e.g. 'C O Fe Ni'. By default all elements are used.")
     args = parser.parse_args()
-
+    
     llistName = args.lineList
     maskName = args.mask
     depthCutoff = float(args.depth)
+    wl1 = float(args.w1)
+    wl2 = float(args.w2)
+    lande1 = float(args.g1)
+    lande2 = float(args.g2)
+    elementsUsed = args.elements.split()
+    elementsExclude = args.excludeEl.split()
     
     #Run the line mask generating code
     print('reading line list from', llistName)
     mask = make_mask(llistName, maskName, depthCutoff = depthCutoff,
+                     wlStart = wl1, wlEnd = wl2,
+                     landeStart = lande1, landeEnd = lande2,
+                     elementsUsed = elementsUsed, elementsExclude = elementsExclude,
                      includeNoLande = False)
     print('mask saved to', maskName)
