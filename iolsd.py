@@ -178,7 +178,29 @@ class lsd_prof:
         self.specN2 = np.multiply(self.specN2, other)
         self.specSigN2 = np.multiply(self.specSigN2, other)
         return self
-
+    
+    def __add__(self, other):
+        """
+        Overloaded addition function. Allows you to do lsd + n and add n to all values in the velocity array. 
+        :param self: lsd_prof being added to
+        :param other: 
+        
+        :rtype: lsd_prof
+        """
+        self.vel = self.vel + other
+        return self
+    
+    def __sub__(self, other):
+        """
+        Overloaded subtraction function. Allows you to do lsd - n and subtract n from all values in the velocity array. 
+        :param self: lsd_prof being subtracted from
+        :param other: 
+        
+        :rtype: lsd_prof
+        """
+        self.vel = self.vel - other
+        return self
+    
     def plot(self, figsize=(10,10), **kwargs):
         '''Plot the LSD profile
         
