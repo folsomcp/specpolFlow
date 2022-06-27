@@ -201,6 +201,29 @@ class lsd_prof:
         self.vel = self.vel - other
         return self
     
+    def __floordiv__(self, other):
+        self.specI = np.divide(self.specI, other)
+        self.specSigI = np.divide(self.specSigI, other)
+        self.specV = np.divide(self.specV, other)
+        self.specSigV = np.divide(self.specSigV, other)
+        self.specN1 = np.divide(self.specN1, other)
+        self.specSigN1 = np.divide(self.specSigN1, other)
+        self.specN2 = np.divide(self.specN2, other)
+        self.specSigN2 = np.divide(self.specSigN2, other)
+        return self
+    
+    def __truediv__(self, other):
+        def __floordiv__(self, other):
+        self.specI = np.divide(self.specI, other)
+        self.specSigI = np.divide(self.specSigI, other)
+        self.specV = np.divide(self.specV, other)
+        self.specSigV = np.divide(self.specSigV, other)
+        self.specN1 = np.divide(self.specN1, other)
+        self.specSigN1 = np.divide(self.specSigN1, other)
+        self.specN2 = np.divide(self.specN2, other)
+        self.specSigN2 = np.divide(self.specSigN2, other)
+        return self
+    
     def plot(self, figsize=(10,10), **kwargs):
         '''Plot the LSD profile
         
