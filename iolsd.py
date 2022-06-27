@@ -234,7 +234,7 @@ class lsd_prof:
         :rtype: lsd object
         '''
         
-        self.specI = self.specI / wint_data * wint_new
+        self.specI = (1.0 - ((1.0-self.specI) / wint_data * wint_new )
         self.specSigI = self.specSigI / wint_data * wint_new
         self.specV = self.specV / wpol_data * wpol_new
         self.specSigV = self.specSigV / wpol_data * wpol_new
