@@ -213,7 +213,6 @@ class lsd_prof:
         return self
     
     def __truediv__(self, other):
-        def __floordiv__(self, other):
         self.specI = np.divide(self.specI, other)
         self.specSigI = np.divide(self.specSigI, other)
         self.specV = np.divide(self.specV, other)
