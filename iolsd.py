@@ -222,6 +222,28 @@ class lsd_prof:
         self.specN2 = np.divide(self.specN2, other)
         self.specSigN2 = np.divide(self.specSigN2, other)
         return self
+        
+    def scale(self, wint_data, wpol_data, wint_new, wpol_new)
+        '''Change the weigth of the lsd profile
+        
+        :param self: the lsd object
+        :param wint_data: The current intensity weight (d)
+        :param wpol_data: The current polarization weigth (g*d*lambda)
+        :param wint_new: The new intensity weight (d)
+        :param wpol_new: The new polarization weigth (g*d*lambda)
+        :rtype: lsd object
+        '''
+        
+        self.specI = self.specI / wint_data * wint_new
+        self.specSigI = self.specSigI / wint_data * wint_new
+        self.specV = self.specV / wpol_data * wpol_new
+        self.specSigV = self.specSigV / wpol_data * wpol_new
+        self.specN1 = self.specN1 / wpol_data * wpol_new
+        self.specSigN1 = self.specSigN1 / wpol_data * wpol_new
+        self.specN2 = self.specN2 / wpol_data * wpol_new
+        self.specSigN2 = self.specSigN2 / wpol_data * wpol_new
+        return(self)
+
     
     def plot(self, figsize=(10,10), **kwargs):
         '''Plot the LSD profile
