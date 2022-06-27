@@ -223,7 +223,7 @@ class lsd_prof:
         self.specSigN2 = np.divide(self.specSigN2, other)
         return self
         
-    def scale(self, wint_data, wpol_data, wint_new, wpol_new)
+    def scale(self, wint_data, wpol_data, wint_new, wpol_new):
         '''Change the weigth of the lsd profile
         
         :param self: the lsd object
