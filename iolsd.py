@@ -433,8 +433,7 @@ class observation:
         self.specN1=specN1
         self.specN2=specN2
         self.specSig=specSig
-        return(self)
-
+        
 
 def read_spectrum(fname, sortByWavelength=False):
     """
