@@ -423,117 +423,135 @@ class observation:
     * specN2 - the second polarimetric null spectrum
     * specSig - the formal uncertainties, which apply to the other spectra
     """
-    def __init__(self, fname, sortByWavelength=False):
-        """
-        Read in the observed spectrum and save it.
-        
-        This follows the .s format from Donati's LibreESPRIT,
-        files can either have two lines of header or no header.
-        This supports 6 column spectropolarimetric files
-        (wavelength, I, V|Q|U, null1, null2, errors),
-        and also 3 column spectra (wavelength, I, errors).
 
-        :param fname: the name of the file to read.
-        :param sortByWavelength: reorder the points in the spectrum to always increase in wavelength, if set to True.
-        """
-        ## Reading manually is ~4 times faster than np.loadtxt for a large files
-        fObs = open(fname, 'r')
-        #Check if the file starts with data or a header (assume it is two lines)
-        line = fObs.readline()
+    def __init__(self,wl, specI, specV, specN1, specN2, specSig, header=None)):
+        
+        self.header=header
+        self.wl = wl
+        self.specI=specI
+        self.specV=specV
+        self.specN1=specN1
+        self.specN2=specN2
+        self.specSig=specSig
+        return(self)
+
+
+def read_spectrum(fname, sortByWavelength=False):
+    """
+    Read in the observed spectrum and save it.
+    
+    This follows the .s format from Donati's LibreESPRIT,
+    files can either have two lines of header or no header.
+    This supports 6 column spectropolarimetric files
+    (wavelength, I, V|Q|U, null1, null2, errors),
+    and also 3 column spectra (wavelength, I, errors).
+
+    :param fname: the name of the file to read.
+    :param sortByWavelength: reorder the points in the spectrum to always increase in wavelength, if set to True.
+    """
+    ## Reading manually is ~4 times faster than np.loadtxt for a large files
+    fObs = open(fname, 'r')
+    #Check if the file starts with data or a header (assume it is two lines)
+    line = fObs.readline()
+    words = line.split()
+    try:
+        float(words[0])
+        float(words[1])
+        float(words[2])
+        line2 = fObs.readline()
+        words2 = line2.split()
+        if(len(line2) > 2 and len(words) == len(words2)):
+            #If the first line behaves like spectrum data,
+            #and the second line is similar to the first line
+            obs_header = None
+            fObs.seek(0)
+        else:
+            #Otherwise assume there are two lines of header,
+            #the first one being a comment the second should be
+            #dimensions of the file but we figure that by reading the file.
+            obs_header = line
+    except ValueError:
+        obs_header = line
+        fObs.readline()
+
+    #Get the number of lines of data in the file
+    nLines = 0
+    for line in fObs:
         words = line.split()
-        try:
-            float(words[0])
-            float(words[1])
-            float(words[2])
-            line2 = fObs.readline()
-            words2 = line2.split()
-            if(len(line2) > 2 and len(words) == len(words2)):
-                #If the first line behaves like spectrum data,
-                #and the second line is similar to the first line
-                self.header = None
-                fObs.seek(0)
-            else:
-                #Otherwise assume there are two lines of header,
-                #the first one being a comment the second should be
-                #dimensions of the file but we figure that by reading the file.
-                self.header = line
-        except ValueError:
-            self.header = line
-            fObs.readline()
-
-        #Get the number of lines of data in the file
-        nLines = 0
-        for line in fObs:
-            words = line.split()
-            if(nLines == 0):
-                ncolumns = len(words)
-                if (ncolumns != 6):
-                    if(ncolumns == 3):
-                        print('Apparent Stokes I only spectrum')
-                        print('Generating place holder V and N columns')
-                    else:
-                        print('{:} column spectrum: unknown format!'.format(ncolumns))
-                        import sys
-                        sys.exit()
-            if len(words) == ncolumns:
-                if ncolumns == 6:
-                    if(float(words[1]) > 0. and float(words[5]) > 0.):
-                        nLines += 1
-                elif ncolumns == 3:
-                    if(float(words[1]) > 0. and float(words[2]) > 0.):
-                        nLines += 1
-            else:
-                print('ERROR: reading observation, line {:}, {:} columns :\n{:}'.format(nLines, len(words), line))
-
-        self.wl = np.zeros(nLines)
-        self.specI = np.zeros(nLines)
-        self.specV = np.zeros(nLines)
-        self.specN1 = np.zeros(nLines)
-        self.specN2 = np.zeros(nLines)
-        self.specSig = np.zeros(nLines)
-        
-        i = 0
-        #Rewind to start then advance the file pointer 2 lines
-        fObs.seek(0)
-        if self.header != None:
-            fObs.readline()
-            fObs.readline()
-        #Then read the actual data of the file
-        for line in fObs:
-            words = line.split()
-            if (len(words) == ncolumns and ncolumns == 6):
+        if(nLines == 0):
+            ncolumns = len(words)
+            if (ncolumns != 6):
+                if(ncolumns == 3):
+                    print('Apparent Stokes I only spectrum')
+                    print('Generating place holder V and N columns')
+                else:
+                    print('{:} column spectrum: unknown format!'.format(ncolumns))
+                    import sys
+                    sys.exit()
+        if len(words) == ncolumns:
+            if ncolumns == 6:
                 if(float(words[1]) > 0. and float(words[5]) > 0.):
-                    self.wl[i] = float(words[0])
-                    self.specI[i] = float(words[1])
-                    self.specV[i] = float(words[2])
-                    self.specN1[i] = float(words[3])
-                    self.specN2[i] = float(words[4])
-                    self.specSig[i] = float(words[5])
-                    i += 1
-            elif (len(words) == ncolumns and ncolumns == 3):
+                    nLines += 1
+            elif ncolumns == 3:
                 if(float(words[1]) > 0. and float(words[2]) > 0.):
-                    self.wl[i] = float(words[0])
-                    self.specI[i] = float(words[1])
-                    self.specSig[i] = float(words[2])
-                    self.specV[i] = 0.
-                    self.specN1[i] = 0.
-                    self.specN2[i] = 0.
-                    i += 1
-                
-        fObs.close()
-        
-        #Optionally, sort the observation so wavelength is always increasing
-        if sortByWavelength:
-            self.ind = np.argsort(self.wl)
+                    nLines += 1
+        else:
+            print('ERROR: reading observation, line {:}, {:} columns :\n{:}'.format(nLines, len(words), line))
+
+    obs_wl = np.zeros(nLines)
+    obs_specI = np.zeros(nLines)
+    obs_specV = np.zeros(nLines)
+    obs_specN1 = np.zeros(nLines)
+    obs_specN2 = np.zeros(nLines)
+    obs_specSig = np.zeros(nLines)
+    
+    i = 0
+    #Rewind to start then advance the file pointer 2 lines
+    fObs.seek(0)
+    if obs_header != None:
+        fObs.readline()
+        fObs.readline()
+    #Then read the actual data of the file
+    for line in fObs:
+        words = line.split()
+        if (len(words) == ncolumns and ncolumns == 6):
+            if(float(words[1]) > 0. and float(words[5]) > 0.):
+                obs_wl[i] = float(words[0])
+                obs_specI[i] = float(words[1])
+                obs_specV[i] = float(words[2])
+                obs_specN1[i] = float(words[3])
+                obs_specN2[i] = float(words[4])
+                obs_specSig[i] = float(words[5])
+                i += 1
+        elif (len(words) == ncolumns and ncolumns == 3):
+            if(float(words[1]) > 0. and float(words[2]) > 0.):
+                obs_wl[i] = float(words[0])
+                obs_specI[i] = float(words[1])
+                obs_specSig[i] = float(words[2])
+                obs_specV[i] = 0.
+                obs_specN1[i] = 0.
+                obs_specN2[i] = 0.
+                i += 1
             
-            self.wl = self.wl[self.ind]
-            self.specI = self.specI[self.ind]
-            self.specV = self.specV[self.ind]
-            self.specN1 = self.specN1[self.ind]
-            self.specN2 = self.specN2[self.ind]
-            self.specSig = self.specSig[self.ind]
+    fObs.close()
+    
+    #Optionally, sort the observation so wavelength is always increasing
+    if sortByWavelength:
+        obs_ind = np.argsort(obs_wl)
         
-        return
+        obs_wl = obs_wl[obs_ind]
+        obs_specI = obs_specI[obs_ind]
+        obs_specV = obs_specV[obs_ind]
+        obs_specN1 = obs_specN1[obs_ind]
+        obs_specN2 = obs_specN2[obs_ind]
+        obs_specSig = obs_specSig[obs_ind]
+    
+    return(observation(obs_header,obs_wl, obs_specI, obs_specV, obs_specN1, obs_specN2, obs_specSig))
+        
+
+
+
+
 
 
 class line_list:
