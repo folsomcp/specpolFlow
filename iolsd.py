@@ -545,7 +545,7 @@ def read_spectrum(fname, sortByWavelength=False):
         obs_specN2 = obs_specN2[obs_ind]
         obs_specSig = obs_specSig[obs_ind]
     
-    return(observation(obs_header,obs_wl, obs_specI, obs_specV, obs_specN1, obs_specN2, obs_specSig))
+    return(observation(obs_wl, obs_specI, obs_specV, obs_specN1, obs_specN2, obs_specSig, header=obs_header))
         
 
 
