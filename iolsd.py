@@ -453,7 +453,7 @@ class observation:
             header_s = self.header
         else:
             header_s = ""
-        slice_obs = observation(wl_s, specI_s, specV_s, specN1_s, specN2_s, specSigI_s, header=header_s)
+        slice_obs = observation(wl_s, specI_s, specV_s, specN1_s, specN2_s, specSig_s, header=header_s)
         return slice_obs
 
     def __setitem__(self, key, newval):
