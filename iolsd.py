@@ -434,6 +434,47 @@ class observation:
         self.specN2=specN2
         self.specSig=specSig
         
+        
+    def __getitem__(self, key):
+        """Overloaded getitem function. Returns an observation object with only the values at the specified index(s).
+
+        :param self: observation being queried
+        :param key: the index or slice being checked
+
+        :rtype: observation
+        """
+        wl_s = self.wl[key]
+        specI_s = self.specI[key]
+        specSig_s = self.specSig[key]
+        specV_s = self.specV[key]
+        specN1_s = self.specN1[key]
+        specN2_s = self.specN2[key]
+        if(self.header != None):
+            header_s = self.header
+        else:
+            header_s = ""
+        slice_obs = observation(wl_s, specI_s, specV_s, specN1_s, specN2_s, specSigI_s, header=header_s)
+        return slice_obs
+
+    def __setitem__(self, key, newval):
+        """
+        Overloaded setitem function. Sets all values of the observation at the specified location equal to the input observation's values.
+
+        :param self: observation object being edited
+        :param key: the index or slice being overwritten
+        :param newval: observation whose values are to replace the overwritten ones
+        """
+        if not(isinstance(newval, observation)):
+            raise TypeError()
+        else:
+            self.wl[key] = newval.wl[:]
+            self.specI[key] = newval.specI[:]
+            self.specSig[key] = newval.specSig[:]
+            self.specV[key] = newval.specV[:]
+            self.specN1[key] = newval.specN1[:]
+            self.specN2[key] = newval.specN2[:]
+
+
 
 def read_spectrum(fname, sortByWavelength=False):
     """
