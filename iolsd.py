@@ -424,7 +424,7 @@ class observation:
     * specSig - the formal uncertainties, which apply to the other spectra
     """
 
-    def __init__(self,wl, specI, specV, specN1, specN2, specSig, header=None)):
+    def __init__(self,wl, specI, specV, specN1, specN2, specSig, header=None):
         
         self.header=header
         self.wl = wl
