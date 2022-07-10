@@ -480,10 +480,10 @@ class observation:
         with open(fname, 'w') as f:
         
             if self.header == None:
-                f.write('*** Spectrum of')
+                f.write('*** Spectrum of\n')
             else:
                 f.write(self.header)
-            f.write('  {} 5'.format(int(self.wl.size)))
+            f.write('  {} 5\n'.format(int(self.wl.size)))
             for i in range(0,self.wl.size):
                 f.write('{:10.4f} {:11.4e} {:11.4e} {:11.4e} {:11.4e} {:11.4e}\n'.format(
                             self[i].wl, self[i].specI, self[i].specV,
