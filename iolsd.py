@@ -474,6 +474,22 @@ class observation:
             self.specN1[key] = newval.specN1[:]
             self.specN2[key] = newval.specN2[:]
 
+    def write_s(self, filename):
+        '''Write the observation into a .s polarization format'''
+        
+        with open(fname, 'w') as f:
+        
+            if self.header == None:
+                f.write('*** Spectrum of')
+            else:
+                f.write(self.header)
+            f.write('  {} 5'.format(int(self.wl.size))
+            for i in range(0,self.wl.size):
+                f.write('{:10.4f} {:11.4e} {:11.4e} {:11.4e} {:11.4e} {:11.4e}\n'.format(
+                            self[i].wl, self[i].specI, self[i].specV,
+                            self[i].specN1, self[i].specN2, self[i].specSig))
+        return
+
 
 
 def read_spectrum(fname, sortByWavelength=False):
