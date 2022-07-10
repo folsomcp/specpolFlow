@@ -474,7 +474,7 @@ class observation:
             self.specN1[key] = newval.specN1[:]
             self.specN2[key] = newval.specN2[:]
 
-    def write_s(self, filename):
+    def write_s(self, fname):
         '''Write the observation into a .s polarization format'''
         
         with open(fname, 'w') as f:
