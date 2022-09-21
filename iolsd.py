@@ -48,7 +48,7 @@ class lsd_prof:
         self.specN1 = specN1
         self.specSigN1 = specSigN1
         
-        self.npix = vel.shape[0]
+        self.npix = vel.size
         if(specN2 != [] and specSigN2 != []):
           self.specN2 = specN2
           self.specSigN2 = specSigN2
