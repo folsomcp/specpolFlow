@@ -9,6 +9,7 @@ import numpy as np
 import astropy.units as u
 import astropy.constants as const
 import pandas as pd
+import copy
 
 def cog_I(lsd, Ic):
     
@@ -70,7 +71,7 @@ def calcBz(lsd, cog='I', norm='auto', lambda0=500*u.nm, geff=1.2, velrange=None,
         lsd_in = lsd[inside]
         lsd_out = lsd[np.logical_not(inside)]
     else:
-        lsd_in=np.copy(lsd)
+        lsd_in=copy.copy(lsd)
         
     
     # Check if norm is a string.
@@ -81,7 +82,7 @@ def calcBz(lsd, cog='I', norm='auto', lambda0=500*u.nm, geff=1.2, velrange=None,
             norm_val = np.median(lsd_out.specI)
         else:
             print('  no range in velocity given, using the median of the whole specI to determine continnum')
-            norm_val = np.median(lsd_out.specI)
+            norm_val = np.median(lsd_in.specI)
     else:
         norm_val = np.copy(norm)
         print('using given norm value')
@@ -108,13 +109,13 @@ def calcBz(lsd, cog='I', norm='auto', lambda0=500*u.nm, geff=1.2, velrange=None,
         # No bzwidth. using vrange if defined
         if velrange != None:
             print('no bzwidth defined, using velrange to calculate Bz')
-            lsd_bz = np.copy(lsd_in)
+            lsd_bz = copy.copy(lsd_in)
             # saving the range for plotting later.
             p_bzwidth = np.copy(velrange)
         else:
             print('no bzwidth nor velrange defined, using full velocity range to calculate Bz')
             p_bzrange = [lsd.vel.min(), lsd.vel.max()]
-            lsd_bz = np.copy(lsd)
+            lsd_bz = copy.copy(lsd)
     else:
         # Check whether it is a numpy array
         if isinstance(bzwidth, list) or isinstance(bzwidth, tuple):
