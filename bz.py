@@ -180,11 +180,11 @@ def calcBz(lsd, cog='I', norm='auto', lambda0=500*u.nm, geff=1.2, velrange=None,
             'Bzwidth min': p_bzwidth[0],
             'Bzwidth max': p_bzwidth[1],
             'V bz (G)': blv.value,
-            'V bz sig (G)': (blv * np.sqrt( (svf/vf)**2 + (si0v/ri0v)**2 )).to(G_cgs).value,
+            'V bz sig (G)': ( np.abs(blv * np.sqrt( (svf/vf)**2 + (si0v/ri0v)**2 ))).to(G_cgs).value,
             'N1 bz (G)': bln1.value,
-            'N1 bz sig (G)': (bln1 * np.sqrt( (snf1/nf1)**2 + (si0v/ri0v)**2 )).to(G_cgs).value,
-            'N2 bz (G)': bln1.value,
-            'N2 bz sig (G)': (bln2 * np.sqrt( (snf2/nf2)**2 + (si0v/ri0v)**2 )).to(G_cgs).value
+            'N1 bz sig (G)': ( np.abs(bln1 * np.sqrt( (snf1/nf1)**2 + (si0v/ri0v)**2 ))).to(G_cgs).value,
+            'N2 bz (G)': bln2.value,
+            'N2 bz sig (G)': ( np.abs(bln2 * np.sqrt( (snf2/nf2)**2 + (si0v/ri0v)**2 ))).to(G_cgs).value
             }
 
     df = pd.DataFrame(data=[result])
@@ -221,4 +221,6 @@ def calcBz(lsd, cog='I', norm='auto', lambda0=500*u.nm, geff=1.2, velrange=None,
         ax[2].fill_between(lsd_bz.vel[red], lsd_bz.specN1[red], step='mid', color='red')
         ax[2].fill_between(lsd_bz.vel[blue], lsd_bz.specN1[blue], step='mid', color='blue')
         
-    return(df)
+        return(df,fig)
+    else:
+        return(df)
