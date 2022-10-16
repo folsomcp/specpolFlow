@@ -4,7 +4,6 @@
 # Tools for reading and writing files, related to calculating
 # and analyzing LSD profiles.
 
-print('importing specpolFlow.iolsd')
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -60,8 +59,6 @@ class lsd_prof:
           self.header = header
         else:
           self.header = ""
-
-    
     
     def save(self, fname):
         """
@@ -115,9 +112,10 @@ class lsd_prof:
         specSigN2_s = self.specSigN2[key]
         if(self.header != None):
             header_s = self.header
-        else:
+        else: #Header should never be None at this point, but to be safe
             header_s = ""
-        slice_prof = lsd_prof(vel_s, specI_s, specSigI_s, specV_s, specSigV_s, specN1_s, specSigN1_s, specN2_s, specSigN2_s, header_s)
+        slice_prof = lsd_prof(vel_s, specI_s, specSigI_s, specV_s, specSigV_s,
+                              specN1_s, specSigN1_s, specN2_s, specSigN2_s, header_s)
         return slice_prof
 
     def __setitem__(self, key, newval):
@@ -143,7 +141,7 @@ class lsd_prof:
 
     def __mul__(self, other):
         """
-        Overloaded multiplication function. Allows you to do lsd * n and multiply all values in the lsd, other than the velocity, by n.
+        Overloaded multiplication function. Allows you to do lsd * n and multiply all profile values in the lsd, other than the velocity, by n.
 
         :param self: lsd_prof being scaled
         :param other: number to multiply by
@@ -161,23 +159,9 @@ class lsd_prof:
         return self
 
     def __rmul__(self, other):
-        """
-        Overloaded reverse multiplication function. Allows you to do n * lsd and multiply all values in the lsd, other than the velocity, by n.
-
-        :param self: lsd_prof being scaled
-        :param other: number to multiply by
-
-        :rtype: lsd_prof
-        """    
-        self.specI = np.multiply(self.specI, other)
-        self.specSigI = np.multiply(self.specSigI, other)
-        self.specV = np.multiply(self.specV, other)
-        self.specSigV = np.multiply(self.specSigV, other)
-        self.specN1 = np.multiply(self.specN1, other)
-        self.specSigN1 = np.multiply(self.specSigN1, other)
-        self.specN2 = np.multiply(self.specN2, other)
-        self.specSigN2 = np.multiply(self.specSigN2, other)
-        return self
+        #Overloaded reverse multiplication function, for n * lsd.
+        return self*other
+    
     
     def __add__(self, other):
         """
@@ -190,6 +174,10 @@ class lsd_prof:
         self.vel = self.vel + other
         return self
     
+    def __radd__(self, other):
+        #Overloaded reverse addition function, for n + lsd.
+        return self + other
+    
     def __sub__(self, other):
         """
         Overloaded subtraction function. Allows you to do lsd - n and subtract n from all values in the velocity array. 
@@ -201,16 +189,21 @@ class lsd_prof:
         self.vel = self.vel - other
         return self
     
-    def __floordiv__(self, other):
-        self.specI = np.divide(self.specI, other)
-        self.specSigI = np.divide(self.specSigI, other)
-        self.specV = np.divide(self.specV, other)
-        self.specSigV = np.divide(self.specSigV, other)
-        self.specN1 = np.divide(self.specN1, other)
-        self.specSigN1 = np.divide(self.specSigN1, other)
-        self.specN2 = np.divide(self.specN2, other)
-        self.specSigN2 = np.divide(self.specSigN2, other)
+    def __rsub__(self, other):
+        #Overloaded reverse subtraction function, for n + lsd.
+        self.vel = other - self.vel
         return self
+    
+    #def __floordiv__(self, other):  #Currently just performs regular division not 'floor division' //
+    #    self.specI = np.divide(self.specI, other)
+    #    self.specSigI = np.divide(self.specSigI, other)
+    #    self.specV = np.divide(self.specV, other)
+    #    self.specSigV = np.divide(self.specSigV, other)
+    #    self.specN1 = np.divide(self.specN1, other)
+    #    self.specSigN1 = np.divide(self.specSigN1, other)
+    #    self.specN2 = np.divide(self.specN2, other)
+    #    self.specSigN2 = np.divide(self.specSigN2, other)
+    #    return self
     
     def __truediv__(self, other):
         self.specI = np.divide(self.specI, other)
@@ -222,7 +215,17 @@ class lsd_prof:
         self.specN2 = np.divide(self.specN2, other)
         self.specSigN2 = np.divide(self.specSigN2, other)
         return self
+
+    def velShift(self, velShift):
+        """
+        Apply a shift to the velocities of the LSD profile
         
+        :param velShift: the change in velocity to be added
+        :rtype: lsd_prof
+        """
+        self.vel = self.vel + velShift
+        return self
+    
     def set_weights(self, wint_data, wpol_data, wint_new, wpol_new):
         '''Change the weigth of the lsd profile
         
@@ -245,26 +248,64 @@ class lsd_prof:
         return(self)
 
     
-    def plot(self, figsize=(10,10), **kwargs):
+    def plot(self, figsize=(10,10), sameYRange=True, plotZeroLevel=True, **kwargs):
         '''Plot the LSD profile
         
         :param self: the lsd object to plot 
-        :param figsize: the size of the figure being created  
+        :param figsize: the size of the figure being created
+        :param sameYRange: optionally set the Stokes V and Null plots to have the same y scale
+        :param plotZeroLevel: optionally include a dashed line at 0 for the V and Null plots.
         :rtype: returns an fig, ax matplotlib container. 
         '''
-        
-        fig, ax = plt.subplots(4,1,figsize=figsize,sharex=True)
 
-        ax[3].errorbar(self.vel, self.specI, yerr=self.specSigI, xerr=None, fmt='o', ms=3,ecolor='0.5',c='k',**kwargs)
-        ax[2].errorbar(self.vel, self.specN1, yerr=self.specSigN1, xerr=None, fmt='o', ms=3,ecolor='0.5',c='k',**kwargs)
-        ax[1].errorbar(self.vel, self.specN2, yerr=self.specSigN2, xerr=None, fmt='o', ms=3,ecolor='0.5',c='k',**kwargs)
-        ax[0].errorbar(self.vel, self.specV, yerr=self.specSigV, xerr=None, fmt='o', ms=3, ecolor='0.5',c='k',**kwargs)
+        #Chose y-axis limits for the V and N plots so that they can have the same scale
+        #use 1.05 time biggest divergence from zero
+        plotVLims = np.max([np.abs(1.05*np.min(self.specV)),
+                            np.abs(1.05*np.max(self.specV)),
+                            np.abs(1.05*np.min(self.specN1)),
+                            np.abs(1.05*np.max(self.specN1)),
+                            np.abs(1.05*np.min(self.specN2)),
+                            np.abs(1.05*np.max(self.specN2)),
+                            1.05*np.max(self.specSigV)])
+        
+        #Get the number of Stokes parameters to plot
+        #(Check the number of non-zero data field)
+        #Support just Stokes I; Stokes I, V, Null1; Stokes I, V, Null1, Null2
+        nplots = 1
+        if np.any(self.specV != 0.0): nplots = 3
+        if np.any(self.specN2 != 0.0): nplots = 4
+        
+        fig, ax = plt.subplots(nplots,1,figsize=figsize,sharex=True)
+        #If there is only 1 plot (only a Stokes I spectrum),
+        #wrap the matplotlib axis in a list to make it iterable
+        if not isinstance(ax, np.ndarray): ax = [ax]
+        for i, axi in enumerate(ax):
+            if i == nplots - 1: #Stokes I
+                axi.errorbar(self.vel, self.specI, yerr=self.specSigI, xerr=None,
+                            fmt='o', ms=3,ecolor='0.5',c='k',**kwargs)
+                axi.set_xlim(xmin=np.min(self.vel),xmax=np.max(self.vel))
+                axi.set_ylabel('I')
+                axi.set_xlabel('Velocity (km/s)')
+            elif i == 0: #Stokes V (if nplots > 1)
+                axi.errorbar(self.vel, self.specV, yerr=self.specSigV, xerr=None,
+                             fmt='o', ms=3, ecolor='0.5',c='k',**kwargs)
+                if plotZeroLevel: axi.axhline(y=0.0, ls='--', c='k', alpha=0.4)
+                if sameYRange: axi.set_ylim(ymin=-plotVLims,ymax=plotVLims)
+                axi.set_ylabel('V')
+            elif i == 1: #Null1
+                axi.errorbar(self.vel, self.specN1, yerr=self.specSigN1, xerr=None,
+                             fmt='o', ms=3,ecolor='0.5',c='k',**kwargs)
+                if plotZeroLevel: axi.axhline(y=0.0, ls='--', c='k', alpha=0.4)
+                if sameYRange: axi.set_ylim(ymin=-plotVLims,ymax=plotVLims)
+                axi.set_ylabel('N1')
+            elif i == 2: #Null2
+                axi.errorbar(self.vel, self.specN2, yerr=self.specSigN2, xerr=None,
+                             fmt='o', ms=3,ecolor='0.5',c='k',**kwargs)
+                if plotZeroLevel: axi.axhline(y=0.0, ls='--', c='k', alpha=0.4)
+                if sameYRange: axi.set_ylim(ymin=-plotVLims,ymax=plotVLims)
+                axi.set_ylabel('N2')
+        
         plt.subplots_adjust(hspace=.0)
-        ax[3].set_xlabel('Velocity (km/s)')
-        ax[3].set_ylabel('I')
-        ax[2].set_ylabel('N1')
-        ax[1].set_ylabel('N2')
-        ax[0].set_ylabel('V')
         return(fig, ax)
 
 def read_lsd(fname):
@@ -285,7 +326,7 @@ def read_lsd(fname):
     head1 = head1txt.split()
     head2 = head2txt.split()
     nskip = 2
-    try:
+    try: #Test if the first two lines look like LSD profile numbers
         float(head1[0])
         if(len(head2) > 2 and len(head1) == len(head2)):
             nskip = 0
@@ -449,11 +490,8 @@ class observation:
         specV_s = self.specV[key]
         specN1_s = self.specN1[key]
         specN2_s = self.specN2[key]
-        if(self.header != None):
-            header_s = self.header
-        else:
-            header_s = ""
-        slice_obs = observation(wl_s, specI_s, specV_s, specN1_s, specN2_s, specSig_s, header=header_s)
+        #The header may be None but that is ok.
+        slice_obs = observation(wl_s, specI_s, specV_s, specN1_s, specN2_s, specSig_s, header=self.header)
         return slice_obs
 
     def __setitem__(self, key, newval):
@@ -489,7 +527,6 @@ class observation:
                             self[i].wl, self[i].specI, self[i].specV,
                             self[i].specN1, self[i].specN2, self[i].specSig))
         return
-
 
 
 def read_spectrum(fname, sortByWavelength=False):

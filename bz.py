@@ -3,7 +3,7 @@
 #
 # More information can come here.
 
-import specpolFlow as pol
+#import specpolFlow as pol  #There is an implicit dependency on specpolFlow.iolsd
 import matplotlib.pyplot as plt
 import numpy as np
 import astropy.units as u
@@ -23,7 +23,7 @@ def cog_IV(lsd, Ic):
     return(nominator/denominator)
 
 def cog_V(lsd):
-    nominator = np.trapz(lsd[k].vel * np.abs(lsd.specV), x=lsd.vel )
+    nominator = np.trapz(lsd.vel * np.abs(lsd.specV), x=lsd.vel )
     denominator = np.trapz( np.abs(lsd.specV), x=lsd.vel )
     return(nominator/denominator)
 
@@ -49,7 +49,7 @@ def calcBz(lsd, cog='I', norm='auto', lambda0=500*u.nm, geff=1.2, velrange=None,
                     Need to be a astropy unit object, with length units.
                     The astropy unit package will take care of the units conversion to give the Bz in Gauss.
     :param geff: effective lande factor of the transition.
-                For an LSD profile, this is the geff value the LSD profile shape was scaled with.
+                 For an LSD profile, this is the geff value the LSD profile shape was scaled with.
     :param velrange: range of velocity to use for the determination of the
                      line center and the continnum. If not defined, the whole range
                      will be used. If bzwidth is not defined, this range will also be
@@ -190,7 +190,7 @@ def calcBz(lsd, cog='I', norm='auto', lambda0=500*u.nm, geff=1.2, velrange=None,
     df = pd.DataFrame(data=[result])
 
     if plot:
-        fig, ax = lsd.plot()
+        fig, ax = lsd.plot(sameYRange=False)
  
         for item in ax:
             if velrange != None:
@@ -199,7 +199,7 @@ def calcBz(lsd, cog='I', norm='auto', lambda0=500*u.nm, geff=1.2, velrange=None,
             item.axvline(x=p_bzwidth[0], ls='dotted', label='bzwidth')
             item.axvline(x=p_bzwidth[1], ls='dotted')
             
-        ax[3].axhline(y=norm_val, ls='--', c='pink', label='Ic')
+        ax[-1].axhline(y=norm_val, ls='--', c='pink', label='Ic')
             
         # for the plot, calculate and display all of the possible methods
         # for calculating the cog.
@@ -207,19 +207,21 @@ def calcBz(lsd, cog='I', norm='auto', lambda0=500*u.nm, geff=1.2, velrange=None,
             item.axvline(x=cog_min(lsd_in), label='cog min I', lw=3, alpha=0.5, c='blue')
             item.axvline(x=cog_I(lsd_in, norm_val), label='cog I',lw=3, alpha=0.5, c='red')
             item.axvline(x=cog_IV(lsd_in, norm_val), label='cog I*V',lw=3, alpha=0.5, c='orange')
-            item.axvline(x=cog_IV(lsd_in, norm_val), label='cog V',lw=3, alpha=0.5, c='green')
+            item.axvline(x=cog_V(lsd_in), label='cog V',lw=3, alpha=0.5, c='green')
             item.axvline(x=cog_val, label='chosen cog: {}'.format(cog), ls='--', c='k')
            
-        ax[3].legend(loc=0)
+        ax[-1].legend(loc=0)
         
-        red = lsd_bz.vel>cog_val
-        blue = lsd_bz.vel<cog_val
-        ax[0].fill_between(lsd_bz.vel[red], lsd_bz.specV[red], step='mid', color='red')
-        ax[0].fill_between(lsd_bz.vel[blue], lsd_bz.specV[blue], step='mid', color='blue')
-        ax[1].fill_between(lsd_bz.vel[red], lsd_bz.specN2[red], step='mid', color='red')
-        ax[1].fill_between(lsd_bz.vel[blue], lsd_bz.specN2[blue], step='mid', color='blue')
-        ax[2].fill_between(lsd_bz.vel[red], lsd_bz.specN1[red], step='mid', color='red')
-        ax[2].fill_between(lsd_bz.vel[blue], lsd_bz.specN1[blue], step='mid', color='blue')
+        red = lsd_bz.vel > cog_val
+        blue = lsd_bz.vel < cog_val
+        if(len(ax) > 2):
+            ax[0].fill_between(lsd_bz.vel[red], lsd_bz.specV[red], step='mid', color='red')
+            ax[0].fill_between(lsd_bz.vel[blue], lsd_bz.specV[blue], step='mid', color='blue')
+            ax[1].fill_between(lsd_bz.vel[red], lsd_bz.specN1[red], step='mid', color='red')
+            ax[1].fill_between(lsd_bz.vel[blue], lsd_bz.specN1[blue], step='mid', color='blue')
+        if(len(ax) > 3):
+            ax[2].fill_between(lsd_bz.vel[red], lsd_bz.specN2[red], step='mid', color='red')
+            ax[2].fill_between(lsd_bz.vel[blue], lsd_bz.specN2[blue], step='mid', color='blue')
         
         return(df,fig)
     else:
