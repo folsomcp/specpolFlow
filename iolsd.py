@@ -14,7 +14,7 @@ class lsd_prof:
     This usually includes numpy arrays:
     
     * vel - velocity grid for the LSD profile
-    * specI - the Stokes I profile)
+    * specI - the Stokes I profile
     * specSigI - the uncertainties on Stokes I
     * specV - the polarization profile, most often Stokes V
     * specSigI - the uncertainties on the polarization profile
@@ -22,8 +22,14 @@ class lsd_prof:
     * specSigN1 - the uncertainties on specN1
     * specN2 - the Null2 profile, if it exists, otherwise zeros
     * specSigN2 - the uncertainties on Null2 if they exist
+
+    And integers:
+    
+    * numParam - The number of Stokes I V & Null profiles used (usually 1, 3, or 4)
+    * npix - the number of pixels (points in velocity) in the LSD profile
     """
-    def __init__(self, vel, specI, specSigI, specV, specSigV, specN1, specSigN1, specN2=[], specSigN2=[], header=None):
+    def __init__(self, vel, specI, specSigI, specV=[], specSigV=[],
+                 specN1=[], specSigN1=[], specN2=[], specSigN2=[], header=None):
         """
         Initialize an LSD profile, using data from an existing profile. 
 
@@ -42,23 +48,37 @@ class lsd_prof:
         self.vel = vel
         self.specI = specI
         self.specSigI = specSigI
-        self.specV = specV
-        self.specSigV = specSigV
-        self.specN1 = specN1
-        self.specSigN1 = specSigN1
-        
         self.npix = vel.size
-        if(specN2 != [] and specSigN2 != []):
-          self.specN2 = specN2
-          self.specSigN2 = specSigN2
+        self.numParam = 1
+        
+        if(specV != [] and specSigV != []):
+            self.specV = specV
+            self.specSigV = specSigV
+            self.numParam = 2
         else:
-          self.specN2 = np.zeros(self.npix)
-          self.specSigN2 = np.zeros(self.npix)
+            self.specV = np.zeros(self.npix)
+            self.specSigV = np.zeros(self.npix)
+            
+        if(specN1 != [] and specSigN1 != []):
+            self.specN1 = specN1
+            self.specSigN1 = specSigN1
+            self.numParam = 3
+        else:
+            self.specN1 = np.zeros(self.npix)
+            self.specSigN1 = np.zeros(self.npix)
+        
+        if(specN2 != [] and specSigN2 != []):
+            self.specN2 = specN2
+            self.specSigN2 = specSigN2
+            self.numParam = 4
+        else:
+            self.specN2 = np.zeros(self.npix)
+            self.specSigN2 = np.zeros(self.npix)
         
         if(header != None):
-          self.header = header
+            self.header = header
         else:
-          self.header = ""
+            self.header = ""
     
     def save(self, fname):
         """
@@ -294,9 +314,7 @@ class lsd_prof:
         #Get the number of Stokes parameters to plot
         #(Check the number of non-zero data field)
         #Support just Stokes I; Stokes I, V, Null1; Stokes I, V, Null1, Null2
-        nplots = 1
-        if np.any(self.specV != 0.0): nplots = 3
-        if np.any(self.specN2 != 0.0): nplots = 4
+        nplots = self.numParam
         
         fig, ax = plt.subplots(nplots,1,figsize=figsize,sharex=True)
         #If there is only 1 plot (only a Stokes I spectrum),
@@ -336,15 +354,16 @@ def read_lsd(fname):
     function that reads in a LSD profile.
     
     The LSD profiles are in Donati's text format.
-    The two lines of header in Donati's format is optional
+    The two lines of header in Donati's format is optional.
     
     :param fname: the name of the file containing the LSD profile
-    :rtype: returns an instance of the lsd_prof class, defined in this module.
+    :rtype: returns an instance of the lsd_prof class, defined in this module
     """
     #check if this file has a header
     fcheck = open(fname, 'r')
     head1txt = fcheck.readline()
     head2txt = fcheck.readline()
+    head3txt = fcheck.readline()
     fcheck.close()
     head1 = head1txt.split()
     head2 = head2txt.split()
@@ -355,21 +374,61 @@ def read_lsd(fname):
             nskip = 0
     except(ValueError):
         nskip = 2
-    
-    #Read the profile, skipping the header
-    __prof = np.loadtxt(fname, skiprows=nskip, unpack=True)
-    vel = __prof[0,:]
-    specI = __prof[1,:]
-    specSigI = __prof[2,:]
-    specV = __prof[3,:]
-    specSigV = __prof[4,:]
-    specN1 = __prof[5,:]
-    specSigN1 = __prof[6,:]
-  
+
     header = None
     if(nskip > 0): header = head1txt
 
-    prof = lsd_prof(vel, specI, specSigI, specV, specSigV, specN1, specSigN1, [], [], header)
+    #Check the number of columns in the LSD profile
+    ncols = len(head3txt.split())
+        
+    #Read the profile, skipping the header
+    __prof = np.loadtxt(fname, skiprows=nskip, unpack=True)
+    
+    if ncols == 9:
+        vel = __prof[0,:]
+        specI = __prof[1,:]
+        specSigI = __prof[2,:]
+        specV = __prof[3,:]
+        specSigV = __prof[4,:]
+        specN1 = __prof[5,:]
+        specSigN1 = __prof[6,:]
+        specN2 = __prof[7,:]
+        specSigN2 = __prof[8,:]
+        #Check for profiles with placeholder columns of 0 (LSDpy may do this!)
+        if (np.all(specN2 == 0.0) and np.all(specSigN2 == 0.0)):
+            ncols = 7
+        elif (np.all(specV == 0.0) and np.all(specSigV == 0.0)
+              and np.all(specN1 == 0.0) and np.all(specSigN1 == 0.0)):
+            ncols = 3
+        else:
+            prof = lsd_prof(vel, specI, specSigI, specV, specSigV,
+                            specN1, specSigN1, specN2, specSigN2, header=header)
+    if ncols == 7:
+        vel = __prof[0,:]
+        specI = __prof[1,:]
+        specSigI = __prof[2,:]
+        specV = __prof[3,:]
+        specSigV = __prof[4,:]
+        specN1 = __prof[5,:]
+        specSigN1 = __prof[6,:]
+        #Check for profiles with placeholder columns of 0 (LSDpy may do this!)
+        if (np.all(specV == 0.0) and np.all(specSigV == 0.0)
+              and np.all(specN1 == 0.0) and np.all(specSigN1 == 0.0)):
+            ncols = 3
+        else:
+            prof = lsd_prof(vel, specI, specSigI, specV, specSigV,
+                        specN1, specSigN1, header=header)
+    
+    if ncols == 3:
+        vel = __prof[0,:]
+        specI = __prof[1,:]
+        specSigI = __prof[2,:]
+        prof = lsd_prof(vel, specI, specSigI, header=header)
+
+    #For unsupported formats or numbers of columns
+    if ncols != 3 and ncols != 7 and ncols != 9:
+        raise ValueError("Read an unexpected number of columns from "
+                         +"{:}, can't read as an LSD profile.".format(fname))
     return prof
 
 
