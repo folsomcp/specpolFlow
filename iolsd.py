@@ -147,7 +147,8 @@ class lsd_prof:
         :param other: number to multiply by
 
         :rtype: lsd_prof
-        """  
+        """
+        print('* for LSD profiels is to be depreciated, use norm() instad')
         self.specI = np.multiply(self.specI, other)
         self.specSigI = np.multiply(self.specSigI, other)
         self.specV = np.multiply(self.specV, other)
@@ -171,6 +172,7 @@ class lsd_prof:
         
         :rtype: lsd_prof
         """
+        print('+ for LSD profiles is to be depreciated, use shift() instead')
         self.vel = self.vel + other
         return self
     
@@ -186,11 +188,13 @@ class lsd_prof:
         
         :rtype: lsd_prof
         """
+        print('- for LSD profiles is to be depreciated, use shift() instead')
         self.vel = self.vel - other
         return self
     
     def __rsub__(self, other):
         #Overloaded reverse subtraction function, for n + lsd.
+        print('- for LSD profiles is to be depreciated, use shift() instead')
         self.vel = other - self.vel
         return self
     
@@ -206,17 +210,28 @@ class lsd_prof:
     #    return self
     
     def __truediv__(self, other):
-        self.specI = np.divide(self.specI, other)
-        self.specSigI = np.divide(self.specSigI, other)
-        self.specV = np.divide(self.specV, other)
-        self.specSigV = np.divide(self.specSigV, other)
-        self.specN1 = np.divide(self.specN1, other)
-        self.specSigN1 = np.divide(self.specSigN1, other)
-        self.specN2 = np.divide(self.specN2, other)
-        self.specSigN2 = np.divide(self.specSigN2, other)
+        print('/ for LSD profiles is to be depreciated, use norm() instead')
+        self.norm(other)
         return self
 
-    def velShift(self, velShift):
+    def norm(self, normValue):
+        """
+        Renormalize an LSD profile, divide the I, V, and null profiles by a value.
+        
+        :param normValue: the value to renormalize (divide) the LSD profile by
+        :rtype: lsd_prof
+        """
+        self.specI = np.divide(self.specI, normValue)
+        self.specSigI = np.divide(self.specSigI, normValue)
+        self.specV = np.divide(self.specV, normValue)
+        self.specSigV = np.divide(self.specSigV, normValue)
+        self.specN1 = np.divide(self.specN1, normValue)
+        self.specSigN1 = np.divide(self.specSigN1, normValue)
+        self.specN2 = np.divide(self.specN2, normValue)
+        self.specSigN2 = np.divide(self.specSigN2, normValue)
+        return self
+    
+    def vshift(self, velShift):
         """
         Apply a shift to the velocities of the LSD profile
         
@@ -226,27 +241,35 @@ class lsd_prof:
         self.vel = self.vel + velShift
         return self
     
-    def set_weights(self, wint_data, wpol_data, wint_new, wpol_new):
-        '''Change the weigth of the lsd profile
+    def set_weights(self, wint_old, wpol_old, wint_new, wpol_new):
+        '''Change the weight of the LSD profile (see also scale())
         
-        :param self: the lsd object
-        :param wint_data: The current intensity weight (d)
-        :param wpol_data: The current polarization weigth (g*d*lambda)
+        :param wint_old: The current intensity weight (d)
+        :param wpol_old: The current polarization weight (g*d*lambda)
         :param wint_new: The new intensity weight (d)
-        :param wpol_new: The new polarization weigth (g*d*lambda)
+        :param wpol_new: The new polarization weight (g*d*lambda)
+        :rtype: lsd object
+        '''
+        self.scale(wint_new/wint_old, wpol_new/wpol_old)
+        return(self)
+
+    def scale(self, scale_int, scale_pol):
+        '''Rescale the amplitudes of the LSD profile (see also set_weights())
+        
+        :param scale_int: scale the intensity profile by this
+        :param scale_pol: scale the polarization and null profiles by this
         :rtype: lsd object
         '''
         
-        self.specI = 1.0 - ( (1.0-self.specI) / wint_data * wint_new )
-        self.specSigI = self.specSigI / wint_data * wint_new
-        self.specV = self.specV / wpol_data * wpol_new
-        self.specSigV = self.specSigV / wpol_data * wpol_new
-        self.specN1 = self.specN1 / wpol_data * wpol_new
-        self.specSigN1 = self.specSigN1 / wpol_data * wpol_new
-        self.specN2 = self.specN2 / wpol_data * wpol_new
-        self.specSigN2 = self.specSigN2 / wpol_data * wpol_new
-        return(self)
-
+        self.specI = 1.0 - ((1.0-self.specI) * scale_int)
+        self.specSigI = self.specSigI * scale_int
+        self.specV = self.specV * scale_pol
+        self.specSigV = self.specSigV * scale_pol
+        self.specN1 = self.specN1 * scale_pol
+        self.specSigN1 = self.specSigN1 * scale_pol
+        self.specN2 = self.specN2 * scale_pol
+        self.specSigN2 = self.specSigN2 * scale_pol
+        return
     
     def plot(self, figsize=(10,10), sameYRange=True, plotZeroLevel=True, **kwargs):
         '''Plot the LSD profile
