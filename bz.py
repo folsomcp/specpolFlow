@@ -100,7 +100,7 @@ def calcBz(lsd, cog='I', norm='auto', lambda0=500*u.nm, geff=1.2, velrange=None,
         if cog == 'V':
             cog_cal = cog_V(lsd_in, norm_val)
     else:
-        cog_val=np.copy(cog)
+        cog_val=copy.copy(cog)
         
 
     # Now we define the position of the line for the Bz calculation itself.
