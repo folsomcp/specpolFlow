@@ -75,7 +75,7 @@ def calcBz(lsd, cog='I', norm='auto', lambda0=500*u.nm, geff=1.2, velrange=None,
         
     
     # Check if norm is a string.
-    if isinstance(cog, str):
+    if isinstance(norm, str):
         print('using AUTO method for the normalization')
         if velrange != None:
             print('  using the median of the continuum outside of the line')
@@ -84,7 +84,7 @@ def calcBz(lsd, cog='I', norm='auto', lambda0=500*u.nm, geff=1.2, velrange=None,
             print('  no range in velocity given, using the median of the whole specI to determine continnum')
             norm_val = np.median(lsd_in.specI)
     else:
-        norm_val = np.copy(norm)
+        norm_val = copy.copy(norm)
         print('using given norm value')
           
 
@@ -98,7 +98,7 @@ def calcBz(lsd, cog='I', norm='auto', lambda0=500*u.nm, geff=1.2, velrange=None,
         if cog == 'IV':
             cog_val = cog_IV(lsd_in, norm_val)
         if cog == 'V':
-            cog_cal = cog_V(lsd_in, norm_val)
+            cog_val = cog_V(lsd_in)
     else:
         cog_val=copy.copy(cog)
         
@@ -152,6 +152,8 @@ def calcBz(lsd, cog='I', norm='auto', lambda0=500*u.nm, geff=1.2, velrange=None,
     
     # Calculation of the integral in the denominator of the Bz function with a trapeze numerical integral
     # For the square error caculation, we propagate like we would for sommation numerical integral.
+    print(norm_val)
+    print(lsd_bz.specI)
     ri0v = np.trapz(norm_val-lsd_bz.specI, x=lsd_bz.vel )*u.km/u.s # This is in km/s
     si0v = np.sqrt(np.sum(lsd_bz.specSigI**2 )* deltav**2) # This will naturaly be in km/s
 
