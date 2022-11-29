@@ -10,6 +10,8 @@ import astropy.units as u
 import astropy.constants as const
 import pandas as pd
 import copy
+import scipy.special as specialf
+
 
 def cog_I(lsd, Ic):
     
@@ -32,6 +34,37 @@ def cog_min(lsd):
     if cog_min.size > 1:
         cog_min = cog_min[0]
     return(cog_min)
+
+def FAP(lsd):
+    '''Returns the V, null1, and null2 FAP for a given LSD object
+    
+    If you would like a specific range in velocity, simply slice the LSD object beforehand. 
+    Note that the calcBz function also returns the FAP inside the spectral line, 
+    over the same velocity range as used in the Bz calculation. 
+
+    :param lsd: lsd object (input)
+
+    :return: FAP V, FAP N1, FAP N2. 
+    '''
+
+    #'fitting' the flat line (essentially an average weighted by 1/sigma^2)
+    contV = np.sum(lsd.specV/lsd.specSigV**2) / np.sum(1./lsd.specSigV**2)
+    contN1 = np.sum(lsd.specN1/lsd.specSigN1**2) / np.sum(1./lsd.specSigN1**2)
+    contN2 = np.sum(lsd.specN2/lsd.specSigN2**2) / np.sum(1./lsd.specSigN2**2)
+    
+    chi2V = np.sum(((lsd.specV - contV)/lsd.specSigV)**2)
+    chi2N1 = np.sum(((lsd.specN1 - contN1)/lsd.specSigN1)**2)
+    chi2N2 = np.sum(((lsd.specN2 - contN2)/lsd.specSigN2)**2)
+   
+    approxDOF = (lsd.npix-1.)
+    
+    probV = 1.0-specialf.gammainc(approxDOF/2., chi2V/2.)
+    probN1 = 1.0-specialf.gammainc(approxDOF/2., chi2N1/2.)
+    probN2 = 1.0-specialf.gammainc(approxDOF/2., chi2N2/2.)
+
+    return(probV, probN1, probN2)
+
+
 
 
 def calcBz(lsd, cog='I', norm='auto', lambda0=500*u.nm, geff=1.2, velrange=None, bzwidth=None, plot=True):
@@ -59,6 +92,7 @@ def calcBz(lsd, cog='I', norm='auto', lambda0=500*u.nm, geff=1.2, velrange=None,
                     Two elements, left and right of line center.
                     Not defined: using velrange.
     :param plot: whether or not a graph is displayed.
+    :return: a dictionary with Bz and FAP calculations
     '''
 
     # Velrange is used to identify the position of the line,
@@ -173,6 +207,9 @@ def calcBz(lsd, cog='I', norm='auto', lambda0=500*u.nm, geff=1.2, velrange=None,
     blv = (-1*vf / ( ri0v*geff*lambda0*const.c*lambda_B_constant)).to(G_cgs)
     bln1 = (-1*nf1 / ( ri0v*geff*lambda0*const.c*lambda_B_constant)).to(G_cgs)
     bln2 = (-1*nf2 / ( ri0v*geff*lambda0*const.c*lambda_B_constant)).to(G_cgs)
+
+    # Get the FAP in the same range as the one used for Bz
+    FAP_V, FAP_N1, FAP_N2 = FAP(lsd_bz)
         
     result = {
             'Ic': norm_val,
@@ -181,10 +218,13 @@ def calcBz(lsd, cog='I', norm='auto', lambda0=500*u.nm, geff=1.2, velrange=None,
             'Bzwidth max': p_bzwidth[1],
             'V bz (G)': blv.value,
             'V bz sig (G)': ( np.abs(blv * np.sqrt( (svf/vf)**2 + (si0v/ri0v)**2 ))).to(G_cgs).value,
+            'V FAP': FAP_V,
             'N1 bz (G)': bln1.value,
             'N1 bz sig (G)': ( np.abs(bln1 * np.sqrt( (snf1/nf1)**2 + (si0v/ri0v)**2 ))).to(G_cgs).value,
+            'N1 FAP': FAP_N1,
             'N2 bz (G)': bln2.value,
-            'N2 bz sig (G)': ( np.abs(bln2 * np.sqrt( (snf2/nf2)**2 + (si0v/ri0v)**2 ))).to(G_cgs).value
+            'N2 bz sig (G)': ( np.abs(bln2 * np.sqrt( (snf2/nf2)**2 + (si0v/ri0v)**2 ))).to(G_cgs).value,
+            'FAP_N2': FAP_N2
             }
 
     df = pd.DataFrame(data=[result])
