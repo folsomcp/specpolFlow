@@ -152,8 +152,6 @@ def calcBz(lsd, cog='I', norm='auto', lambda0=500*u.nm, geff=1.2, velrange=None,
     
     # Calculation of the integral in the denominator of the Bz function with a trapeze numerical integral
     # For the square error caculation, we propagate like we would for sommation numerical integral.
-    print(norm_val)
-    print(lsd_bz.specI)
     ri0v = np.trapz(norm_val-lsd_bz.specI, x=lsd_bz.vel )*u.km/u.s # This is in km/s
     si0v = np.sqrt(np.sum(lsd_bz.specSigI**2 )* deltav**2) # This will naturaly be in km/s
 
@@ -225,6 +223,6 @@ def calcBz(lsd, cog='I', norm='auto', lambda0=500*u.nm, geff=1.2, velrange=None,
             ax[2].fill_between(lsd_bz.vel[red], lsd_bz.specN2[red], step='mid', color='red')
             ax[2].fill_between(lsd_bz.vel[blue], lsd_bz.specN2[blue], step='mid', color='blue')
         
-        return(df,fig)
+        return(result,fig)
     else:
-        return(df)
+        return(result)
