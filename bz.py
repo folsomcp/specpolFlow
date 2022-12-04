@@ -238,39 +238,60 @@ def calcBz(lsd, cog='I', norm='auto', lambda0=500*u.nm, geff=1.2, velrange=None,
             }
 
     if plot:
-        fig, ax = lsd.plot(sameYRange=False)
- 
-        for item in ax:
-            if velrange != None:
-                item.axvline(x=velrange[0], ls='--', label='velrange')
-                item.axvline(x=velrange[1], ls='--')
-            item.axvline(x=p_bzwidth[0], ls='dotted', label='bzwidth')
-            item.axvline(x=p_bzwidth[1], ls='dotted')
-            
-        ax[-1].axhline(y=norm_val, ls='--', c='pink', label='Ic')
-            
-        # for the plot, calculate and display all of the possible methods
-        # for calculating the cog.
-        for item in ax:
-            item.axvline(x=cog_min(lsd_in), label='cog min I', lw=3, alpha=0.5, c='blue')
-            item.axvline(x=cog_I(lsd_in, norm_val), label='cog I',lw=3, alpha=0.5, c='red')
-            item.axvline(x=cog_IV(lsd_in, norm_val), label='cog I*V',lw=3, alpha=0.5, c='orange')
-            item.axvline(x=cog_V(lsd_in), label='cog V',lw=3, alpha=0.5, c='green')
-            item.axvline(x=cog_val, label='chosen cog: {}'.format(cog), ls='--', c='k')
-           
-        ax[-1].legend(loc=0)
-        
-        red = lsd_bz.vel > cog_val
-        blue = lsd_bz.vel < cog_val
-        if(len(ax) > 2):
-            ax[0].fill_between(lsd_bz.vel[red], lsd_bz.specV[red], step='mid', color='red')
-            ax[0].fill_between(lsd_bz.vel[blue], lsd_bz.specV[blue], step='mid', color='blue')
-            ax[1].fill_between(lsd_bz.vel[red], lsd_bz.specN1[red], step='mid', color='red')
-            ax[1].fill_between(lsd_bz.vel[blue], lsd_bz.specN1[blue], step='mid', color='blue')
-        if(len(ax) > 3):
-            ax[2].fill_between(lsd_bz.vel[red], lsd_bz.specN2[red], step='mid', color='red')
-            ax[2].fill_between(lsd_bz.vel[blue], lsd_bz.specN2[blue], step='mid', color='blue')
+        fig  = plotBzCalc(lsd, lsd_in, lsd_bz, velrange, p_bzwidth, norm_val, cog_val, cog)
         
         return(result,fig)
     else:
         return(result)
+
+
+def plotBzCalc(lsd, lsd_in, lsd_bz, velrange, p_bzwidth, norm_val, cog_val, cog):
+    """
+    Generate a plot showing the center of gravity and integration ranges used in the calculation of Bz from and LSD profile.
+    Called by the main calcBz function.
+
+    :param lsd: the full LSD profile to plot
+    :param lsd_in: slice of an LSD profile with the range used for COG calculation
+    :param lsd_bz: slice of an LSD profile with the range used for integration of Bz
+    :param velrange: the velocity range used for COG calculation
+    :param p_bzwidth: the velocity range used for integration of Bz
+    :param norm_val: the continuum level used for normalization
+    :param cog_val: the final COG used for Bz calculation
+    :param cog: the input COG flag/value given by the user
+    :return: a matplotlib figure object
+    """
+    #This function relies on the plot method of the LSD profile class
+    fig, ax = lsd.plot(sameYRange=False)
+    
+    for item in ax:
+        if velrange != None:
+            item.axvline(x=velrange[0], ls='--', label='velrange')
+            item.axvline(x=velrange[1], ls='--')
+        item.axvline(x=p_bzwidth[0], ls='dotted', label='bzwidth')
+        item.axvline(x=p_bzwidth[1], ls='dotted')
+        
+    ax[-1].axhline(y=norm_val, ls='--', c='pink', label='Ic')
+    
+    # for the plot, calculate and display all of the possible methods
+    # for calculating the cog.
+    for item in ax:
+        item.axvline(x=cog_min(lsd_in), label='cog min I', lw=3, alpha=0.5, c='blue')
+        item.axvline(x=cog_I(lsd_in, norm_val), label='cog I',lw=3, alpha=0.5, c='red')
+        item.axvline(x=cog_IV(lsd_in, norm_val), label='cog I*V',lw=3, alpha=0.5, c='orange')
+        item.axvline(x=cog_V(lsd_in), label='cog V',lw=3, alpha=0.5, c='green')
+        item.axvline(x=cog_val, label='chosen cog: {}'.format(cog), ls='--', c='k')
+       
+    ax[-1].legend(loc=0)
+    
+    red = lsd_bz.vel > cog_val
+    blue = lsd_bz.vel < cog_val
+    ax[0].fill_between(lsd_bz.vel[red], lsd_bz.specV[red], step='mid', color='red')
+    ax[0].fill_between(lsd_bz.vel[blue], lsd_bz.specV[blue], step='mid', color='blue')
+    if(len(ax) > 2):
+        ax[1].fill_between(lsd_bz.vel[red], lsd_bz.specN1[red], step='mid', color='red')
+        ax[1].fill_between(lsd_bz.vel[blue], lsd_bz.specN1[blue], step='mid', color='blue')
+    if(len(ax) > 3):
+        ax[2].fill_between(lsd_bz.vel[red], lsd_bz.specN2[red], step='mid', color='red')
+        ax[2].fill_between(lsd_bz.vel[blue], lsd_bz.specN2[blue], step='mid', color='blue')
+    
+    return fig
