@@ -1,20 +1,18 @@
 ## @module bz.py
 # Documentation for bz.py
 #
-# More information can come here.
+# Calculate a longitudinal magnetic field (Bz) from an LSD profile.
 
-#import specpolFlow as pol  #There is an implicit dependency on specpolFlow.iolsd
-import matplotlib.pyplot as plt
+#import specpolFlow as pol  #implicitly depends on specpolFlow.iolsd
+#import matplotlib.pyplot as plt #Implicitly depends on matplotlib.pyplot
 import numpy as np
 import astropy.units as u
 import astropy.constants as const
-import pandas as pd
 import copy
 import scipy.special as specialf
 
-
+#Routines for calculating the center of gravity of a line/LSD profile
 def cog_I(lsd, Ic):
-    
     nominator = np.trapz(lsd.vel * (Ic-lsd.specI), x=lsd.vel)
     denominator = np.trapz( Ic-lsd.specI, x=lsd.vel )
     return(nominator/denominator)
@@ -35,8 +33,15 @@ def cog_min(lsd):
         cog_min = cog_min[0]
     return(cog_min)
 
+
 def FAP(lsd):
     '''Returns the V, null1, and null2 FAP for a given LSD object
+
+    The False Alarm Probability (FAP) is the probability that the observed
+    data are consistent with the null hypothesis of no magnetic field.
+    In this case, the null hypothesis is a flat line in Stokes V
+    (an offset from 0 is allowed to account for continuum polarization).
+    The probability is evaluated from chi^2.
     
     If you would like a specific range in velocity, simply slice the LSD object beforehand. 
     Note that the calcBz function also returns the FAP inside the spectral line, 
@@ -47,57 +52,62 @@ def FAP(lsd):
     :return: FAP V, FAP N1, FAP N2. 
     '''
 
+    approxDOF = (lsd.npix-1.)
+
     #'fitting' the flat line (essentially an average weighted by 1/sigma^2)
     contV = np.sum(lsd.specV/lsd.specSigV**2) / np.sum(1./lsd.specSigV**2)
-    contN1 = np.sum(lsd.specN1/lsd.specSigN1**2) / np.sum(1./lsd.specSigN1**2)
-    contN2 = np.sum(lsd.specN2/lsd.specSigN2**2) / np.sum(1./lsd.specSigN2**2)
-    
     chi2V = np.sum(((lsd.specV - contV)/lsd.specSigV)**2)
-    chi2N1 = np.sum(((lsd.specN1 - contN1)/lsd.specSigN1)**2)
-    chi2N2 = np.sum(((lsd.specN2 - contN2)/lsd.specSigN2)**2)
-   
-    approxDOF = (lsd.npix-1.)
-    
     probV = 1.0-specialf.gammainc(approxDOF/2., chi2V/2.)
-    probN1 = 1.0-specialf.gammainc(approxDOF/2., chi2N1/2.)
-    probN2 = 1.0-specialf.gammainc(approxDOF/2., chi2N2/2.)
-
+    #repeat for the Null1 and Null2 profiles (if they exist)
+    probN1 = 0.
+    probN2 = 0.
+    
+    if lsd.numParam > 2:
+        contN1 = np.sum(lsd.specN1/lsd.specSigN1**2) / np.sum(1./lsd.specSigN1**2)
+        chi2N1 = np.sum(((lsd.specN1 - contN1)/lsd.specSigN1)**2)
+        probN1 = 1.0-specialf.gammainc(approxDOF/2., chi2N1/2.)
+    if lsd.numParam > 3:
+        contN2 = np.sum(lsd.specN2/lsd.specSigN2**2) / np.sum(1./lsd.specSigN2**2)
+        chi2N2 = np.sum(((lsd.specN2 - contN2)/lsd.specSigN2)**2)
+        probN2 = 1.0-specialf.gammainc(approxDOF/2., chi2N2/2.)
+    
     return(probV, probN1, probN2)
-
-
 
 
 def calcBz(lsd, cog='I', norm='auto', lambda0=500*u.nm, geff=1.2, velrange=None, bzwidth=None, plot=True):
     '''Calculate the Bz of an LSD profile
     
     :param lsd: lsd object (input). It is assumed that the lsd.vel is in km/s.
-    :param cog: choice of value, or calculation method for the center of gravity. The choices are:
-                'I': center of gravity of I, 'V': center of gravity of V, 'IV': center of gravity of I*V,
+    :param cog: The value, or calculation method for the center of gravity. The choices are:
+                'I': center of gravity of I,
+                'V': center of gravity of V,
+                'IV': center of gravity of I*V,
                 a float: a user defined value in km/s.
     :param norm: calculation method for the continuum. The choices are:
-                    'auto': the median of I outside of velrange (if defined) or the full range (if velrange not defined)
-                    float: a used defined value to use for Ic.
+                    'auto': the median of I outside of velrange (if defined) or the full range (if velrange is not defined)
+                    float: a user defined value to use for Ic.
     :param lambda0: wavelength of the transition (default=500 nm or 5000 AA).
-                    For a LSD profile, this is the lambda value the LSD profile shape was scaled with.
-                    Need to be a astropy unit object, with length units.
+                    For an LSD profile, this is the lambda value the LSD profile shape was scaled with.
+                    Needs to be a astropy unit object, with length units.
                     The astropy unit package will take care of the units conversion to give the Bz in Gauss.
-    :param geff: effective lande factor of the transition.
+    :param geff: effective Lande factor of the transition.
                  For an LSD profile, this is the geff value the LSD profile shape was scaled with.
     :param velrange: range of velocity to use for the determination of the
-                     line center and the continnum. If not defined, the whole range
+                     line center and the continuum. If not defined, the whole range
                      will be used. If bzwidth is not defined, this range will also be
                      used for the line Bz calculation.
     :param bzwidth: distance from the line center to use in the Bz calculation.
                     One element = same on each side of line center.
                     Two elements, left and right of line center.
                     Not defined: using velrange.
-    :param plot: whether or not a graph is displayed.
-    :return: a dictionary with Bz and FAP calculations
+    :param plot: whether or not a graph is generated, and returned.
+    :return: a dictionary with Bz and FAP calculations,
+             optionally a matplotlib figure.
     '''
 
     # Velrange is used to identify the position of the line,
-    # for calulating the cog, and for calculating the position
-    # of the continnum.
+    # for calculating the cog, and for calculating the position
+    # of the continuum.
     # If Velrange is not defined, it will use the whole range.
     # The range for calculating Bz itself is controlled by bzwidth below
     if velrange != None:
@@ -106,7 +116,6 @@ def calcBz(lsd, cog='I', norm='auto', lambda0=500*u.nm, geff=1.2, velrange=None,
         lsd_out = lsd[np.logical_not(inside)]
     else:
         lsd_in=copy.copy(lsd)
-        
     
     # Check if norm is a string.
     if isinstance(norm, str):
@@ -115,24 +124,25 @@ def calcBz(lsd, cog='I', norm='auto', lambda0=500*u.nm, geff=1.2, velrange=None,
             print('  using the median of the continuum outside of the line')
             norm_val = np.median(lsd_out.specI)
         else:
-            print('  no range in velocity given, using the median of the whole specI to determine continnum')
+            print('  no range in velocity given, using the median of the whole specI to determine continuum')
             norm_val = np.median(lsd_in.specI)
     else:
         norm_val = copy.copy(norm)
         print('using given norm value')
-          
 
-    # Check ig cog is a string.
+    # Check if cog is a string.
     if isinstance(cog, str):
         # calculate the cog for the chosen method
         if cog == 'I':
             cog_val = cog_I(lsd_in, norm_val)
-        if cog == 'min':
+        elif cog == 'min':
             cog_val = cog_min(lsd_in)
-        if cog == 'IV':
+        elif cog == 'IV':
             cog_val = cog_IV(lsd_in, norm_val)
-        if cog == 'V':
+        elif cog == 'V':
             cog_val = cog_V(lsd_in)
+        else:
+            raise ValueError('calcBz got unrecognized value for cog: {:}'.format(cog))
     else:
         cog_val=copy.copy(cog)
         
@@ -185,12 +195,12 @@ def calcBz(lsd, cog='I', norm='auto', lambda0=500*u.nm, geff=1.2, velrange=None,
     deltav = (lsd_bz[1].vel - lsd_bz[0].vel)*u.km/u.s # This is in km/s
     
     # Calculation of the integral in the denominator of the Bz function with a trapeze numerical integral
-    # For the square error caculation, we propagate like we would for sommation numerical integral.
+    # For the square error calculation, we propagate like we would for summation numerical integral.
     ri0v = np.trapz(norm_val-lsd_bz.specI, x=lsd_bz.vel )*u.km/u.s # This is in km/s
-    si0v = np.sqrt(np.sum(lsd_bz.specSigI**2 )* deltav**2) # This will naturaly be in km/s
+    si0v = np.sqrt(np.sum(lsd_bz.specSigI**2 )* deltav**2) # This will naturally be in km/s
 
     # Calculation of the integral in the numerator of the Bz function with a trapeze numerical integral
-    # For the error caculation, we propagate like we would for sommation numerical integral.
+    # For the error calculation, we propagate like we would for summation numerical integral.
     vf = np.trapz( (lsd_bz.vel - cog_val) * lsd_bz.specV, x=lsd_bz.vel-cog_val )*(u.km/u.s)**2 # This is in (km/s)^2
     svf = np.sqrt(np.sum( (lsd_bz.vel - cog_val )**2 * lsd_bz.specSigV**2 )*(u.km/u.s)**2 * deltav**2)
     
@@ -226,8 +236,6 @@ def calcBz(lsd, cog='I', norm='auto', lambda0=500*u.nm, geff=1.2, velrange=None,
             'N2 bz sig (G)': ( np.abs(bln2 * np.sqrt( (snf2/nf2)**2 + (si0v/ri0v)**2 ))).to(G_cgs).value,
             'FAP_N2': FAP_N2
             }
-
-    df = pd.DataFrame(data=[result])
 
     if plot:
         fig, ax = lsd.plot(sameYRange=False)
