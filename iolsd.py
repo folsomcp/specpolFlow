@@ -130,12 +130,9 @@ class lsd_prof:
         specSigN1_s = self.specSigN1[key]
         specN2_s = self.specN2[key]
         specSigN2_s = self.specSigN2[key]
-        if(self.header != None):
-            header_s = self.header
-        else: #Header should never be None at this point, but to be safe
-            header_s = ""
         slice_prof = lsd_prof(vel_s, specI_s, specSigI_s, specV_s, specSigV_s,
-                              specN1_s, specSigN1_s, specN2_s, specSigN2_s, header_s)
+                              specN1_s, specSigN1_s, specN2_s, specSigN2_s, self.header)
+        slice_prof.numParam = self.numParam
         return slice_prof
 
     def __setitem__(self, key, newval):
