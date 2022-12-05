@@ -174,7 +174,7 @@ def calcBz(lsd, cog='I', norm='auto', lambda0=500*u.nm, geff=1.2, velrange=None,
                 lsd_bz = lsd[ np.logical_and(lsd.vel >= p_bzwidth[0], lsd.vel <= p_bzwidth[1]) ]
             else:
                 print('bzwidth has too many elements (need one or two)')
-                ## Add an error handling here?
+                raise ValueError('bzwidth has too many elements {:} (need 1 or 2)'.format(len(bzwidth)))
         else:
             p_bzwidth = [cog_val-bzwidth, cog_val+bzwidth]
             lsd_bz = lsd[ np.logical_and(lsd.vel >= p_bzwidth[0], lsd.vel <= p_bzwidth[1]) ]
@@ -238,7 +238,8 @@ def calcBz(lsd, cog='I', norm='auto', lambda0=500*u.nm, geff=1.2, velrange=None,
             }
 
     if plot:
-        fig  = plotBzCalc(lsd, lsd_in, lsd_bz, velrange, p_bzwidth, norm_val, cog_val, cog)
+        fig  = plotBzCalc(lsd, lsd_in, lsd_bz, velrange,
+                          p_bzwidth, norm_val, cog_val, cog)
         
         return(result,fig)
     else:
@@ -295,3 +296,82 @@ def plotBzCalc(lsd, lsd_in, lsd_bz, velrange, p_bzwidth, norm_val, cog_val, cog)
         ax[2].fill_between(lsd_bz.vel[blue], lsd_bz.specN2[blue], step='mid', color='blue')
     
     return fig
+
+
+###############################################################
+#For running calcBz as a terminal program
+if __name__ == "__main__":
+    
+    #Take input file names and velocity ranges as command line arguments,
+    #with some additional optional control parameters.
+    import argparse
+    import iolsd
+    parser = argparse.ArgumentParser(description="""
+    Calculate the longitudinal magnetic field Bz from LSD profiles.
+    Prints Bz from Stokes V and null profiles.
+    Also prints the detection 'false alarm probability' (FAP)
+    (1 - detection probability) for the profile.""")
+    parser.add_argument("fileList", nargs='*',
+                        help='LSD profile file(s), to calculate Bz for.  Can be more than one file.')
+    parser.add_argument("-v", "--velRange", nargs=2, type=float, metavar=('VEL1', 'VEL2'), required=True, 
+                        help='Starting and ending velocity for the range used calculating line center and integrating.')
+    parser.add_argument("-g", "--Lande", type=float,  help='The effective Lande factor used to normalize (scale) the LSD profile.')
+    parser.add_argument("-l", "--wavelength", type=float,  help='The wavelength used to normalize (scale) the LSD profile, in nm.')
+    parser.add_argument("-p", "--plotFit", action='store_true',
+                        help='Optional, plot information about the line range used.')
+    args = parser.parse_args()
+    #Process the command line parameters
+    fileList = []
+    for fileName in args.fileList:
+        fileList += [fileName]
+    velRange = args.velRange
+    lande = args.Lande
+    wl0 = args.wavelength
+    plotFit = args.plotFit
+
+    results=[]
+    #Run the Bz calculation on any files provided
+    for fileName in fileList:
+        lsd = iolsd.read_lsd(fileName)
+        #If there isn't a Lande factor and wavelength provided,
+        #see if there is a value in the LSD profile header
+        if lande == None:
+            indLande = lsd.header.find('lande=')
+            if indLande >= 0:
+                lande = float(lsd.header[indLande+6:].split()[0])
+            else:
+                print('A reference effective Lande factor is needed')
+        if wl0 == None:
+            indWl0 = lsd.header.find('wl=')
+            if indWl0 >= 0:
+                wl0 = float(lsd.header[indWl0+3:].split()[0])
+            else:
+                print('A reference effective Wavelength is needed')
+        
+        res = calcBz(lsd, cog='I', lambda0=wl0*u.nm, geff=lande, velrange=velRange, plot=plotFit)
+        
+        #If we want to plot this figure, first unpack the two values returned,
+        #then we need to run the matplotlib show function.
+        if plotFit:
+            res, fig  = res
+            import matplotlib.pyplot as plt
+            plt.show()
+        results += [res]
+
+    #Print the results out
+    nPar = lsd.numParam
+    txtline = ('file                             Bz_V(G)  sigma_V  ratio FAP_V'
+              +'       Bz_N1(G) sigma_N1  ratio FAP_N1')
+    if nPar == 4: txtline += '     Bz_N2(G) sigma_N2  ratio FAP_N2'
+    print(txtline)
+    for i, res in enumerate(results):
+        txtline = ('{:30s} {:+9.2f} {:8.2f} {:6.2f} {:9.3e} '
+                   +' {:+9.2f} {:8.2f} {:6.2f} {:9.3e}').format(
+                       fileList[i], res['V bz (G)'], res['V bz sig (G)'],
+                       res['V bz (G)']/res['V bz sig (G)'], res['V FAP'],
+                       res['N1 bz (G)'], res['N1 bz sig (G)'],
+                       res['N1 bz (G)']/res['N1 bz sig (G)'], res['N1 FAP'])
+        if nPar == 4: txtline += ' {:+9.2f} {:8.2f} {:6.2f} {:9.3e}'.format(
+                res['N2 bz (G)'], res['N2 bz sig (G)'],
+                res['N2 bz (G)']/res['N2 bz sig (G)'], res['N2 FAP'])
+        print(txtline)
