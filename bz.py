@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 ## @module bz.py
 # Documentation for bz.py
 #
@@ -179,7 +180,52 @@ def calcBz(lsd, cog='I', norm='auto', lambda0=500*u.nm, geff=1.2, velrange=None,
             p_bzwidth = [cog_val-bzwidth, cog_val+bzwidth]
             lsd_bz = lsd[ np.logical_and(lsd.vel >= p_bzwidth[0], lsd.vel <= p_bzwidth[1]) ]
 
-    # Actual calculation of the Bz:
+    # u.G is not properly defined in astropy.
+    # It is defined in Tesla base units.
+    # So here we are creating the right cgs base units for a Gauss.
+    G_cgs = u.def_unit('G_cgs', 1 * u.g**0.5/u.cm**0.5/u.s)
+    
+    #Evaluate the equation for Bz; use V, Null1, and Null2 if they exist
+    blv, blvSig = integrateBz(lsd_bz.vel, lsd_bz.specV, lsd_bz.specSigV, 
+                geff, lambda0, cog_val, lsd_bz.specI, lsd_bz.specSigI, norm_val)
+    if lsd.numParam > 2:
+        bln1, bln1Sig = integrateBz(lsd_bz.vel, lsd_bz.specN1, lsd_bz.specSigN1,
+                geff, lambda0, cog_val, lsd_bz.specI, lsd_bz.specSigI, norm_val)
+    else: bln1, bln1Sig = (0*G_cgs, 0*G_cgs)
+    if lsd.numParam > 3:
+        bln2, bln2Sig = integrateBz(lsd_bz.vel, lsd_bz.specN2, lsd_bz.specSigN2,
+                geff, lambda0, cog_val, lsd_bz.specI, lsd_bz.specSigI, norm_val)
+    else: bln2, bln2Sig = (0*G_cgs, 0*G_cgs)
+    
+    # Get the FAP in the same range as the one used for Bz
+    FAP_V, FAP_N1, FAP_N2 = FAP(lsd_bz)
+    
+    result = {
+            'Ic': norm_val,
+            'cog': cog_val,
+            'Bzwidth min': p_bzwidth[0],
+            'Bzwidth max': p_bzwidth[1],
+            'V bz (G)': blv.value,
+            'V bz sig (G)': blvSig.value,
+            'V FAP': FAP_V,
+            'N1 bz (G)': bln1.value,
+            'N1 bz sig (G)': bln1Sig.value,
+            'N1 FAP': FAP_N1,
+            'N2 bz (G)': bln2.value,
+            'N2 bz sig (G)': bln2Sig.value,
+            'N2 FAP': FAP_N2
+            }
+
+    if plot:
+        fig  = plotBzCalc(lsd, lsd_in, lsd_bz, velrange,
+                          p_bzwidth, norm_val, cog_val, cog)
+        return(result,fig)
+    else:
+        return(result)
+
+
+def integrateBz(vel, spec, specSig, geff, lambda0, cog_val, specI, specSigI, norm_val):
+    #Evaluate the integral equation for Bz.  Only intended for use in calcBz.
     
     # u.G is not properly defined in astropy.
     # It is defined in Tesla base units.
@@ -188,62 +234,27 @@ def calcBz(lsd, cog='I', norm='auto', lambda0=500*u.nm, geff=1.2, velrange=None,
     # This is the constant for the Zeeman splitting
     # Lambda_B = constant * lambda0**2 B
     lambda_B_constant = const.e.esu / (4 * np.pi * const.m_e.cgs * const.c.cgs**2)
-    #print('Lambda_B constant: ', lambda_B_constant.to(u.AA / (u.AA**2 * G_cgs)))
     
     # set the velocity step for error propagation
     # and set to km/s (because the lsd profile objects don't have units associated with them)
-    deltav = (lsd_bz[1].vel - lsd_bz[0].vel)*u.km/u.s # This is in km/s
+    deltav = (vel[1] - vel[0])*u.km/u.s # This is in km/s
     
-    # Calculation of the integral in the denominator of the Bz function with a trapeze numerical integral
-    # For the square error calculation, we propagate like we would for summation numerical integral.
-    ri0v = np.trapz(norm_val-lsd_bz.specI, x=lsd_bz.vel )*u.km/u.s # This is in km/s
-    si0v = np.sqrt(np.sum(lsd_bz.specSigI**2 )* deltav**2) # This will naturally be in km/s
-
-    # Calculation of the integral in the numerator of the Bz function with a trapeze numerical integral
+    # Calculation of the integral in the numerator of the Bz function with a trapezoidal numerical integral
     # For the error calculation, we propagate like we would for summation numerical integral.
-    vf = np.trapz( (lsd_bz.vel - cog_val) * lsd_bz.specV, x=lsd_bz.vel-cog_val )*(u.km/u.s)**2 # This is in (km/s)^2
-    svf = np.sqrt(np.sum( (lsd_bz.vel - cog_val )**2 * lsd_bz.specSigV**2 )*(u.km/u.s)**2 * deltav**2)
-    
-    # Same as above, but for the null profiles.
-    nf1 = np.trapz( (lsd_bz.vel - cog_val) * lsd_bz.specN1, x=lsd_bz.vel-cog_val )*(u.km/u.s)**2
-    snf1 = np.sqrt(np.sum( (lsd_bz.vel - cog_val )**2 * lsd_bz.specSigN1**2 )*(u.km/u.s)**2* deltav**2)
+    fnum = np.trapz( (vel - cog_val) * spec, x=vel-cog_val )*(u.km/u.s)**2 # This is in (km/s)^2
+    sfnum = np.sqrt(np.sum( (vel - cog_val )**2 * specSig**2 )*(u.km/u.s)**2 * deltav**2)
 
-    nf2 = np.trapz( (lsd_bz.vel - cog_val) * lsd_bz.specN2, x=lsd_bz.vel-cog_val )*(u.km/u.s)**2
-    snf2 = np.sqrt(np.sum( (lsd_bz.vel - cog_val )**2 * lsd_bz.specSigN2**2 )*(u.km/u.s)**2* deltav**2)
+    # Calculation of the integral in the denominator of the Bz function with a trapezoidal numerical integral
+    # For the square error calculation, we propagate like we would for summation numerical integral.
+    ri0v = np.trapz(norm_val-specI, x=vel )*u.km/u.s # This is in km/s
+    si0v = np.sqrt(np.sum(specSigI**2 )* deltav**2) # This will naturally be in km/s
 
-    # Making the actual Bz calculation.
+    # Make the actual Bz calculation.
     # for the units to work out, lambda0 needs to be passed
     # as a unit quantity (e.g. u.nm or u.AA)
-    blv = (-1*vf / ( ri0v*geff*lambda0*const.c*lambda_B_constant)).to(G_cgs)
-    bln1 = (-1*nf1 / ( ri0v*geff*lambda0*const.c*lambda_B_constant)).to(G_cgs)
-    bln2 = (-1*nf2 / ( ri0v*geff*lambda0*const.c*lambda_B_constant)).to(G_cgs)
-
-    # Get the FAP in the same range as the one used for Bz
-    FAP_V, FAP_N1, FAP_N2 = FAP(lsd_bz)
-        
-    result = {
-            'Ic': norm_val,
-            'cog': cog_val,
-            'Bzwidth min': p_bzwidth[0],
-            'Bzwidth max': p_bzwidth[1],
-            'V bz (G)': blv.value,
-            'V bz sig (G)': ( np.abs(blv * np.sqrt( (svf/vf)**2 + (si0v/ri0v)**2 ))).to(G_cgs).value,
-            'V FAP': FAP_V,
-            'N1 bz (G)': bln1.value,
-            'N1 bz sig (G)': ( np.abs(bln1 * np.sqrt( (snf1/nf1)**2 + (si0v/ri0v)**2 ))).to(G_cgs).value,
-            'N1 FAP': FAP_N1,
-            'N2 bz (G)': bln2.value,
-            'N2 bz sig (G)': ( np.abs(bln2 * np.sqrt( (snf2/nf2)**2 + (si0v/ri0v)**2 ))).to(G_cgs).value,
-            'FAP_N2': FAP_N2
-            }
-
-    if plot:
-        fig  = plotBzCalc(lsd, lsd_in, lsd_bz, velrange,
-                          p_bzwidth, norm_val, cog_val, cog)
-        
-        return(result,fig)
-    else:
-        return(result)
+    bl = (-1*fnum / ( ri0v*geff*lambda0*const.c*lambda_B_constant)).to(G_cgs)
+    blSig = ( np.abs(bl * np.sqrt( (sfnum/fnum)**2 + (si0v/ri0v)**2 ))).to(G_cgs)
+    return bl, blSig
 
 
 def plotBzCalc(lsd, lsd_in, lsd_bz, velrange, p_bzwidth, norm_val, cog_val, cog):
@@ -348,7 +359,9 @@ if __name__ == "__main__":
             else:
                 print('A reference effective Wavelength is needed')
         
-        res = calcBz(lsd, cog='I', lambda0=wl0*u.nm, geff=lande, velrange=velRange, plot=plotFit)
+        #The main Bz calculation
+        res = calcBz(lsd, cog='I', lambda0=wl0*u.nm, geff=lande,
+                     velrange=velRange, plot=plotFit)
         
         #If we want to plot this figure, first unpack the two values returned,
         #then we need to run the matplotlib show function.
@@ -360,18 +373,18 @@ if __name__ == "__main__":
 
     #Print the results out
     nPar = lsd.numParam
-    txtline = ('file                             Bz_V(G)  sigma_V  ratio FAP_V'
-              +'       Bz_N1(G) sigma_N1  ratio FAP_N1')
-    if nPar == 4: txtline += '     Bz_N2(G) sigma_N2  ratio FAP_N2'
+    txtline = ('file                             Bz_V(G)  sigma_V  ratio FAP_V')
+    if nPar >= 3: txtline += '      Bz_N1(G) sigma_N1  ratio FAP_N1'
+    if nPar >= 4: txtline += '     Bz_N2(G) sigma_N2  ratio FAP_N2'
     print(txtline)
     for i, res in enumerate(results):
-        txtline = ('{:30s} {:+9.2f} {:8.2f} {:6.2f} {:9.3e} '
-                   +' {:+9.2f} {:8.2f} {:6.2f} {:9.3e}').format(
+        txtline = '{:30s} {:+9.2f} {:8.2f} {:6.2f} {:9.3e}'.format(
                        fileList[i], res['V bz (G)'], res['V bz sig (G)'],
-                       res['V bz (G)']/res['V bz sig (G)'], res['V FAP'],
-                       res['N1 bz (G)'], res['N1 bz sig (G)'],
-                       res['N1 bz (G)']/res['N1 bz sig (G)'], res['N1 FAP'])
-        if nPar == 4: txtline += ' {:+9.2f} {:8.2f} {:6.2f} {:9.3e}'.format(
+                       res['V bz (G)']/res['V bz sig (G)'], res['V FAP'])
+        if nPar >= 3: txtline += ' {:+9.2f} {:8.2f} {:6.2f} {:9.3e}'.format(
+                res['N1 bz (G)'], res['N1 bz sig (G)'],
+                res['N1 bz (G)']/res['N1 bz sig (G)'], res['N1 FAP'])
+        if nPar >= 4: txtline += ' {:+9.2f} {:8.2f} {:6.2f} {:9.3e}'.format(
                 res['N2 bz (G)'], res['N2 bz sig (G)'],
                 res['N2 bz (G)']/res['N2 bz sig (G)'], res['N2 FAP'])
         print(txtline)
