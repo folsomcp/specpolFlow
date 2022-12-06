@@ -323,13 +323,21 @@ if __name__ == "__main__":
     Also prints the detection 'false alarm probability' (FAP)
     (1 - detection probability) for the profile.""")
     parser.add_argument("fileList", nargs='*',
-                        help='LSD profile file(s), to calculate Bz for.  Can be more than one file.')
-    parser.add_argument("-v", "--velRange", nargs=2, type=float, metavar=('VEL1', 'VEL2'), required=True, 
-                        help='Starting and ending velocity for the range used calculating line center and integrating.')
-    parser.add_argument("-g", "--Lande", type=float,  help='The effective Lande factor used to normalize (scale) the LSD profile.')
-    parser.add_argument("-l", "--wavelength", type=float,  help='The wavelength used to normalize (scale) the LSD profile, in nm.')
+                        help='LSD profile file(s), to calculate Bz for.  '
+                        +'Can be more than one file.')
+    parser.add_argument("-v", "--velRange", nargs=2, type=float,
+                        metavar=('VEL1', 'VEL2'), required=True, 
+                        help='Starting and ending velocity for the range used '
+                        +'to calculate line centre and integrate.')
+    parser.add_argument("-g", "--Lande", type=float,
+                        help='The effective Lande factor used to normalize '
+                        +'(scale) the LSD profile.')
+    parser.add_argument("-l", "--wavelength", type=float,
+                        help='The wavelength, in nm, used to normalize '
+                        +'(scale) the LSD profile.')
     parser.add_argument("-p", "--plotFit", action='store_true',
-                        help='Optional, plot information about the line range used.')
+                        help='Optional, plot information about the line range '
+                        +'and centre used.')
     args = parser.parse_args()
     #Process the command line parameters
     fileList = []
@@ -339,6 +347,8 @@ if __name__ == "__main__":
     lande = args.Lande
     wl0 = args.wavelength
     plotFit = args.plotFit
+    if fileList == []:
+        print('Provide an LSD profile file!\n(try -h for more info)\n')
 
     results=[]
     #Run the Bz calculation on any files provided
@@ -357,7 +367,7 @@ if __name__ == "__main__":
             if indWl0 >= 0:
                 wl0 = float(lsd.header[indWl0+3:].split()[0])
             else:
-                print('A reference effective Wavelength is needed')
+                print('A reference effective Wavelength is needed\n')
         
         #The main Bz calculation
         res = calcBz(lsd, cog='I', lambda0=wl0*u.nm, geff=lande,
