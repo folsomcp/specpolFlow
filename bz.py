@@ -163,7 +163,7 @@ def calcBz(lsd, cog='I', norm='auto', lambda0=500., geff=1.2, velrange=None, bzw
             p_bzwidth = np.copy(velrange)
         else:
             print('no bzwidth nor velrange defined, using full velocity range to calculate Bz')
-            p_bzrange = [lsd.vel.min(), lsd.vel.max()]
+            p_bzwidth = [lsd.vel.min(), lsd.vel.max()]
             lsd_bz = copy.copy(lsd)
     else:
         # Check whether it is a numpy array
