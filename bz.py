@@ -5,10 +5,9 @@
 # Calculate a longitudinal magnetic field (Bz) from an LSD profile.
 
 #import specpolFlow as pol  #implicitly depends on specpolFlow.iolsd
-#import matplotlib.pyplot as plt #Implicitly depends on matplotlib.pyplot
+#import matplotlib.pyplot as plt #implicitly depends on matplotlib.pyplot
 import numpy as np
-import astropy.units as u
-import astropy.constants as const
+#import astropy.units as u #only used if the given a wavelength in astropy units
 import copy
 import scipy.special as specialf
 
@@ -75,7 +74,7 @@ def FAP(lsd):
     return(probV, probN1, probN2)
 
 
-def calcBz(lsd, cog='I', norm='auto', lambda0=500*u.nm, geff=1.2, velrange=None, bzwidth=None, plot=True):
+def calcBz(lsd, cog='I', norm='auto', lambda0=500., geff=1.2, velrange=None, bzwidth=None, plot=True):
     '''Calculate the Bz of an LSD profile
     
     :param lsd: lsd object (input). It is assumed that the lsd.vel is in km/s.
@@ -89,8 +88,9 @@ def calcBz(lsd, cog='I', norm='auto', lambda0=500*u.nm, geff=1.2, velrange=None,
                     float: a user defined value to use for Ic.
     :param lambda0: wavelength of the transition (default=500 nm or 5000 AA).
                     For an LSD profile, this is the lambda value the LSD profile shape was scaled with.
-                    Needs to be a astropy unit object, with length units.
-                    The astropy unit package will take care of the units conversion to give the Bz in Gauss.
+                    This can either be a float (which must be in nm)
+                    or an astropy unit object, with length units.
+                    If this is an astropy unit, that package will take care of any necessary unit conversion.
     :param geff: effective Lande factor of the transition.
                  For an LSD profile, this is the geff value the LSD profile shape was scaled with.
     :param velrange: range of velocity to use for the determination of the
@@ -102,10 +102,15 @@ def calcBz(lsd, cog='I', norm='auto', lambda0=500*u.nm, geff=1.2, velrange=None,
                     Two elements, left and right of line center.
                     Not defined: using velrange.
     :param plot: whether or not a graph is generated, and returned.
-    :return: a dictionary with Bz and FAP calculations,
+    :return: a dictionary with Bz (in G) and FAP calculations,
              optionally a matplotlib figure.
     '''
-
+    
+    if not isinstance(lambda0, (float, int)):
+        import astropy.units as u
+        lamb0 = lambda0.to(u.nm).value
+    else: lamb0 = lambda0
+    
     # Velrange is used to identify the position of the line,
     # for calculating the cog, and for calculating the position
     # of the continuum.
@@ -146,8 +151,7 @@ def calcBz(lsd, cog='I', norm='auto', lambda0=500*u.nm, geff=1.2, velrange=None,
             raise ValueError('calcBz got unrecognized value for cog: {:}'.format(cog))
     else:
         cog_val=copy.copy(cog)
-        
-
+    
     # Now we define the position of the line for the Bz calculation itself.
     # If the keyword bzwidth is defined, we use that range from the chosen cog.
     if bzwidth == None:
@@ -180,22 +184,18 @@ def calcBz(lsd, cog='I', norm='auto', lambda0=500*u.nm, geff=1.2, velrange=None,
             p_bzwidth = [cog_val-bzwidth, cog_val+bzwidth]
             lsd_bz = lsd[ np.logical_and(lsd.vel >= p_bzwidth[0], lsd.vel <= p_bzwidth[1]) ]
 
-    # u.G is not properly defined in astropy.
-    # It is defined in Tesla base units.
-    # So here we are creating the right cgs base units for a Gauss.
-    G_cgs = u.def_unit('G_cgs', 1 * u.g**0.5/u.cm**0.5/u.s)
-    
-    #Evaluate the equation for Bz; use V, Null1, and Null2 if they exist
+    # Actual calculation of the Bz:
+    # Call the integration function for each V, Null1, Null2 parameter
     blv, blvSig = integrateBz(lsd_bz.vel, lsd_bz.specV, lsd_bz.specSigV, 
-                geff, lambda0, cog_val, lsd_bz.specI, lsd_bz.specSigI, norm_val)
+                geff, lamb0, cog_val, lsd_bz.specI, lsd_bz.specSigI, norm_val)
     if lsd.numParam > 2:
         bln1, bln1Sig = integrateBz(lsd_bz.vel, lsd_bz.specN1, lsd_bz.specSigN1,
-                geff, lambda0, cog_val, lsd_bz.specI, lsd_bz.specSigI, norm_val)
-    else: bln1, bln1Sig = (0*G_cgs, 0*G_cgs)
+                geff, lamb0, cog_val, lsd_bz.specI, lsd_bz.specSigI, norm_val)
+    else: bln1, bln1Sig = (0.0, 0.0)
     if lsd.numParam > 3:
         bln2, bln2Sig = integrateBz(lsd_bz.vel, lsd_bz.specN2, lsd_bz.specSigN2,
-                geff, lambda0, cog_val, lsd_bz.specI, lsd_bz.specSigI, norm_val)
-    else: bln2, bln2Sig = (0*G_cgs, 0*G_cgs)
+                geff, lamb0, cog_val, lsd_bz.specI, lsd_bz.specSigI, norm_val)
+    else: bln2, bln2Sig = (0.0, 0.0)
     
     # Get the FAP in the same range as the one used for Bz
     FAP_V, FAP_N1, FAP_N2 = FAP(lsd_bz)
@@ -205,14 +205,14 @@ def calcBz(lsd, cog='I', norm='auto', lambda0=500*u.nm, geff=1.2, velrange=None,
             'cog': cog_val,
             'Bzwidth min': p_bzwidth[0],
             'Bzwidth max': p_bzwidth[1],
-            'V bz (G)': blv.value,
-            'V bz sig (G)': blvSig.value,
+            'V bz (G)': blv,
+            'V bz sig (G)': blvSig,
             'V FAP': FAP_V,
-            'N1 bz (G)': bln1.value,
-            'N1 bz sig (G)': bln1Sig.value,
+            'N1 bz (G)': bln1,
+            'N1 bz sig (G)': bln1Sig,
             'N1 FAP': FAP_N1,
-            'N2 bz (G)': bln2.value,
-            'N2 bz sig (G)': bln2Sig.value,
+            'N2 bz (G)': bln2,
+            'N2 bz sig (G)': bln2Sig,
             'N2 FAP': FAP_N2
             }
 
@@ -227,33 +227,33 @@ def calcBz(lsd, cog='I', norm='auto', lambda0=500*u.nm, geff=1.2, velrange=None,
 def integrateBz(vel, spec, specSig, geff, lambda0, cog_val, specI, specSigI, norm_val):
     #Evaluate the integral equation for Bz.  Only intended for use in calcBz.
     
-    # u.G is not properly defined in astropy.
-    # It is defined in Tesla base units.
-    # So here we are creating the right cgs base units for a Gauss.
-    G_cgs = u.def_unit('G_cgs', 1 * u.g**0.5/u.cm**0.5/u.s)
     # This is the constant for the Zeeman splitting
     # Lambda_B = constant * lambda0**2 B
-    lambda_B_constant = const.e.esu / (4 * np.pi * const.m_e.cgs * const.c.cgs**2)
+    # lambda_B_constant = e/(4*pi*m_e*c) = 4.668644778304102e-05 in cgs units
+    lambda_B_constant = 4.668644778304102e-12 #to match/cancel lambda0 in nm
+    cvel = 2.99792458e5 #c in km/s to match/cancel the LSD profile velocities
     
     # set the velocity step for error propagation
-    # and set to km/s (because the lsd profile objects don't have units associated with them)
-    deltav = (vel[1] - vel[0])*u.km/u.s # This is in km/s
+    deltav = (vel[1] - vel[0]) # This is in km/s
     
-    # Calculation of the integral in the numerator of the Bz function with a trapezoidal numerical integral
-    # For the error calculation, we propagate like we would for summation numerical integral.
-    fnum = np.trapz( (vel - cog_val) * spec, x=vel-cog_val )*(u.km/u.s)**2 # This is in (km/s)^2
-    sfnum = np.sqrt(np.sum( (vel - cog_val )**2 * specSig**2 )*(u.km/u.s)**2 * deltav**2)
-
-    # Calculation of the integral in the denominator of the Bz function with a trapezoidal numerical integral
-    # For the square error calculation, we propagate like we would for summation numerical integral.
-    ri0v = np.trapz(norm_val-specI, x=vel )*u.km/u.s # This is in km/s
-    si0v = np.sqrt(np.sum(specSigI**2 )* deltav**2) # This will naturally be in km/s
-
+    # Calculation of the integral in the numerator of the Bz function
+    # with a trapezoidal numerical integral
+    # For the error calculation, we propagate like we would for
+    # summation in a numerical integral.
+    fnum = np.trapz( (vel - cog_val) * spec, x=vel-cog_val ) #in (km/s)^2
+    sfnum = np.sqrt(np.sum( (vel - cog_val )**2 * specSig**2 ) * deltav**2)
+    
+    # Calculation of the integral in the denominator of the Bz function
+    # with a trapezoidal numerical integral
+    # For the square error calculation, we propagate like we would for
+    # summation in a numerical integral.
+    ri0v = np.trapz(norm_val-specI, x=vel ) # in km/s
+    si0v = np.sqrt(np.sum(specSigI**2 )* deltav**2) # in km/s
+    
     # Make the actual Bz calculation.
-    # for the units to work out, lambda0 needs to be passed
-    # as a unit quantity (e.g. u.nm or u.AA)
-    bl = (-1*fnum / ( ri0v*geff*lambda0*const.c*lambda_B_constant)).to(G_cgs)
-    blSig = ( np.abs(bl * np.sqrt( (sfnum/fnum)**2 + (si0v/ri0v)**2 ))).to(G_cgs)
+    # for the units to work out, lambda0 should be in nm
+    bl = -1*fnum / ( ri0v*geff*lambda0*cvel*lambda_B_constant)
+    blSig = np.abs(bl * np.sqrt( (sfnum/fnum)**2 + (si0v/ri0v)**2 ))
     return bl, blSig
 
 
@@ -370,7 +370,7 @@ if __name__ == "__main__":
                 print('A reference effective Wavelength is needed\n')
         
         #The main Bz calculation
-        res = calcBz(lsd, cog='I', lambda0=wl0*u.nm, geff=lande,
+        res = calcBz(lsd, cog='I', lambda0=wl0, geff=lande,
                      velrange=velRange, plot=plotFit)
         
         #If we want to plot this figure, first unpack the two values returned,
