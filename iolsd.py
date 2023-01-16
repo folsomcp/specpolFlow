@@ -165,7 +165,7 @@ class lsd_prof:
 
         :rtype: lsd_prof
         """
-        print('* for LSD profiels is to be depreciated, use norm() instad')
+        print('* for LSD profiles is to be depreciated, use norm() instead')
         self.specI = np.multiply(self.specI, other)
         self.specSigI = np.multiply(self.specSigI, other)
         self.specV = np.multiply(self.specV, other)
@@ -233,30 +233,53 @@ class lsd_prof:
 
     def norm(self, normValue):
         """
-        Renormalize an LSD profile, divide the I, V, and null profiles by a value.
+        Return a renormalize an LSD profile, divide the I, V, and null profiles by a value.
         
         :param normValue: the value to renormalize (divide) the LSD profile by
         :rtype: lsd_prof
         """
-        self.specI = np.divide(self.specI, normValue)
-        self.specSigI = np.divide(self.specSigI, normValue)
-        self.specV = np.divide(self.specV, normValue)
-        self.specSigV = np.divide(self.specSigV, normValue)
-        self.specN1 = np.divide(self.specN1, normValue)
-        self.specSigN1 = np.divide(self.specSigN1, normValue)
-        self.specN2 = np.divide(self.specN2, normValue)
-        self.specSigN2 = np.divide(self.specSigN2, normValue)
-        return self
+        # FROM VERO:
+        # It could look like this:
+        #new = copy.deepcopy(self) 
+        #new.specI = np.divide(new.specI, normValue)
+        #new.specSigI = np.divide(new.specSigI, normValue)
+        #new.specV = np.divide(new.specV, normValue)
+        #new.specSigV = np.divide(new.specSigV, normValue)
+        #new.specN1 = np.divide(new.specN1, normValue)
+        #new.specSigN1 = np.divide(new.specSigN1, normValue)
+        #new.specN2 = np.divide(new.specN2, normValue)
+        #new.specSigN2 = np.divide(new.specSigN2, normValue)
+        # But maybe using the constructor directly saves a package. 
+        new = lsd_prof(self.vel, 
+                        self.specI/normValue, self.specSigI/normValue, 
+                        self.specV/normValue, self.specSigV/normValue,
+                        self.specN1/normValue, self.specSigN1/normValue, 
+                        self.specN2/normValue, self.specSigN2/normValue, 
+                        self.header)
+        new.numParam = self.numParam
+
+        return new
     
     def vshift(self, velShift):
         """
-        Apply a shift to the velocities of the LSD profile
+        Return a LSD profile with a shift to the velocities of the LSD profile
         
         :param velShift: the change in velocity to be added
         :rtype: lsd_prof
         """
-        self.vel = self.vel + velShift
-        return self
+        # VERO: old def that changes the original object. 
+        # Can be removed in cleanup later.
+        #self.vel = self.vel + velShift
+        #return self
+        new = lsd_prof(self.vel-velShift, 
+                        self.specI, self.specSigI, 
+                        self.specV, self.specSigV,
+                        self.specN1, self.specSigN1, 
+                        self.specN2, self.specSigN2, 
+                        self.header)
+        new.numParam = self.numParam
+
+        return new
     
     def set_weights(self, wint_old, wpol_old, wint_new, wpol_new):
         '''Change the weight of the LSD profile (see also scale())
@@ -267,26 +290,39 @@ class lsd_prof:
         :param wpol_new: The new polarization weight (g*d*lambda)
         :rtype: lsd object
         '''
-        self.scale(wint_new/wint_old, wpol_new/wpol_old)
-        return(self)
+        # VERO: old def that changes the original object. 
+        # Can be removed in cleanup later.
+        #self.scale(wint_new/wint_old, wpol_new/wpol_old)
+        return(self.scale(wint_new/wint_old, wpol_new/wpol_old))
 
     def scale(self, scale_int, scale_pol):
-        '''Rescale the amplitudes of the LSD profile (see also set_weights())
+        '''Return a LSD profile with rescaled amplitudes of the LSD profile (see also set_weights())
         
         :param scale_int: scale the intensity profile by this
         :param scale_pol: scale the polarization and null profiles by this
         :rtype: lsd object
         '''
         
-        self.specI = 1.0 - ((1.0-self.specI) * scale_int)
-        self.specSigI = self.specSigI * scale_int
-        self.specV = self.specV * scale_pol
-        self.specSigV = self.specSigV * scale_pol
-        self.specN1 = self.specN1 * scale_pol
-        self.specSigN1 = self.specSigN1 * scale_pol
-        self.specN2 = self.specN2 * scale_pol
-        self.specSigN2 = self.specSigN2 * scale_pol
-        return
+        # VERO: old def that changes the original object. 
+        # Can be removed in cleanup later.
+        #self.specI = 1.0 - ((1.0-self.specI) * scale_int)
+        #self.specSigI = self.specSigI * scale_int
+        #self.specV = self.specV * scale_pol
+        #self.specSigV = self.specSigV * scale_pol
+        #self.specN1 = self.specN1 * scale_pol
+        #self.specSigN1 = self.specSigN1 * scale_pol
+        #self.specN2 = self.specN2 * scale_pol
+        #self.specSigN2 = self.specSigN2 * scale_pol
+
+        new = lsd_prof(self.vel, 
+                        1.0 - ((1.0-self.specI) * scale_int), self.specSigI * scale_int, 
+                        self.specV*scale_pol, self.specSigV*scale_pol,
+                        self.specN1*scale_pol, self.specSigN1*scale_pol, 
+                        self.specN2*scale_pol, self.specSigN2*scale_pol, 
+                        self.header)
+        new.numParam = self.numParam
+
+        return new
     
     def plot(self, figsize=(10,10), sameYRange=True, plotZeroLevel=True, **kwargs):
         '''Plot the LSD profile
