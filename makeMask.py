@@ -170,6 +170,9 @@ def estimateLande(J, config, verbose=False):
     Lval = ('S','P','D','F','G','H','I','K','L','M','N','O','Q','R','T','U','V')
     lval = ('s','p','d','f','g','h','i','k','l','m','n','o','q','r','t','u','v')
 
+    #In the rare case of a blank string for the electron configuration, abort
+    if(len(config.split()) < 2): return 99.00
+    
     coupling = config.split()[0]
 
     #For levels in LS coupling
