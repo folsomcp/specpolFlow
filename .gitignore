@@ -3,3 +3,4 @@ docs-src/source/.DS_Store
 .DS_Store
 __pycache__/
 tutorials/BzTable.csv
+*.wav
