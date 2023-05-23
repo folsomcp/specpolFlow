@@ -6,6 +6,7 @@
 import numpy as np
 import astropy.units as u
 import astropy.constants as const
+import specpolFlow as pol
 
 
 def default_exclude_regions(velrange):
