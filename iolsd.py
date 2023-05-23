@@ -755,8 +755,6 @@ def read_spectrum(fname, sortByWavelength=False):
         obs_specSig = obs_specSig[obs_ind]
     
     return(observation(obs_wl, obs_specI, obs_specV, obs_specN1, obs_specN2, obs_specSig, header=obs_header))
-        
-
 
 
 
@@ -785,6 +783,7 @@ class line_list:
     * depth - depth at the centre of the spectral line, as estimated by VALD
     * configLo - list of strings with the electron configuration and term symbols for the lower level
     * configUp - list of strings with the electron configuration and term symbols for the upper level
+    * refs - list of references for the sources of the line data (optional)
     """
     def __init__(self, nLines = 0):
         """
@@ -809,11 +808,12 @@ class line_list:
         self.depth    = np.zeros(nLines)
         self.configLo = ['' for i in range(nLines)]
         self.configUp = ['' for i in range(nLines)]
+        self.refs = ["'_          unknown source'" for i in range(nLines)]
     
 
 def read_VALD(fname):
     """
-    Read a list of spectral line data from VALD
+    Read a list of spectral line data from VALD and return a line_list
 
     This expects VALD version 3 line list, in an 'extract stellar' 'long' format.
 
@@ -856,8 +856,42 @@ def read_VALD(fname):
                 llist.configLo[j] = txtLine.strip(' \n\'')
             if ii == 2:
                 llist.configUp[j] = txtLine.strip(' \n\'')
+            if ii == 3:
+                llist.refs[j] = txtLine.strip(' \n\'')
                 j += 1
         i += 1
     
     fVald.close()
     return llist
+
+
+def write_VALD(lineList, fname):
+    """
+    Write a line list to a text file.
+    This outputs using the VALD version 3 'extract stellar' 'long' format.
+
+    A few details (e.g. references) are omitted since they are not saved
+    in the line_list class.
+
+    :param lineList: the line_list object containing data to write
+    :param fname: the file name to save the output to
+    """
+
+    fOut = open(fname, 'w')
+    fOut.write("{:11.5f},{:12.5f},{:5d},{:7d},{:4.1f}, Wavelength region, lines selected, lines processed, Vmicro\n".format(
+        lineList.wl[0], lineList.wl[-1], lineList.nLines, 999999, 0.0))
+    fOut.write("                                                                     Lande factors       Damping parameters  Central\n")
+    fOut.write("Spec Ion       WL_air(A)  log gf* E_low(eV) J lo E_up(eV)  J up  lower   upper    mean   Rad.   Stark  Waals  depth\n")
+
+    
+    for i in range(lineList.nLines):
+        fOut.write("'{:4s}',{:16.4f},{:8.3f},{:8.4f},{:5.1f},{:8.4f},{:5.1f},{:7.3f},{:7.3f},{:7.3f},{:6.3f},{:6.3f},{:6.3f},{:6.3f},\n".format(
+            lineList.ion[i],lineList.wl[i],lineList.loggf[i],
+            lineList.Elo[i],lineList.Jlo[i],lineList.Eup[i],lineList.Jup[i],
+            lineList.landeLo[i],lineList.landeUp[i],lineList.landeEff[i],
+            lineList.rad[i],lineList.stark[i],lineList.waals[i],
+            lineList.depth[i]))
+        fOut.write(lineList.configLo[i]+'\n')
+        fOut.write(lineList.configUp[i]+'\n')
+        fOut.write(lineList.refs[i]+'\n')
+    fOut.close()
