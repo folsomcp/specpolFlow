@@ -6,7 +6,7 @@
 import numpy as np
 import astropy.units as u
 import astropy.constants as const
-import specpolFlow as pol
+import specpolFlow.iolsd
 
 
 def default_exclude_regions(velrange):
@@ -65,7 +65,7 @@ def clean_model_mask(name_in, name_out, data):
 
 
     name = name_in
-    mask_i = pol.iolsd.mask(fname = name)
+    mask_i = specpolFlow.iolsd.mask(fname = name)
 
     #Identifying if a line is inside or outside the regions
     dcard = []
