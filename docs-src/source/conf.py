@@ -18,9 +18,9 @@ sys.path.insert(0, os.path.abspath('../../../'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'specpol-flow'
-copyright = '2022, The spec-flow team'
-author = '2022, The spec-flow team'
+project = 'SpecPolFlow'
+copyright = '2022, The SpecPolFlow team'
+author = '2022, The SpecPolFlow team'
 
 
 # -- General configuration ---------------------------------------------------

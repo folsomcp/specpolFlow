@@ -8,9 +8,21 @@ iolsd module
     :members:
     :special-members: __init__
 
-bz module
+Bz module
 ####################
 
 .. automodule:: specpolFlow.bz
     :members:
 
+makeMask module
+####################
+
+.. automodule:: specpolFlow.makeMask
+    :members:
+
+
+rvFit module
+####################
+
+.. automodule:: specpolFlow.rvFit
+    :members:

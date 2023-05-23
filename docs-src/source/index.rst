@@ -16,14 +16,17 @@ We can even add math: :math:`E = mc^2`
    :caption: Contents:
 
 .. toctree::
-   tutorials/tutorial1
+   tutorials/ColabSetup
+   tutorials/LSDtutorial
+   tutorials/CalculateBz
+   tutorials/LSDsonification
    :maxdepth: 1
    :caption: Tutorials:
 
 
 .. toctree::
    API
-   :maxdepth: 1
+   :maxdepth: 2
    :caption: API documentation:
 
 
