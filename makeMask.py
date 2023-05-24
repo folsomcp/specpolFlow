@@ -47,7 +47,8 @@ def make_mask(lineListFile, maskFile, depthCutoff=0.0, wlStart=0.0, wlEnd=1e10,
                        elementsExclude=elementsExclude)
     
     mask.save(maskFile)
-
+    
+    print('Masks made!')
     return mask
 
     
