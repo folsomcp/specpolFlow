@@ -19,7 +19,7 @@ def default_exclude_regions(velrange):
     the exclusion regions.
 
     '''
-    velrange*u.km/u.s
+    #velrange*u.km/u.s
     Halpha = 656.3
     Hbeta = 486.14
     Hgamma = 434.05
