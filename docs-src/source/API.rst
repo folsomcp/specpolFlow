@@ -21,6 +21,13 @@ makeMask module
     :members:
 
 
+cleanmask module
+####################
+
+.. automodule:: specpolFlow.cleanmask
+    :members:
+
+
 rvFit module
 ####################
 
