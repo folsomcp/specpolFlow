@@ -19,7 +19,7 @@ def default_exclude_regions(velrange):
     the exclusion regions.
 
     '''
-
+    velrange*u.km/u.s
     Halpha = 656.3
     Hbeta = 486.14
     Hgamma = 434.05
@@ -87,4 +87,5 @@ def clean_model_mask(name_in, name_out, data):
       if mask_i.iuse[j] == 1:
         spec_lines.append(mask_i.wl[j])
     mask_i.save(name_out)
-    return()
+    print('Masks cleaned!')
+    return
