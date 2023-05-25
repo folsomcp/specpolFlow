@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Welcome to … &mdash; SpecPolFlow  documentation</title>
+  <title>Welcome to SpecPolFlow &mdash; SpecPolFlow  documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -17,8 +17,6 @@
         <script src="_static/doctools.js"></script>
         <script src="_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
-        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -75,7 +73,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Welcome to …</li>
+      <li class="breadcrumb-item active">Welcome to SpecPolFlow</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -85,10 +83,14 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="welcome-to">
-<h1>Welcome to …<a class="headerlink" href="#welcome-to" title="Permalink to this heading"></a></h1>
-<p>Let’s add here a welcoming message, stating the purpose of the documentation.</p>
-<p>We can even add math: <span class="math notranslate nohighlight">\(E = mc^2\)</span></p>
+  <section id="welcome-to-specpolflow">
+<h1>Welcome to SpecPolFlow<a class="headerlink" href="#welcome-to-specpolflow" title="Permalink to this heading"></a></h1>
+<p>The goal of SpecpolFlow is to provide a completely pythonic workflow for the analysis of spectropolarimetric observations (for example, ESPaDOnS at CFHT, Narval at TBL, etc).</p>
+<p>The SpecpolFlow package is built around two other packages developed by Colin Folsom for the two most computationally challenging tasks: spectra normalization (Github: folsomcp/NormPlot) and LSD profile calculations (Github:folsomcp/LSDpy).</p>
+<p>SpecPolFlow provides intermediate calculation tools (for example line mask calculations and longitudinal field calculations), as well as object classes and manipulation tools that are useful to build a spectropolarimetric workflow (for example a LSD object class, with built-in read, write, slice, plot, etc methods).</p>
+<p>These tools are fully documented (see API documentation)</p>
+<p>We also provide tutorials that can be used to teach the workflow, and examples on how to construct a workflow from these tools to e.g. handle automation for very large datasets (using tools like the Panda package that is becoming very popular in data science).</p>
+<p>These tutorials are in the form of python notebooks (that can also run on Google Colab).</p>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
