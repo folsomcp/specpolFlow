@@ -7,7 +7,7 @@ import numpy as np
 import astropy.units as u
 import astropy.constants as const
 import specpolFlow.iolsd
-
+import matplotlib.pylot as plt
 
 def default_exclude_regions(velrange):
     '''
@@ -89,3 +89,65 @@ def clean_model_mask(name_in, name_out, data):
     mask_i.save(name_out)
     print('Masks cleaned!')
     return
+
+def split_order(data):
+  '''
+  Split an observation object into a list of observation objects with one order per item
+  '''
+  # one order is where the wavelength backtracks. 
+  ind = np.where((data.wl[1:]-data.wl[0:-1]) < 0)[0]
+  norder = ind.size+1
+  ind = np.append(-1,ind)
+  ind = np.append(ind,data.wl.size)
+  print('{} orders'.format(norder))
+
+  list_order=[]
+  for i in range(0,norder):
+    list_order.append(data[ind[i]+1:ind[i+1]])
+ 
+  return(list_order)
+
+def Excluded_Regions_Visual(input_file, input_mask, WLRegions):
+    # reading the observed spectrum
+    file_obs = input_file
+    data_obs = specpolFlow.iolsd.read_spectrum(file_obs)
+    # splitting the observed spectrum by order
+    list_order = split_order(data_obs)
+
+    # # shifting the model spectrum for its radial velocity
+    # # (note the rshift function asks for numpy unit quantities)
+    # mod_wave_shift = rshift(mod_wave*u.nm, float(obs["vradCorrected"])*u.km/u.s)
+
+    # read in the mask 
+    file_mask=input_mask
+    mask = specpolFlow.iolsd.mask(fname=file_mask)
+
+    mask_used = mask.wl[mask.iuse==1]
+    mask_not_used = mask.wl[mask.iuse==0]
+
+
+    for i, order in enumerate(list_order):
+        fig, ax = plt.subplots(1,1, figsize=(10,2))
+        #Setting limits to axes
+        ax.set_xlim([order.wl[0],order.wl[-1]])
+        ax.set_ylim(0.8,1.2)
+        ax.set_title('Order: {}'.format(i))
+
+        ## Plotting the spectrum
+        p = ax.plot(order.wl, order.specI, label='Observation')
+
+        # plotting the lines from the masks
+        p = ax.vlines(x=mask_used, ymin=0, ymax=1.2,color='green',linestyle='--',lw=1)
+        p = ax.vlines(x=mask_not_used,ymin=0, ymax=np.max(order.specI),color='r',linestyle='--',lw=1)
+
+
+        ## Plotting the excluded regions in shaded grey
+        for i in range(0,np.shape(WLRegions)[0]):
+            #if WLRegions.loc[i,'Type']=='Telluric':
+                #color = '0.75'
+            color = '0.5'
+            Xr = np.arange(WLRegions['WLStart'][i],WLRegions['WLFinish'][i],0.01)
+            p = ax.fill_between(Xr,y1=0,y2=1.2,facecolor =color)
+        return
+
+
