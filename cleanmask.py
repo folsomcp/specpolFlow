@@ -7,7 +7,7 @@ import numpy as np
 import astropy.units as u
 import astropy.constants as const
 import specpolFlow.iolsd
-import matplotlib.pylot as plt
+import matplotlib.pyplot as plt
 
 def default_exclude_regions(velrange):
     '''
