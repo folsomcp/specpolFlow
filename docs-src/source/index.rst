@@ -12,6 +12,7 @@ We can even add math: :math:`E = mc^2`
 
 .. toctree::
    Installation
+   Credits
    :maxdepth: 1
    :caption: Contents:
 

@@ -1,24 +1,26 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>spFlow Package &mdash; specpol-flow  documentation</title>
+  <title>spFlow Package &mdash; SpecPolFlow  documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="Importing specpolFlow into Colab for tutorial" href="tutorials/tutorial1.html" /> 
+    <link rel="prev" title="Sonifying LSD profiles" href="tutorials/LSDsonification.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -26,11 +28,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> specpol-flow
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            SpecPolFlow
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -39,16 +45,78 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Credits.html">Credits</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorials:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="tutorials/tutorial1.html">Importing specpolFlow into Colab for tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/ColabSetup.html">Importing specpolFlow into Colab for tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/LSDtutorial.html">Demonstration of the LSD class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/CalculateBz.html">Calculating the longitudinal field and False Alarm Probability (FAP)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/LSDsonification.html">Sonifying LSD profiles</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API documentation:</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">spFlow Package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#module-specpolFlow.iolsd">iolsd module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-specpolFlow.bz">bz module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-specpolFlow.iolsd">iolsd module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#specpolFlow.iolsd.line_list"><code class="docutils literal notranslate"><span class="pre">line_list</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#specpolFlow.iolsd.line_list.__init__"><code class="docutils literal notranslate"><span class="pre">line_list.__init__()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#specpolFlow.iolsd.lsd_prof"><code class="docutils literal notranslate"><span class="pre">lsd_prof</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#specpolFlow.iolsd.lsd_prof.__init__"><code class="docutils literal notranslate"><span class="pre">lsd_prof.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specpolFlow.iolsd.lsd_prof.norm"><code class="docutils literal notranslate"><span class="pre">lsd_prof.norm()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specpolFlow.iolsd.lsd_prof.plot"><code class="docutils literal notranslate"><span class="pre">lsd_prof.plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specpolFlow.iolsd.lsd_prof.save"><code class="docutils literal notranslate"><span class="pre">lsd_prof.save()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specpolFlow.iolsd.lsd_prof.scale"><code class="docutils literal notranslate"><span class="pre">lsd_prof.scale()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specpolFlow.iolsd.lsd_prof.set_weights"><code class="docutils literal notranslate"><span class="pre">lsd_prof.set_weights()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specpolFlow.iolsd.lsd_prof.vshift"><code class="docutils literal notranslate"><span class="pre">lsd_prof.vshift()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#specpolFlow.iolsd.mask"><code class="docutils literal notranslate"><span class="pre">mask</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#specpolFlow.iolsd.mask.__init__"><code class="docutils literal notranslate"><span class="pre">mask.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specpolFlow.iolsd.mask.prune"><code class="docutils literal notranslate"><span class="pre">mask.prune()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specpolFlow.iolsd.mask.save"><code class="docutils literal notranslate"><span class="pre">mask.save()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specpolFlow.iolsd.mask.set_weights"><code class="docutils literal notranslate"><span class="pre">mask.set_weights()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#specpolFlow.iolsd.observation"><code class="docutils literal notranslate"><span class="pre">observation</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#specpolFlow.iolsd.observation.__init__"><code class="docutils literal notranslate"><span class="pre">observation.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specpolFlow.iolsd.observation.write_s"><code class="docutils literal notranslate"><span class="pre">observation.write_s()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#specpolFlow.iolsd.read_VALD"><code class="docutils literal notranslate"><span class="pre">read_VALD()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#specpolFlow.iolsd.read_lsd"><code class="docutils literal notranslate"><span class="pre">read_lsd()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#specpolFlow.iolsd.read_spectrum"><code class="docutils literal notranslate"><span class="pre">read_spectrum()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#specpolFlow.iolsd.write_VALD"><code class="docutils literal notranslate"><span class="pre">write_VALD()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-specpolFlow.bz">Bz module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#specpolFlow.bz.FAP"><code class="docutils literal notranslate"><span class="pre">FAP()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#specpolFlow.bz.calcBz"><code class="docutils literal notranslate"><span class="pre">calcBz()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#specpolFlow.bz.plotBzCalc"><code class="docutils literal notranslate"><span class="pre">plotBzCalc()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-specpolFlow.makeMask">makeMask module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#specpolFlow.makeMask.convert_list_to_mask"><code class="docutils literal notranslate"><span class="pre">convert_list_to_mask()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#specpolFlow.makeMask.estimateLande"><code class="docutils literal notranslate"><span class="pre">estimateLande()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#specpolFlow.makeMask.filter_mask"><code class="docutils literal notranslate"><span class="pre">filter_mask()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#specpolFlow.makeMask.getEffectiveLande"><code class="docutils literal notranslate"><span class="pre">getEffectiveLande()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#specpolFlow.makeMask.get_JJ_numbers"><code class="docutils literal notranslate"><span class="pre">get_JJ_numbers()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#specpolFlow.makeMask.get_JK_numbers"><code class="docutils literal notranslate"><span class="pre">get_JK_numbers()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#specpolFlow.makeMask.get_LS_numbers"><code class="docutils literal notranslate"><span class="pre">get_LS_numbers()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#specpolFlow.makeMask.make_mask"><code class="docutils literal notranslate"><span class="pre">make_mask()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#specpolFlow.makeMask.parseFraction"><code class="docutils literal notranslate"><span class="pre">parseFraction()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-specpolFlow.cleanmask">cleanmask module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#specpolFlow.cleanmask.clean_model_mask"><code class="docutils literal notranslate"><span class="pre">clean_model_mask()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#specpolFlow.cleanmask.default_exclude_regions"><code class="docutils literal notranslate"><span class="pre">default_exclude_regions()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-specpolFlow.rvFit">rvFit module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#specpolFlow.rvFit.fitGaussianRV"><code class="docutils literal notranslate"><span class="pre">fitGaussianRV()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -59,15 +127,15 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">specpol-flow</a>
+          <a href="index.html">SpecPolFlow</a>
       </nav>
 
       <div class="wy-nav-content">
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>spFlow Package</li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">spFlow Package</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/API.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -77,42 +145,56 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  
-<style>
-/* CSS overrides for sphinx_rtd_theme */
+  <section id="spflow-package">
+<h1>spFlow Package<a class="headerlink" href="#spflow-package" title="Permalink to this heading"></a></h1>
+<section id="module-specpolFlow.iolsd">
+<span id="iolsd-module"></span><h2>iolsd module<a class="headerlink" href="#module-specpolFlow.iolsd" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="specpolFlow.iolsd.line_list">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">specpolFlow.iolsd.</span></span><span class="sig-name descname"><span class="pre">line_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nLines</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.iolsd.line_list" title="Permalink to this definition"></a></dt>
+<dd><p>Container for a set of spectral line data, usually from VALD.</p>
+<p>This usually contains:</p>
+<ul class="simple">
+<li><p>nLines - number of lines in the line list</p></li>
+<li><p>ion - list of species identifiers (element or molecule and ionization)</p></li>
+<li><p>wl - array of wavelengths</p></li>
+<li><p>loggf - array of oscillator strengths (log gf)</p></li>
+<li><p>Elo - array of excitation potentials for the lower level in the transition (in eV)</p></li>
+<li><p>Jlo - array of J quantum numbers for the lower level</p></li>
+<li><p>Eu - array of excitation potentials for the upper level in the transition (in eV)</p></li>
+<li><p>Jup - array of J quantum numbers for the upper level</p></li>
+<li><p>landeLo - array of Lande factors for the lower level</p></li>
+<li><p>landeUp - array of Lande factors for the upper level</p></li>
+<li><p>landeEff - array of effective Lande factors for the transition</p></li>
+<li><p>rad - array of radiative damping coefficients</p></li>
+<li><p>stark - array of quadratic Stark damping coefficients</p></li>
+<li><p>waals - array of van der Waals damping coefficients</p></li>
+<li><p>depth - depth at the centre of the spectral line, as estimated by VALD</p></li>
+<li><p>configLo - list of strings with the electron configuration and term symbols for the lower level</p></li>
+<li><p>configUp - list of strings with the electron configuration and term symbols for the upper level</p></li>
+<li><p>refs - list of references for the sources of the line data (optional)</p></li>
+</ul>
+<dl class="py method">
+<dt class="sig sig-object py" id="specpolFlow.iolsd.line_list.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nLines</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.iolsd.line_list.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize an empty line_list to be populated later</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>nLines</strong> – optional, make arrays for this many lines (initial values are all 0)</p>
+</dd>
+</dl>
+</dd></dl>
 
-/* 24px margin */
-.nbinput.nblast.container,
-.nboutput.nblast.container {
-    margin-bottom: 19px;  /* padding has already 5px */
-}
+</dd></dl>
 
-/* ... except between code cells! */
-.nblast.container + .nbinput.container {
-    margin-top: -19px;
-}
-
-.admonition > p:before {
-    margin-right: 4px;  /* make room for the exclamation icon */
-}
-
-/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
-.math {
-    text-align: unset;
-}
-</style>
-<div class="section" id="spflow-package">
-<h1>spFlow Package<a class="headerlink" href="#spflow-package" title="Permalink to this headline"></a></h1>
-<div class="section" id="module-specpolFlow.iolsd">
-<span id="iolsd-module"></span><h2>iolsd module<a class="headerlink" href="#module-specpolFlow.iolsd" title="Permalink to this headline"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="specpolFlow.iolsd.lsd_prof">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">specpolFlow.iolsd.</span></span><span class="sig-name descname"><span class="pre">lsd_prof</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">velStart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velEnd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixVel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.iolsd.lsd_prof" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">specpolFlow.iolsd.</span></span><span class="sig-name descname"><span class="pre">lsd_prof</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specI</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specSigI</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specSigV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specN1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specSigN1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specN2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specSigN2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.iolsd.lsd_prof" title="Permalink to this definition"></a></dt>
 <dd><p>Holds the LSD profile data.</p>
 <p>This usually includes numpy arrays:</p>
 <ul class="simple">
 <li><p>vel - velocity grid for the LSD profile</p></li>
-<li><p>specI - the Stokes I profile)</p></li>
+<li><p>specI - the Stokes I profile</p></li>
 <li><p>specSigI - the uncertainties on Stokes I</p></li>
 <li><p>specV - the polarization profile, most often Stokes V</p></li>
 <li><p>specSigI - the uncertainties on the polarization profile</p></li>
@@ -121,18 +203,63 @@
 <li><p>specN2 - the Null2 profile, if it exists, otherwise zeros</p></li>
 <li><p>specSigN2 - the uncertainties on Null2 if they exist</p></li>
 </ul>
+<p>And integers:</p>
+<ul class="simple">
+<li><p>numParam - The number of Stokes I V &amp; Null profiles used (usually 1, 3, or 4)</p></li>
+<li><p>npix - the number of pixels (points in velocity) in the LSD profile</p></li>
+</ul>
 <dl class="py method">
 <dt class="sig sig-object py" id="specpolFlow.iolsd.lsd_prof.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">velStart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velEnd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixVel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.iolsd.lsd_prof.__init__" title="Permalink to this definition"></a></dt>
-<dd><p>Initialize an empty LSD profile.</p>
-<p>Optionally this can set up the grid in velocity for the profile.</p>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specI</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specSigI</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specSigV</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specN1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specSigN1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specN2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specSigN2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.iolsd.lsd_prof.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize an LSD profile, using data from an existing profile.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>velStart</strong> – the velocity for the start (blue side) of the LSD profile</p></li>
-<li><p><strong>velEnd</strong> – the velocity for the end (red side) of the the LSD profile</p></li>
-<li><p><strong>pixVel</strong> – the step in velocity between pixels in the LSD profile</p></li>
+<li><p><strong>self</strong> – lsd_prof being created</p></li>
+<li><p><strong>vel</strong> – velocity grid for the LSD profile</p></li>
+<li><p><strong>specI</strong> – the Stokes I profile</p></li>
+<li><p><strong>specSigI</strong> – the uncertainties on Stokes I</p></li>
+<li><p><strong>specV</strong> – the polarization profile, usually Stokes V</p></li>
+<li><p><strong>specSigV</strong> – the uncertainties on the polarization profile</p></li>
+<li><p><strong>specN1</strong> – the Null1 profile</p></li>
+<li><p><strong>specSigN1</strong> – the uncertainties on Null1</p></li>
+<li><p><strong>specN2</strong> – the Null2 profile, if it exists, otherwise it is all 0s (optional)</p></li>
+<li><p><strong>specSigN2</strong> – the uncertainties on Null2 if there are any, otherwise all 0s (optional)</p></li>
+<li><p><strong>header</strong> – the header of the LSD profile file, if it exists (optional)</p></li>
 </ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specpolFlow.iolsd.lsd_prof.norm">
+<span class="sig-name descname"><span class="pre">norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">normValue</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.iolsd.lsd_prof.norm" title="Permalink to this definition"></a></dt>
+<dd><p>Return a renormalize an LSD profile, divide the I, V, and null profiles by a value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>normValue</strong> – the value to renormalize (divide) the LSD profile by</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#specpolFlow.iolsd.lsd_prof" title="specpolFlow.iolsd.lsd_prof">lsd_prof</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specpolFlow.iolsd.lsd_prof.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(10,</span> <span class="pre">10)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sameYRange</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotZeroLevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.iolsd.lsd_prof.plot" title="Permalink to this definition"></a></dt>
+<dd><p>Plot the LSD profile</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> – the lsd object to plot</p></li>
+<li><p><strong>figsize</strong> – the size of the figure being created</p></li>
+<li><p><strong>sameYRange</strong> – optionally set the Stokes V and Null plots to have the same y scale</p></li>
+<li><p><strong>plotZeroLevel</strong> – optionally include a dashed line at 0 for the V and Null plots.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>returns an fig, ax matplotlib container.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -143,7 +270,7 @@
 <dd><p>Save the LSD profile to a file.</p>
 <p>This saves to a text file in Donati’s format.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>fname</strong> – the name of the file the LSD profile to save to.</p></li>
 <li><p><strong>header</strong> – optionally, one line of header text for the output file.  This text string should end with a newline.</p></li>
@@ -152,11 +279,61 @@
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="specpolFlow.iolsd.lsd_prof.scale">
+<span class="sig-name descname"><span class="pre">scale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scale_int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_pol</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.iolsd.lsd_prof.scale" title="Permalink to this definition"></a></dt>
+<dd><p>Return a LSD profile with rescaled amplitudes of the LSD profile (see also set_weights())</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scale_int</strong> – scale the intensity profile by this</p></li>
+<li><p><strong>scale_pol</strong> – scale the polarization and null profiles by this</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>lsd object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specpolFlow.iolsd.lsd_prof.set_weights">
+<span class="sig-name descname"><span class="pre">set_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wint_old</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wpol_old</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wint_new</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wpol_new</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.iolsd.lsd_prof.set_weights" title="Permalink to this definition"></a></dt>
+<dd><p>Change the weight of the LSD profile (see also scale())</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wint_old</strong> – The current intensity weight (d)</p></li>
+<li><p><strong>wpol_old</strong> – The current polarization weight (g*d*lambda)</p></li>
+<li><p><strong>wint_new</strong> – The new intensity weight (d)</p></li>
+<li><p><strong>wpol_new</strong> – The new polarization weight (g*d*lambda)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>lsd object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specpolFlow.iolsd.lsd_prof.vshift">
+<span class="sig-name descname"><span class="pre">vshift</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">velShift</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.iolsd.lsd_prof.vshift" title="Permalink to this definition"></a></dt>
+<dd><p>Return a LSD profile with a shift to the velocities of the LSD profile</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>velShift</strong> – the change in velocity to be added</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#specpolFlow.iolsd.lsd_prof" title="specpolFlow.iolsd.lsd_prof">lsd_prof</a></p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="specpolFlow.iolsd.mask">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">specpolFlow.iolsd.</span></span><span class="sig-name descname"><span class="pre">mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.iolsd.mask" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">specpolFlow.iolsd.</span></span><span class="sig-name descname"><span class="pre">mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nLines</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.iolsd.mask" title="Permalink to this definition"></a></dt>
 <dd><p>The data for the LSD line mask.</p>
 <p>This usually contains arrays:</p>
 <ul class="simple">
@@ -168,12 +345,16 @@
 </ul>
 <dl class="py method">
 <dt class="sig sig-object py" id="specpolFlow.iolsd.mask.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.iolsd.mask.__init__" title="Permalink to this definition"></a></dt>
-<dd><p>Read in an LSD mask file and save it to an instance of the mask class.</p>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nLines</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.iolsd.mask.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>Read in an LSD mask file and save it to an instance of the mask class.
+If no file is given an empty line mask can be generated.</p>
 <p>The mask files are in the format for Donati’s LSD and LSDpy.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>fname</strong> – the name of the file containing the mask</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fname</strong> – the name of the file containing the mask</p></li>
+<li><p><strong>nLines</strong> – if no file name is given, initialize arrays of zeros, for nLines of data.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -193,7 +374,7 @@ for more efficient processing of the mask later.</p>
 <span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.iolsd.mask.save" title="Permalink to this definition"></a></dt>
 <dd><p>Save the line mask to a text file, in Donati’s and LSDpy format.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>fname</strong> – the file name to output the mask to.</p>
 </dd>
 </dl>
@@ -206,7 +387,7 @@ for more efficient processing of the mask later.</p>
 <p>This assumes the Stokes I lines are weighted as depth,
 and Stokes V is weighted as depth*wavelength*Lande factor</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>normDepth</strong> – the normalizing line depth for the mask/LSD profile</p></li>
 <li><p><strong>normWave</strong> – the normalizing wavelength (nm) for the mask/LSD profile</p></li>
@@ -220,7 +401,7 @@ and Stokes V is weighted as depth*wavelength*Lande factor</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="specpolFlow.iolsd.observation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">specpolFlow.iolsd.</span></span><span class="sig-name descname"><span class="pre">observation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sortByWavelength</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.iolsd.observation" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">specpolFlow.iolsd.</span></span><span class="sig-name descname"><span class="pre">observation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specI</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specV</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specN1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specN2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specSig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.iolsd.observation" title="Permalink to this definition"></a></dt>
 <dd><p>Contains an observed spectrum, usually spectropolarimetric data.</p>
 <p>Usually contains arrays:</p>
 <ul class="simple">
@@ -233,7 +414,51 @@ and Stokes V is weighted as depth*wavelength*Lande factor</p>
 </ul>
 <dl class="py method">
 <dt class="sig sig-object py" id="specpolFlow.iolsd.observation.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sortByWavelength</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.iolsd.observation.__init__" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specI</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specV</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specN1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specN2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">specSig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.iolsd.observation.__init__" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="specpolFlow.iolsd.observation.write_s">
+<span class="sig-name descname"><span class="pre">write_s</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.iolsd.observation.write_s" title="Permalink to this definition"></a></dt>
+<dd><p>Write the observation into a .s polarization format</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="specpolFlow.iolsd.read_VALD">
+<span class="sig-prename descclassname"><span class="pre">specpolFlow.iolsd.</span></span><span class="sig-name descname"><span class="pre">read_VALD</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.iolsd.read_VALD" title="Permalink to this definition"></a></dt>
+<dd><p>Read a list of spectral line data from VALD and return a line_list</p>
+<p>This expects VALD version 3 line list, in an ‘extract stellar’ ‘long’ format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>fname</strong> – the file name for the VALD line list.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>line_list object, containing arrays of line data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="specpolFlow.iolsd.read_lsd">
+<span class="sig-prename descclassname"><span class="pre">specpolFlow.iolsd.</span></span><span class="sig-name descname"><span class="pre">read_lsd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.iolsd.read_lsd" title="Permalink to this definition"></a></dt>
+<dd><p>function that reads in a LSD profile.</p>
+<p>The LSD profiles are in Donati’s text format.
+The two lines of header in Donati’s format is optional.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>fname</strong> – the name of the file containing the LSD profile</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>returns an instance of the lsd_prof class, defined in this module</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="specpolFlow.iolsd.read_spectrum">
+<span class="sig-prename descclassname"><span class="pre">specpolFlow.iolsd.</span></span><span class="sig-name descname"><span class="pre">read_spectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sortByWavelength</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.iolsd.read_spectrum" title="Permalink to this definition"></a></dt>
 <dd><p>Read in the observed spectrum and save it.</p>
 <p>This follows the .s format from Donati’s LibreESPRIT,
 files can either have two lines of header or no header.
@@ -241,7 +466,7 @@ This supports 6 column spectropolarimetric files
 (wavelength, I, V|Q|U, null1, null2, errors),
 and also 3 column spectra (wavelength, I, errors).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>fname</strong> – the name of the file to read.</p></li>
 <li><p><strong>sortByWavelength</strong> – reorder the points in the spectrum to always increase in wavelength, if set to True.</p></li>
@@ -250,56 +475,384 @@ and also 3 column spectra (wavelength, I, errors).</p>
 </dl>
 </dd></dl>
 
-</dd></dl>
-
 <dl class="py function">
-<dt class="sig sig-object py" id="specpolFlow.iolsd.read_lsd">
-<span class="sig-prename descclassname"><span class="pre">specpolFlow.iolsd.</span></span><span class="sig-name descname"><span class="pre">read_lsd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.iolsd.read_lsd" title="Permalink to this definition"></a></dt>
-<dd><p>function that reads in a LSD profile.</p>
-<p>The LSD profiles are in Donati’s text format.
-The two lines of header in Donati’s format is optional</p>
+<dt class="sig sig-object py" id="specpolFlow.iolsd.write_VALD">
+<span class="sig-prename descclassname"><span class="pre">specpolFlow.iolsd.</span></span><span class="sig-name descname"><span class="pre">write_VALD</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lineList</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fname</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.iolsd.write_VALD" title="Permalink to this definition"></a></dt>
+<dd><p>Write a line list to a text file.
+This outputs using the VALD version 3 ‘extract stellar’ ‘long’ format.</p>
+<p>A few details (e.g. references) are omitted since they are not saved
+in the line_list class.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>fname</strong> – the name of the file containing the LSD profile</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>returns an instance of the lsd_prof class, defined in this module.</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lineList</strong> – the line_list object containing data to write</p></li>
+<li><p><strong>fname</strong> – the file name to save the output to</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
 
-</div>
-<div class="section" id="module-specpolFlow.bz">
-<span id="bz-module"></span><h2>bz module<a class="headerlink" href="#module-specpolFlow.bz" title="Permalink to this headline"></a></h2>
+</section>
+<section id="module-specpolFlow.bz">
+<span id="bz-module"></span><h2>Bz module<a class="headerlink" href="#module-specpolFlow.bz" title="Permalink to this heading"></a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="specpolFlow.bz.bz">
-<span class="sig-prename descclassname"><span class="pre">specpolFlow.bz.</span></span><span class="sig-name descname"><span class="pre">bz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lsd</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.bz.bz" title="Permalink to this definition"></a></dt>
-<dd><p>function that calculates the Bx from an LSD profile object</p>
-<p>The function is currently empty – this was just to show how to documentation works.</p>
+<dt class="sig sig-object py" id="specpolFlow.bz.FAP">
+<span class="sig-prename descclassname"><span class="pre">specpolFlow.bz.</span></span><span class="sig-name descname"><span class="pre">FAP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lsd</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.bz.FAP" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the V, null1, and null2 FAP for a given LSD object</p>
+<p>The False Alarm Probability (FAP) is the probability that the observed
+data are consistent with the null hypothesis of no magnetic field.
+In this case, the null hypothesis is a flat line in Stokes V
+(an offset from 0 is allowed to account for continuum polarization).
+The probability is evaluated from chi^2.</p>
+<p>If you would like a specific range in velocity, simply slice the LSD object beforehand. 
+Note that the calcBz function also returns the FAP inside the spectral line, 
+over the same velocity range as used in the Bz calculation.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>lsd</strong> – a LSD object</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>lsd</strong> – lsd object (input)</p>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>returns….</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>FAP V, FAP N1, FAP N2.</p>
 </dd>
 </dl>
 </dd></dl>
 
-</div>
-</div>
+<dl class="py function">
+<dt class="sig sig-object py" id="specpolFlow.bz.calcBz">
+<span class="sig-prename descclassname"><span class="pre">specpolFlow.bz.</span></span><span class="sig-name descname"><span class="pre">calcBz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lsd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cog</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'I'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lambda0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velrange</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bzwidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.bz.calcBz" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the Bz of an LSD profile</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lsd</strong> – lsd object (input). It is assumed that the lsd.vel is in km/s.</p></li>
+<li><p><strong>cog</strong> – The value, or calculation method for the center of gravity. The choices are:
+‘I’: center of gravity of I,
+‘V’: center of gravity of V,
+‘IV’: center of gravity of I*V,
+a float: a user defined value in km/s.</p></li>
+<li><p><strong>norm</strong> – calculation method for the continuum. The choices are:
+‘auto’: the median of I outside of velrange (if defined) or the full range (if velrange is not defined)
+float: a user defined value to use for Ic.</p></li>
+<li><p><strong>lambda0</strong> – wavelength of the transition (default=500 nm or 5000 AA).
+For an LSD profile, this is the lambda value the LSD profile shape was scaled with.
+This can either be a float (which must be in nm)
+or an astropy unit object, with length units.
+If this is an astropy unit, that package will take care of any necessary unit conversion.</p></li>
+<li><p><strong>geff</strong> – effective Lande factor of the transition.
+For an LSD profile, this is the geff value the LSD profile shape was scaled with.</p></li>
+<li><p><strong>velrange</strong> – range of velocity to use for the determination of the
+line center and the continuum. If not defined, the whole range
+will be used. If bzwidth is not defined, this range will also be
+used for the line Bz calculation.</p></li>
+<li><p><strong>bzwidth</strong> – distance from the line center to use in the Bz calculation.
+One element = same on each side of line center.
+Two elements, left and right of line center.
+Not defined: using velrange.</p></li>
+<li><p><strong>plot</strong> – whether or not a graph is generated, and returned.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a dictionary with Bz (in G) and FAP calculations,
+optionally a matplotlib figure.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="specpolFlow.bz.plotBzCalc">
+<span class="sig-prename descclassname"><span class="pre">specpolFlow.bz.</span></span><span class="sig-name descname"><span class="pre">plotBzCalc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lsd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lsd_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lsd_bz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velrange</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_bzwidth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm_val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cog_val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cog</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.bz.plotBzCalc" title="Permalink to this definition"></a></dt>
+<dd><p>Generate a plot showing the center of gravity and integration ranges used in the calculation of Bz from and LSD profile.
+Called by the main calcBz function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lsd</strong> – the full LSD profile to plot</p></li>
+<li><p><strong>lsd_in</strong> – slice of an LSD profile with the range used for COG calculation</p></li>
+<li><p><strong>lsd_bz</strong> – slice of an LSD profile with the range used for integration of Bz</p></li>
+<li><p><strong>velrange</strong> – the velocity range used for COG calculation</p></li>
+<li><p><strong>p_bzwidth</strong> – the velocity range used for integration of Bz</p></li>
+<li><p><strong>norm_val</strong> – the continuum level used for normalization</p></li>
+<li><p><strong>cog_val</strong> – the final COG used for Bz calculation</p></li>
+<li><p><strong>cog</strong> – the input COG flag/value given by the user</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a matplotlib figure object</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-specpolFlow.makeMask">
+<span id="makemask-module"></span><h2>makeMask module<a class="headerlink" href="#module-specpolFlow.makeMask" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="specpolFlow.makeMask.convert_list_to_mask">
+<span class="sig-prename descclassname"><span class="pre">specpolFlow.makeMask.</span></span><span class="sig-name descname"><span class="pre">convert_list_to_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lineList</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depthCutoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atomsOnly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">includeNoLande</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defaultLande</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.makeMask.convert_list_to_mask" title="Permalink to this definition"></a></dt>
+<dd><p>Convert a VALD line list to an LSD line mask.</p>
+<p>This estimates Lande factors when VALD doesn’t have a known value
+This also can automatically reject any H lines and any molecular lines.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lineList</strong> – The line list object to be converted to a mask</p></li>
+<li><p><strong>depthCutoff</strong> – Only include lines deeper than this depth cutoff (defaults to 0, all lines included)</p></li>
+<li><p><strong>atomsOnly</strong> – Flag to use only atomic lines (no molecular lines) and exclude H lines (defaults to True)</p></li>
+<li><p><strong>includeNoLande</strong> – Flag to include lines in the mask even if no Lande factor can be estimated for them (defaults to False)</p></li>
+<li><p><strong>defaultLande</strong> – The value of the effective Lande factor to use for lines where no value can be estimated (only used if includeNoLande = True)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>The line mask object created from this data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="specpolFlow.makeMask.estimateLande">
+<span class="sig-prename descclassname"><span class="pre">specpolFlow.makeMask.</span></span><span class="sig-name descname"><span class="pre">estimateLande</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">J</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.makeMask.estimateLande" title="Permalink to this definition"></a></dt>
+<dd><p>Estimate a Lande factor for a level (if VALD doesn’t have one)</p>
+<p>This supports levels in LS coupling, JJ coupling, and JK coupling.
+Levels in LK coupling are not supported.  This relies on VALD3’s text 
+format for electron term symbols and configurations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>J</strong> – The J quantum number for this level</p></li>
+<li><p><strong>config</strong> – The text string from VALD with the electron configuration
+and term symbol for the level</p></li>
+<li><p><strong>verbose</strong> – Report warnings for levels in unsupported coupling schemes if True</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>The Lande factor estimated for this level.  If the Lande factor can’t be estimated this will be 99.0.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="specpolFlow.makeMask.filter_mask">
+<span class="sig-prename descclassname"><span class="pre">specpolFlow.makeMask.</span></span><span class="sig-name descname"><span class="pre">filter_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depthCutoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wlStart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wlEnd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000000000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">landeStart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10000000000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">landeEnd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000000000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elementsUsed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elementsExclude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.makeMask.filter_mask" title="Permalink to this definition"></a></dt>
+<dd><p>Remove lines from an LSD line mask, based on their depth, wavelength,
+effective Lande factor, or element.</p>
+<p>Usually, only one of elementsUsed and elementsExclude should be used.
+Both can be used, in that case only elements in elementsUsed are included,
+and then any elements in elementsExclude are removed from that.
+(Filtering by element currently only works for atomic lines,
+not molecular lines)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mask</strong> – The line mask object to filter lines out of.</p></li>
+<li><p><strong>depthCutoff</strong> – Only include lines in the mask deeper than this value (defaults to 0, all lines included)</p></li>
+<li><p><strong>wlStart</strong> – Optionally, only use lines with wavelengths above this (note: value in nm!)</p></li>
+<li><p><strong>wlEnd</strong> – Optionally, only use lines with wavelengths below this (note: value in nm!)</p></li>
+<li><p><strong>landeStart</strong> – Optionally, only use lines with effective Lande factors above this</p></li>
+<li><p><strong>landeEnd</strong> – Optionally, only use lines with effective Lande factors below this</p></li>
+<li><p><strong>elementsUsed</strong> – Optionally, provide a list of elements to include in the line mask. This should be a list of strings with the element symbols, e.g. [‘C’, ‘O’, ‘Si’, ‘Fe’] (an empty list or a list starting with ‘all’ will include all elements)</p></li>
+<li><p><strong>elementsExclude</strong> – Optionally, provide a list of elements to exclude from the line mask. Also a list of strings with the element symbols.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>The line mask object, with the requested lines removed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="specpolFlow.makeMask.getEffectiveLande">
+<span class="sig-prename descclassname"><span class="pre">specpolFlow.makeMask.</span></span><span class="sig-name descname"><span class="pre">getEffectiveLande</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">landeLo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">landeUp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Jlo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Jup</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.makeMask.getEffectiveLande" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate an effective Lande factor for a transition.</p>
+<p>This uses the upper and lower level Lande factors and J quantum numbers.
+The effective Lande factor is similar to an average weighted by the
+splitting pattern of the line.  It parameterizes the displacement of
+the centre of gravity of the sigma components of a Zeeman split line.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>landeLo</strong> – Lower level Lande factor</p></li>
+<li><p><strong>landeUp</strong> – Upper level Lande factor</p></li>
+<li><p><strong>Jlo</strong> – Lower level J quantum number</p></li>
+<li><p><strong>Jup</strong> – Upper level J quantum number</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Effective Lande factor for the transition</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="specpolFlow.makeMask.get_JJ_numbers">
+<span class="sig-prename descclassname"><span class="pre">specpolFlow.makeMask.</span></span><span class="sig-name descname"><span class="pre">get_JJ_numbers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.makeMask.get_JJ_numbers" title="Permalink to this definition"></a></dt>
+<dd><p>Extract the L1, S1, J1, L2, S2, and J2 quantum numbers for a level in JJ 
+coupling from VALD’s electron configuration and term symbol text string.</p>
+<p>This should cover the J1-J2 case (where two subgroups combine to produce
+J1 and J2, which combine to produce the total J), the J1-j case (where
+one subgroup makes J1, which combines with an additional electron with j
+combines to produce J), and it should work for the j-j case (for two
+equivalent electrons with their own j, which combine to make J).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> – the electron configuration and term symbol text string</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>The L1, S1, J1, L2, S2, and J2 quantum numbers (if a parsing error occurs, negative values are returned)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="specpolFlow.makeMask.get_JK_numbers">
+<span class="sig-prename descclassname"><span class="pre">specpolFlow.makeMask.</span></span><span class="sig-name descname"><span class="pre">get_JK_numbers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.makeMask.get_JK_numbers" title="Permalink to this definition"></a></dt>
+<dd><p>Extract the L1, S1, J1, L2, S2, and K quantum numbers for a level in JK
+coupling from VALD’s electron configuration and term symbol text string.</p>
+<p>This is sometimes called J1-l or J1-L2 coupling.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> – the electron configuration and term symbol text string</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>The L1, S1, J1, L2, S2, and K quantum numbers (if a parsing error occurs, negative values are returned)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="specpolFlow.makeMask.get_LS_numbers">
+<span class="sig-prename descclassname"><span class="pre">specpolFlow.makeMask.</span></span><span class="sig-name descname"><span class="pre">get_LS_numbers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.makeMask.get_LS_numbers" title="Permalink to this definition"></a></dt>
+<dd><p>Extract the L and S quantum numbers from a VALD term symbol text string,
+for a level in LS coupling.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> – the electron configuration and term symbol text string</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>The L and S quantum numbers (if a parsing error occurs, negative values are returned)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="specpolFlow.makeMask.make_mask">
+<span class="sig-prename descclassname"><span class="pre">specpolFlow.makeMask.</span></span><span class="sig-name descname"><span class="pre">make_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lineListFile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maskFile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depthCutoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wlStart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wlEnd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000000000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">landeStart</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-10000000000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">landeEnd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000000000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elementsUsed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elementsExclude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">atomsOnly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">includeNoLande</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">defaultLande</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.makeMask.make_mask" title="Permalink to this definition"></a></dt>
+<dd><p>Generate an LSD line mask from a VALD line list and save it.
+The main interface for generating new line masks with Python scrips.</p>
+<p>This generates an LSD line mask from atomic lines in the list,
+and estimates Lande factors for lines where possible.  Lines that 
+no Lande factor can be estimated for are omitted by default.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lineListFile</strong> – The name of the file containing the line list</p></li>
+<li><p><strong>maskFile</strong> – The name of the to write the mask to</p></li>
+<li><p><strong>depthCutoff</strong> – Only include lines in the mask deeper than this value (defaults to 0, all lines included)</p></li>
+<li><p><strong>wlStart</strong> – Optionally, only use lines with wavelengths above this (note: value in nm!)</p></li>
+<li><p><strong>wlEnd</strong> – Optionally, only use lines with wavelengths below this (note: value in nm!)</p></li>
+<li><p><strong>landeStart</strong> – Optionally, only use lines with effective Lande factors above this</p></li>
+<li><p><strong>landeEnd</strong> – Optionally, only use lines with effective Lande factors below this</p></li>
+<li><p><strong>elementsUsed</strong> – Optionally, provide a list of elements to include in the line mask. This should be a list of strings with the element symbols, e.g. [‘C’, ‘O’, ‘Si’, ‘Fe’] (an empty list or a list starting with ‘all’ will include all elements)</p></li>
+<li><p><strong>elementsExclude</strong> – Optionally, provide a list of elements to exclude from the line mask. Also a list of strings with the element symbols.</p></li>
+<li><p><strong>atomsOnly</strong> – Only include atomic lines (no molecular lines) and exclude H lines (defaults to True)</p></li>
+<li><p><strong>includeNoLande</strong> – Include lines in the mask even if no Lande factor can be estimated for them (defaults to False)</p></li>
+<li><p><strong>defaultLande</strong> – The value of the effective Lande factor to use if no value can be estimated (only used if includeNoLande = True)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>The mask object, in case further processing is desired</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="specpolFlow.makeMask.parseFraction">
+<span class="sig-prename descclassname"><span class="pre">specpolFlow.makeMask.</span></span><span class="sig-name descname"><span class="pre">parseFraction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errMsg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'failed</span> <span class="pre">to</span> <span class="pre">parse</span> <span class="pre">as</span> <span class="pre">a</span> <span class="pre">fraction:'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.makeMask.parseFraction" title="Permalink to this definition"></a></dt>
+<dd><p>Parse a text string fraction and convert it to a floating point number.</p>
+<p>This only works for fractions with no whole part in front
+(i.e. a numerator/denominator, or only an integer).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>string</strong> – Text string to convert</p></li>
+<li><p><strong>errMsg</strong> – Error message if this operation fails</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>The converted value, will be NaN if the conversion fails.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-specpolFlow.cleanmask">
+<span id="cleanmask-module"></span><h2>cleanmask module<a class="headerlink" href="#module-specpolFlow.cleanmask" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="specpolFlow.cleanmask.clean_model_mask">
+<span class="sig-prename descclassname"><span class="pre">specpolFlow.cleanmask.</span></span><span class="sig-name descname"><span class="pre">clean_model_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name_in</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.cleanmask.clean_model_mask" title="Permalink to this definition"></a></dt>
+<dd><p>Function that cleans a given mask.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name_in</strong> – name of input uncleaned mask</p></li>
+<li><p><strong>name_out</strong> – name of the output cleaned mask</p></li>
+<li><p><strong>data</strong> – python dictionary containing the start and stop wavelength of regions to be excluded</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="specpolFlow.cleanmask.default_exclude_regions">
+<span class="sig-prename descclassname"><span class="pre">specpolFlow.cleanmask.</span></span><span class="sig-name descname"><span class="pre">default_exclude_regions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">velrange</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.cleanmask.default_exclude_regions" title="Permalink to this definition"></a></dt>
+<dd><p>Defines exclusion regions around H-lines and the telleric regions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>velrange</strong> – velocity range around the H-line to be excluded.</p>
+</dd>
+</dl>
+<p>Returns a dictionary with the start and end wavelengths of all of 
+the exclusion regions.</p>
+</dd></dl>
+
+</section>
+<section id="module-specpolFlow.rvFit">
+<span id="rvfit-module"></span><h2>rvFit module<a class="headerlink" href="#module-specpolFlow.rvFit" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="specpolFlow.rvFit.fitGaussianRV">
+<span class="sig-prename descclassname"><span class="pre">specpolFlow.rvFit.</span></span><span class="sig-name descname"><span class="pre">fitGaussianRV</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lsd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velrange</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotFit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fullOutput</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#specpolFlow.rvFit.fitGaussianRV" title="Permalink to this definition"></a></dt>
+<dd><p>Fit a Gaussian function to an LSD profile, to determine a radial velocity.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lsd</strong> – The LSD profile for fitting to.</p></li>
+<li><p><strong>velrange</strong> – Range of velocity to fit include in the fit
+(a tuple or list with 2 elements).
+If not given, the whole range will be used.</p></li>
+<li><p><strong>plotFit</strong> – If True, Plot the fit to the LSD profile with matplotlib.</p></li>
+<li><p><strong>fullOutput</strong> – If True, Return all the Gaussian best fit parameters,
+rather than just the RV and RV error</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Tuple of best fit RV and RV error. If fullOutput is True then also
+includes continuum &amp; error, amplitude &amp; error, and width &amp; error.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="tutorials/tutorial1.html" class="btn btn-neutral float-left" title="Importing specpolFlow into Colab for tutorial" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tutorials/LSDsonification.html" class="btn btn-neutral float-left" title="Sonifying LSD profiles" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, The spec-flow team.</p>
+    <p>&#169; Copyright 2022, The SpecPolFlow team.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

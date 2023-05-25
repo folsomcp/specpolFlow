@@ -1,0 +1,3 @@
+{
+    "path": "../../../tutorials/LSDtutorial.ipynb"
+}
