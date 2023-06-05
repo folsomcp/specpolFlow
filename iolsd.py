@@ -465,6 +465,79 @@ def read_lsd(fname):
     return prof
 
 
+def run_lsdpy(obs=None, mask=None, outName='prof.dat',
+         velStart=None, velEnd=None, velPixel=None, 
+         normDepth=None, normLande=None, normWave=None,
+         removeContPol=None, trimMask=None, sigmaClipIter=None, sigmaClip=None, 
+         interpMode=None, outModelName='',
+         fLSDPlotImg=None, fSavePlotImg=None, outPlotImgName=None):
+    """Run the LSDpy code and return an lsd_prof object.
+    (A convenience wrapper around the lsdpy.main() function.)
+    
+    Any arguments not specified will be read from the file inlsd.dat.
+    The file inlsd.dat is optional, but if the file dose not exist and 
+    any arguments are 'None', the program will error and halt.
+    Some arguments have default values, which will be used if they are not
+    explicitly specified and if the inlsd.dat file is missing.
+    
+    Arguments are: 
+    :param obs:           name of the input observed spectrum file
+    :param mask:          name of the input LSD mask file
+    :param outName:       name of the output LSD profile (Default = 'prof.dat')
+    :param velStart:      float, starting velocity for the LSD profile (km/s)
+    :param velEnd:        float, ending  velocity (km/s)
+    :param velPixel:      float, velocity pixel size (km/s)
+    :param normDepth:     float, normalizing line depth
+    :param normLande:     float, normalizing effective Lande factor
+    :param normWave:      float, normalizing wavelength
+    :param removeContPol: int, flag for whether continuum polarization is 
+                          subtracted from the LSD profile (0=no, 1=yes)
+                          (Default = 1)
+    :param trimMask:      int, flag for whether very closely spaced lines 
+                          should be removed from the line mask (0=no, 1=yes)
+                          (Default = 0)
+    :param sigmaClipIter: int, number of iterations for sigma clipping, 
+                          rejecting possible bad pixels based on the fit to
+                          Stokes I. Set to 0 for no sigma clipping.
+                          (Default = 0, no sigma clipping)
+    :param sigmaClip:     float, if sigma clipping, reject pixels where the
+                          observation differs from the model by more than this
+                          number of sigma.  Should be a large value so only very
+                          bad pixels are rejected.
+                          (Default = 500.)
+    :param interpMode:    int, mode for interpolating the model on to the
+                          observation during LSD 0 = nearest neighbour,
+                          1 = linear interpolation.
+                          (Default = 1)
+    :param outModelName:  name of the file for the output model spectrum 
+                          (if saved). If this is '' a model 
+                          will be generated but not saved to file.
+                          (Default = '')
+    :param fLSDPlotImg:   int, flag for whether to plot the LSD profile
+                          (using matplotlib) (0=no, 1=yes)
+                          (Default = 1)
+    :param fSavePlotImg:  int, flag for whether to save the plot of the 
+                          LSD profile (0=no, 1=yes)
+                          (Default = 0)
+    :param outPlotImgName: name of the plotted figure of the LSD profile 
+                          (if saved) (Default = 'figProf.pdf')
+    :rtype: Returns an LSD profile object.  Also the model spectrum (the fit
+                          to the observation, i.e. the convolution of the line
+                          mask and LSD profile), inside an 'observation' object.
+    """
+    import LSDpy
+
+    vel, sI, sIerr, sV, sVerr, sN1, sN1err, headerTxt, specList = LSDpy.lsdpy.main(
+        obs, mask, outName, velStart, velEnd, velPixel, 
+        normDepth, normLande, normWave, removeContPol, trimMask, 
+        sigmaClipIter, sigmaClip, interpMode, 1, outModelName, 
+        fLSDPlotImg, fSavePlotImg, outPlotImgName)
+
+    prof = lsd_prof(vel, sI, sIerr, sV, sVerr, sN1, sN1err, header=headerTxt)
+    modelSpec = observation(specList[0], specList[1], specList[2], specList[3],
+                            np.zeros_like(specList[0]), np.zeros_like(specList[0]))
+    return prof, modelSpec
+    
 class mask:
     """
     The data for the LSD line mask.
