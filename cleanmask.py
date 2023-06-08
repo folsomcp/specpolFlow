@@ -107,17 +107,14 @@ def split_order(data):
  
   return(list_order)
 
+import matplotlib.pyplot as plt
 def Excluded_Regions_Visual(input_file, input_mask, WLRegions):
     # reading the observed spectrum
     file_obs = input_file
     data_obs = specpolFlow.iolsd.read_spectrum(file_obs)
     # splitting the observed spectrum by order
     list_order = split_order(data_obs)
-
-    # # shifting the model spectrum for its radial velocity
-    # # (note the rshift function asks for numpy unit quantities)
-    # mod_wave_shift = rshift(mod_wave*u.nm, float(obs["vradCorrected"])*u.km/u.s)
-
+    
     # read in the mask 
     file_mask=input_mask
     mask = specpolFlow.iolsd.mask(fname=file_mask)
@@ -127,27 +124,24 @@ def Excluded_Regions_Visual(input_file, input_mask, WLRegions):
 
 
     for i, order in enumerate(list_order):
-      fig, ax = plt.subplots(1,1, figsize=(10,2))
-      #Setting limits to axes
-      ax.set_xlim([order.wl[0],order.wl[-1]])
-      ax.set_ylim(0.8,1.2)
-      ax.set_title('Order: {}'.format(i))
+        fig, ax = plt.subplots(1,1, figsize=(10,2))
+        #Setting limits to axes
+        ax.set_xlim([order.wl[0],order.wl[-1]])
+        ax.set_ylim(0.8,1.2)
+        ax.set_title('Order: {}'.format(i))
 
-      ## Plotting the spectrum
-      p = ax.plot(order.wl, order.specI, label='Observation')
+        ## Plotting the spectrum
+        p = ax.plot(order.wl, order.specI, label='Observation')
 
-      # plotting the lines from the masks
-      p = ax.vlines(x=mask_used, ymin=0, ymax=1.2,color='green',linestyle='--',lw=1)
-      p = ax.vlines(x=mask_not_used,ymin=0, ymax=np.max(order.specI),color='r',linestyle='--',lw=1)
+        # plotting the lines from the masks
+        p = ax.vlines(x=mask_used, ymin=0, ymax=1.2,color='green',linestyle='--',lw=1)
+        p = ax.vlines(x=mask_not_used,ymin=0, ymax=np.max(order.specI),color='r',linestyle='--',lw=1)
 
 
-      ## Plotting the excluded regions in shaded grey
-      for i in range(0,WLRegions['WLStart'].size):
-          #if WLRegions.loc[i,'Type']=='Telluric':
-              #color = '0.75'
-          color = '0.5'
-          Xr = np.arange(WLRegions['WLStart'][i],WLRegions['WLFinish'][i],0.01)
-          p = ax.fill_between(Xr,y1=0,y2=1.2,facecolor =color)
-    return
+        ## Plotting the excluded regions in shaded grey
+        for i in range(WLRegions['WLStart'].size):
+            color = '0.5'
+            Xr = np.arange(WLRegions['WLStart'][i],WLRegions['WLFinish'][i],0.01)
+            p = ax.fill_between(Xr,y1=0,y2=1.2,facecolor =color)
 
 
