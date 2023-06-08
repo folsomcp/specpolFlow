@@ -3,5 +3,5 @@ import specpolFlow.iolsd
 import specpolFlow.bz
 import specpolFlow.makeMask
 import specpolFlow.rvFit
-import specpolFlow.cleanmask
+import specpolFlow.cleanMask
 import specpolFlow.converters
