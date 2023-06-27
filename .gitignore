@@ -4,3 +4,6 @@ docs-src/source/.DS_Store
 __pycache__/
 tutorials/BzTable.csv
 *.wav
+tutorials/Convert_tutorialfiles/2378196p.out
+tutorials/Convert_tutorialfiles/2378196pn.s
+tutorials/Convert_tutorialfiles/2378196pu.s

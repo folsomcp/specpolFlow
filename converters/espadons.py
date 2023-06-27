@@ -5,11 +5,13 @@
 #if you know the structure of the records in the FITS file.
 import numpy as np
 import astropy.io.fits as fits
+import astropy.constants as const
+import astropy.units as u
 
-def espadons(flist):
+def espadons(flist, flistout=None):
     """
     Convert a list of .fits files in the CADC ESPaDOnS format into
-    text .s files
+    text .s files. 
 
     The code provides two files in .s format:
     * The UPENA normalized spectrum, with automated radial velocity corrections from the telluric lines.
@@ -17,34 +19,49 @@ def espadons(flist):
         and we apply the radial velocity correction determined from the normalized spectrum.  
         The reason behind this is that the UPENA automated radial velocity determination performed on 
         unnormalized spectra does not produce consistant results. 
-    The files are written at the same path as the fits-format data, with the '.fits' stripped, 
+    The content of the fits header is also saved in a .out ascii file.
+    If flistout=None (default) The files are written at the same path as the fits-format data, with the '.fits' stripped, 
     and 'n.s' and 'u.s' appended to the filename root. 
+    If flistout is a list of paths ending with a rootname, the files will be saved at that path with that rootname, 
+    and 'n.s' and 'u.s' appended to the filename root
 
     :param flist: (list of strings) a list of ESPaDOnS filenames
     """
-    for fname in flist:
+    for i, fname in enumerate(flist):
         print('converting ', fname.strip())
-        # striping of white spaces
-        fnameOut = fname.strip()
-        # removing the '.fits' from the end of the string, 
-        # to create the root name for the output files. 
-        fnameOut = fnameOut.rstrip('.fits')
+        if flistout is None:
+            # striping of white spaces
+            fnameOut = fname.strip()
+            # removing the '.fits' from the end of the string, 
+            # to create the root name for the output files. 
+            fnameOut = fnameOut.rstrip('.fits')
+        else:
+            fnameOut = flistout[i]
         # open the fits file with astropy
         fitsSpec = fits.open(fname.strip())
 
         header = fitsSpec[0].header
 
         # Useful for debugging
-        print('File format info')
-        print(fitsSpec.info())
-        print('Header information')
-        print(repr(header))
+        #print('File format info')
+        #print(fitsSpec.info())
+        #print('Header information')
+        #print(repr(header))
 
         # We need to extract the radial velocity correction 
         # that was determined from the normalized spectrum,
         # so that we can apply it to the unnormalized spectrum
 
-        # TODO!!!!
+        # the radial velocity correction is in the comment section
+        # of the header. Using the 'COMMENT' keyword returns a 
+        # list of strings
+        comments = header['COMMENT']
+        # searching for the two strings in the comments that contains the radial velocity correction:
+        matches = [match for match in comments if "radial velocity correction from telluric lines" in match]
+        #print(matches)
+        # the one calculated for the normalized spectrum is the first instance
+        radvel = float(matches[0].split(':')[1])
+        #print(radvel)
         
         # extracting the table of data (24 columns)
         specTab = fitsSpec[0].data
@@ -69,9 +86,9 @@ def espadons(flist):
     
         fitsSpec.close()
 
-        # Now we apply the velocity correction 
-        # wave = wave + wave*vel/c 
-        
+        # Now we apply the velocity correction to the unnormalized data
+        wlu = wlu + wlu*radvel/const.c.to(u.km/u.s).value
+
         outNorm = open(fnameOut+'n.s','w')
         for i in range(len(wln)):
             outNorm.write('%10.4f %11.4e %11.4e %11.4e %11.4e %11.4e\n' % (wln[i], specIn[i], specVn[i], specN1n[i], specN2n[i], specSign[i]))
