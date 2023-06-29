@@ -700,20 +700,38 @@ class observation:
             self.specN1[key] = newval.specN1[:]
             self.specN2[key] = newval.specN2[:]
 
-    def write_s(self, fname):
-        '''Write the observation into a .s polarization format'''
+    def write_s(self, fname, noHeader=False):
+        '''
+        Write the observation into a .s LibreESPRIT style format
+        Optionally skip writing the two lines of header
+
+        :param noHeader: flag to skip writing the header if True
+        '''
+
+        #Note, the LibreESPRIT .s format header counts the number of columns
+        #not counting the first wavelength column
+        ncols = 5
+        #Support 3 column (intensity only) spectra
+        if np.all(self.specV == 0.): ncols = 2
         
         with open(fname, 'w') as f:
-        
-            if self.header == None:
-                f.write('*** Spectrum of\n')
-            else:
-                f.write(self.header)
-            f.write('  {} 5\n'.format(int(self.wl.size)))
-            for i in range(0,self.wl.size):
-                f.write('{:10.4f} {:11.4e} {:11.4e} {:11.4e} {:11.4e} {:11.4e}\n'.format(
-                            self[i].wl, self[i].specI, self[i].specV,
-                            self[i].specN1, self[i].specN2, self[i].specSig))
+            #Optionaly write 2 lines of header            
+            if noHeader == False:
+                if self.header == None:
+                    f.write('*** Spectrum of\n')
+                else:
+                    f.write(self.header)
+                f.write('{:7i} {:1i}\n'.format(int(self.wl.size)), ncols)
+            
+            if ncols == 5:
+                for i in range(0,self.wl.size):
+                    f.write('{:10.4f} {:11.4e} {:11.4e} {:11.4e} {:11.4e} {:11.4e}\n'.format(
+                        self.wl[i], self.specI[i], self.specV[i],
+                        self.specN1[i], self.specN2[i], self.specSig[i]))
+            elif ncols == 2:
+                for i in range(0,self.wl.size):
+                    f.write('{:10.4f} {:11.4e} {:11.4e}\n'.format(
+                        self.wl[i], self.specI[i], self.specSig[i]))
         return
 
 
