@@ -5,8 +5,6 @@
 #if you know the structure of the records in the FITS file.
 import numpy as np
 import astropy.io.fits as fits
-import astropy.constants as const
-import astropy.units as u
 
 def espadons(flist, flistout=None):
     """
@@ -15,10 +13,11 @@ def espadons(flist, flistout=None):
 
     The code provides two files in .s format:
     * The UPENA normalized spectrum, with automated radial velocity corrections from the telluric lines.
-    * The UPENA normalized spectrum, witout the automated radial velocity correction, 
+    * The UPENA unnormalized spectrum, using the automated radial velocity correction from the normalized spectrum.
+        For we use the unnormalized spectrum without the automated radial velocity correction, 
         and we apply the radial velocity correction determined from the normalized spectrum.  
         The reason behind this is that the UPENA automated radial velocity determination performed on 
-        unnormalized spectra does not produce consistant results. 
+        unnormalized spectra does not produce consistently reliable results. 
     The content of the fits header is also saved in a .out ascii file.
     If flistout=None (default) The files are written at the same path as the fits-format data, with the '.fits' stripped, 
     and 'n.s' and 'u.s' appended to the filename root. 
@@ -77,6 +76,8 @@ def espadons(flist, flistout=None):
     
         # The unnormalized spectrum *without* the radial velocity correction
         # from the telluric lines is the last of 4 data blocks
+        # (Use this since the radial velocity correction for the unnormalized 
+        #  spectrum is unreliable)
         wlu = specTab[18]
         specIu = specTab[19]
         specVu = specTab[20]
@@ -87,16 +88,19 @@ def espadons(flist, flistout=None):
         fitsSpec.close()
 
         # Now we apply the velocity correction to the unnormalized data
-        wlu = wlu + wlu*radvel/const.c.to(u.km/u.s).value
+        c = 299792.458  #speed of light in km/s, since radvel is in km/s
+        wlu = wlu + wlu*radvel/c
 
         outNorm = open(fnameOut+'n.s','w')
         for i in range(len(wln)):
-            outNorm.write('%10.4f %11.4e %11.4e %11.4e %11.4e %11.4e\n' % (wln[i], specIn[i], specVn[i], specN1n[i], specN2n[i], specSign[i]))
+            outNorm.write('%10.4f %11.4e %11.4e %11.4e %11.4e %11.4e\n' % (
+                wln[i], specIn[i], specVn[i], specN1n[i], specN2n[i], specSign[i]))
         outNorm.close()
     
         outUNorm = open(fnameOut+'u.s','w')
         for i in range(len(wln)):
-            outUNorm.write('%10.4f %11.4e %11.4e %11.4e %11.4e %11.4e\n' % (wlu[i], specIu[i], specVu[i], specN1u[i], specN2u[i], specSigu[i]))
+            outUNorm.write('%10.4f %11.4e %11.4e %11.4e %11.4e %11.4e\n' % (
+                wlu[i], specIu[i], specVu[i], specN1u[i], specN2u[i], specSigu[i]))
         outUNorm.close()
         
         outHeader = open(fnameOut+'.out','w')
