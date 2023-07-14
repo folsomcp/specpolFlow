@@ -462,7 +462,7 @@ def read_lsd(fname):
     if ncols != 3 and ncols != 7 and ncols != 9:
         raise ValueError("Read an unexpected number of columns from "
                          +"{:}, can't read as an LSD profile.".format(fname))
-    return prof
+    return prof   
 
 
 def run_lsdpy(obs=None, mask=None, outName='prof.dat',
