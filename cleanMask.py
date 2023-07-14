@@ -45,7 +45,6 @@ def default_exclude_regions(velrange):
 
     return data
 
-
 def clean_model_mask(name_in, name_out, data):
     '''
     Function that cleans a given mask.
