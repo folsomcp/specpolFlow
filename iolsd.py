@@ -462,7 +462,7 @@ def read_lsd(fname):
     if ncols != 3 and ncols != 7 and ncols != 9:
         raise ValueError("Read an unexpected number of columns from "
                          +"{:}, can't read as an LSD profile.".format(fname))
-    return prof   
+    return prof
 
 
 def run_lsdpy(obs=None, mask=None, outName='prof.dat',
@@ -537,7 +537,8 @@ def run_lsdpy(obs=None, mask=None, outName='prof.dat',
     modelSpec = observation(specList[0], specList[1], specList[2], specList[3],
                             np.zeros_like(specList[0]), np.zeros_like(specList[0]))
     return prof, modelSpec
-    
+
+
 class mask:
     """
     The data for the LSD line mask.
@@ -548,45 +549,53 @@ class mask:
     * element - the element+ion code for the line
     * depth - the depth of the line
     * lande - the effective Lande factor of the line
-    * iuse - a flag for whether the line is used
+    * iuse - integer flag for whether the line is used
     """
-    def __init__(self, fname=None, nLines=0):
+    def __init__(self, wl, element, depth, excite, lande, iuse):
         """
-        Read in an LSD mask file and save it to an instance of the mask class.
-        If no file is given an empty line mask can be generated.
-        
-        The mask files are in the format for Donati's LSD and LSDpy.
-        
-        :param fname: the name of the file containing the mask
-        :param nLines: if no file name is given, initialize arrays of zeros, for nLines of data.
+        Generate a mask object
         """
-        if fname == None:
-            self.wl = np.zeros(nLines)
-            self.element = np.zeros(nLines)
-            self.depth = np.zeros(nLines)
-            self.excite = np.zeros(nLines)
-            self.lande = np.zeros(nLines)
-            self.iuse = np.zeros(nLines, dtype=int)
-            
-        else:
-            #Columns are: wavelength (nm),
-            #             element + ionization*0.01,
-            #             line depth,
-            #             excitation potential of the lower level,
-            #             effective Lande factor,
-            #             flag for whether the line is used (1=use, 0=skip).
-            tmpMask = np.loadtxt(fname, skiprows=1, unpack=True)
-            
-            #Sort the line mask so wavelength is always increasing
-            self.ind = np.argsort(tmpMask[0,:])
-            
-            self.wl = tmpMask[0, self.ind]
-            self.element = tmpMask[1, self.ind]
-            self.depth = tmpMask[2, self.ind]
-            self.excite = tmpMask[3, self.ind]
-            self.lande = tmpMask[4, self.ind]
-            self.iuse = tmpMask[5, self.ind].astype(int)
+        self.wl = wl
+        self.element = element
+        self.depth = depth
+        self.excite = excite
+        self.lande = lande
+        self.iuse = iuse
 
+    def __getitem__(self, key):
+        """Overloaded getitem function. Returns a mask object with only the values at the specified index(s).
+
+        :param key: the index or slice being checked
+        :rtype: mask
+        """
+        wl_s = self.wl[key]
+        element_s = self.element[key]
+        depth_s = self.depth[key]
+        excite_s = self.excite[key]
+        lande_s = self.lande[key]
+        iuse_s = self.iuse[key]
+        return mask(wl_s, element_s, depth_s, excite_s, lande_s, iuse_s)
+
+    def __setitem__(self, key, newval):
+        """
+        Overloaded setitem function. Sets all values of the mask at the specified location equal to the input mask's values.
+
+        :param key: the index or slice being overwritten
+        :param newval: mask whose values are to replace the overwritten ones
+        """
+        if not(isinstance(newval, mask)):
+            raise TypeError()
+        else:
+            self.wl[key] = newval.wl[:]
+            self.element[key] = newval.element[:]
+            self.depth[key] = newval.depth[:]
+            self.excite[key] = newval.excite[:]
+            self.lande[key] = newval.lande[:]
+            self.iuse[key] = newval.iuse[:]
+
+    def __len__(self):
+        return self.wl.size
+    
     def prune(self):
         """
         Remove unused lines from the mask.
@@ -637,6 +646,36 @@ class mask:
                 self.wl[i], self.element[i], self.depth[i],
                 self.excite[i], self.lande[i], self.iuse[i]))
         return
+
+
+def read_mask(fname):
+    """
+    Read in an LSD line mask and return a mask object.
+
+    The mask file should one line of header and columns of:
+    * Wavelength (nm)
+    * Atomic number + (ionization state)*0.01
+    * Line depth
+    * Excitation potential of the lower level (eV)
+    * Effective Lande factor
+    * Flag for whether the line is used (1=use, 0=skip).
+
+    :param fname: the name of the file to read.
+    :rtype: mask
+    """
+    tmpMask = np.loadtxt(fname, skiprows=1, unpack=True)
+    
+    #Sort the line mask so wavelength is always increasing
+    ind = np.argsort(tmpMask[0,:])
+    
+    wl = tmpMask[0, ind]
+    element = tmpMask[1, ind]
+    depth = tmpMask[2, ind]
+    excite = tmpMask[3, ind]
+    lande = tmpMask[4, ind]
+    iuse = tmpMask[5, ind].astype(int)
+    
+    return mask(wl, element, depth, excite, lande, iuse)
 
 
 class observation:
@@ -699,6 +738,9 @@ class observation:
             self.specV[key] = newval.specV[:]
             self.specN1[key] = newval.specN1[:]
             self.specN2[key] = newval.specN2[:]
+
+    def __len__(self):
+        return self.wl.size
 
     def write_s(self, fname, noHeader=False):
         '''
@@ -845,10 +887,8 @@ def read_spectrum(fname, sortByWavelength=False):
         obs_specN2 = obs_specN2[obs_ind]
         obs_specSig = obs_specSig[obs_ind]
     
-    return(observation(obs_wl, obs_specI, obs_specV, obs_specN1, obs_specN2, obs_specSig, header=obs_header))
-
-
-
+    return(observation(obs_wl, obs_specI, obs_specV, obs_specN1, obs_specN2,
+                       obs_specSig, header=obs_header))
 
 
 class line_list:
@@ -876,31 +916,147 @@ class line_list:
     * configUp - list of strings with the electron configuration and term symbols for the upper level
     * refs - list of references for the sources of the line data (optional)
     """
-    def __init__(self, nLines = 0):
+    def __init__(self, ion, wl, loggf, Elo, Jlo, Eup, Jup, landeLo, landeUp,
+                 landeEff, rad, stark, waals, depth, configLo, configUp, refs):
+        self.ion      = ion
+        self.wl       = wl
+        self.loggf    = loggf
+        self.Elo      = Elo
+        self.Jlo      = Jlo
+        self.Eup      = Eup
+        self.Jup      = Jup
+        self.landeLo  = landeLo
+        self.landeUp  = landeUp
+        self.landeEff = landeEff
+        self.rad      = rad
+        self.stark    = stark
+        self.waals    = waals
+        self.depth    = depth
+        self.configLo = configLo #['' for i in range(nLines)]
+        self.configUp = configUp #['' for i in range(nLines)]
+        self.refs     = refs #["'_          unknown source'" for i in range(nLines)]
+        self.nLines   = self.wl.size
+
+    def __getitem__(self, key):
+        """Overloaded getitem function. Returns a line_list with only the values at the specified index(s).
+
+        :param key: the index or slice being checked
+        :rtype: line_list
         """
-        Initialize an empty line_list to be populated later
+        ion      = self.ion[key]
+        wl       = self.wl[key]
+        loggf    = self.loggf[key]
+        Elo      = self.Elo[key]
+        Jlo      = self.Jlo[key]
+        Eup      = self.Eup[key]
+        Jup      = self.Jup[key]
+        landeLo  = self.landeLo[key]
+        landeUp  = self.landeUp[key]
+        landeEff = self.landeEff[key]
+        rad      = self.rad[key]
+        stark    = self.stark[key]
+        waals    = self.waals[key]
+        depth    = self.depth[key]
+        configLo = self.configLo[key]
+        configUp = self.configUp[key]
+        refs     = self.refs[key]
+        lList =  line_list(ion, wl, loggf, Elo, Jlo, Eup, Jup, landeLo,
+                           landeUp, landeEff, rad, stark, waals, depth,
+                           configLo, configUp, refs)
+        return lList
+
+    def __setitem__(self, key, newval):
+        """
+        Overloaded setitem function. Sets all values of the line_list at the specified location equal to the input line_list values.
+
+        :param key: the index or slice being overwritten
+        :param newval: line_list used to replace the values given by key
+        """
+        if not(isinstance(newval, line_list)):
+            raise TypeError()
+        else:
+            self.ion[key]      = newval.ion[:]
+            self.wl[key]       = newval.wl[:]
+            self.loggf[key]    = newval.loggf[:]
+            self.Elo[key]      = newval.Elo[:]
+            self.Jlo[key]      = newval.Jlo[:]
+            self.Eup[key]      = newval.Eup[:]
+            self.Jup[key]      = newval.Jup[:]
+            self.landeLo[key]  = newval.landeLo[:]
+            self.landeUp[key]  = newval.landeUp[:]
+            self.landeEff[key] = newval.landeEff[:]
+            self.rad[key]      = newval.rad[:]
+            self.stark[key]    = newval.stark[:]
+            self.waals[key]    = newval.waals[:]
+            self.depth[key]    = newval.depth[:]
+            self.configLo[key] = newval.configLo[:]
+            self.configUp[key] = newval.configUp[:]
+            self.refs[key]     = newval.refs[:]
+            self.nLines   = self.wl.size
+
+    def __len__(self):
+        return self.nLines
+
+    def write_VALD(self, fname):
+        """
+        Write a line list to a text file.
+        This outputs using the VALD version 3 'extract stellar' 'long' format.
         
-        :param nLines: optional, make arrays for this many lines (initial values are all 0)
+        A few details (e.g. references) are omitted since they are not saved
+        in the line_list class.
+        
+        :param fname: the file name to save the output to
         """
-        self.nLines   = nLines
-        self.ion      = ['' for i in range(nLines)]
-        self.wl      = np.zeros(nLines)
-        self.loggf    = np.zeros(nLines)
-        self.Elo      = np.zeros(nLines)
-        self.Jlo      = np.zeros(nLines)
-        self.Eup      = np.zeros(nLines)
-        self.Jup      = np.zeros(nLines)
-        self.landeLo  = np.zeros(nLines)
-        self.landeUp  = np.zeros(nLines)
-        self.landeEff = np.zeros(nLines)
-        self.rad      = np.zeros(nLines)
-        self.stark    = np.zeros(nLines)
-        self.waals    = np.zeros(nLines)
-        self.depth    = np.zeros(nLines)
-        self.configLo = ['' for i in range(nLines)]
-        self.configUp = ['' for i in range(nLines)]
-        self.refs = ["'_          unknown source'" for i in range(nLines)]
+        
+        fOut = open(fname, 'w')
+        fOut.write("{:11.5f},{:11.5f},{:5d},{:7d},{:4.1f}, Wavelength region, lines selected, lines processed, Vmicro\n".format(
+            self.wl[0], self.wl[-1], self.nLines, 999999, 0.0))
+        fOut.write("                                                                     Lande factors       Damping parameters  Central\n")
+        fOut.write("Spec Ion       WL_air(A)  log gf* E_low(eV) J lo E_up(eV)  J up  lower   upper    mean   Rad.   Stark  Waals  depth\n")
+        
+        for i, line in enumerate(self):
+            fmt = "'{:s}',{:16.4f},{:8.3f},{:8.4f},{:5.1f},{:8.4f},{:5.1f},{:7.3f},{:7.3f},{:7.3f},{:6.3f},{:6.3f},{:6.3f},{:6.3f},\n"
+            if len(line.ion) == 3: fmt = fmt[:7] + ' ' + fmt[7:]
+            fOut.write(fmt.format(
+                line.ion, line.wl, line.loggf, line.Elo, line.Jlo,
+                line.Eup, line.Jup, line.landeLo, line.landeUp, line.landeEff,
+                line.rad, line.stark, line.waals, line.depth))
+            fOut.write("'  {:}'\n".format(line.configLo))
+            fOut.write("'  {:}'\n".format(line.configUp))
+            fOut.write("'{:}'\n".format(line.refs))
+        fOut.close()
+        return
     
+def line_list_zeros(nLines):
+    """
+    Generate a line list of zeros and blank text.
+    
+    Used by read_VALD (It can be a bit faster to allocate all the array space at once)
+    
+    :param nLines: the number of lines in the line_list of zeros
+    :rtype: line_list
+    """
+    ion      = ['' for i in range(nLines)]
+    wl      = np.zeros(nLines)
+    loggf    = np.zeros(nLines)
+    Elo      = np.zeros(nLines)
+    Jlo      = np.zeros(nLines)
+    Eup      = np.zeros(nLines)
+    Jup      = np.zeros(nLines)
+    landeLo  = np.zeros(nLines)
+    landeUp  = np.zeros(nLines)
+    landeEff = np.zeros(nLines)
+    rad      = np.zeros(nLines)
+    stark    = np.zeros(nLines)
+    waals    = np.zeros(nLines)
+    depth    = np.zeros(nLines)
+    configLo = ['' for i in range(nLines)]
+    configUp = ['' for i in range(nLines)]
+    refs = ["'_          unknown source'" for i in range(nLines)]
+    lList = line_list(ion, wl, loggf, Elo, Jlo, Eup, Jup, landeLo,
+                           landeUp, landeEff, rad, stark, waals, depth,
+                           configLo, configUp, refs)
+    return lList
 
 def read_VALD(fname):
     """
@@ -918,7 +1074,7 @@ def read_VALD(fname):
     for txtLine in fVald:
         if i == 0:
             nLines = int(txtLine.split(',')[2])
-            llist = line_list(nLines)
+            llist = line_list_zeros(nLines)
         #There should be 3 lines of header,
         #then 4 file lines for each set of spectra line data.
         if i > 2 and i < nLines*4+3:
@@ -954,35 +1110,3 @@ def read_VALD(fname):
     
     fVald.close()
     return llist
-
-
-def write_VALD(lineList, fname):
-    """
-    Write a line list to a text file.
-    This outputs using the VALD version 3 'extract stellar' 'long' format.
-
-    A few details (e.g. references) are omitted since they are not saved
-    in the line_list class.
-
-    :param lineList: the line_list object containing data to write
-    :param fname: the file name to save the output to
-    """
-
-    fOut = open(fname, 'w')
-    fOut.write("{:11.5f},{:12.5f},{:5d},{:7d},{:4.1f}, Wavelength region, lines selected, lines processed, Vmicro\n".format(
-        lineList.wl[0], lineList.wl[-1], lineList.nLines, 999999, 0.0))
-    fOut.write("                                                                     Lande factors       Damping parameters  Central\n")
-    fOut.write("Spec Ion       WL_air(A)  log gf* E_low(eV) J lo E_up(eV)  J up  lower   upper    mean   Rad.   Stark  Waals  depth\n")
-
-    
-    for i in range(lineList.nLines):
-        fOut.write("'{:4s}',{:16.4f},{:8.3f},{:8.4f},{:5.1f},{:8.4f},{:5.1f},{:7.3f},{:7.3f},{:7.3f},{:6.3f},{:6.3f},{:6.3f},{:6.3f},\n".format(
-            lineList.ion[i],lineList.wl[i],lineList.loggf[i],
-            lineList.Elo[i],lineList.Jlo[i],lineList.Eup[i],lineList.Jup[i],
-            lineList.landeLo[i],lineList.landeUp[i],lineList.landeEff[i],
-            lineList.rad[i],lineList.stark[i],lineList.waals[i],
-            lineList.depth[i]))
-        fOut.write(lineList.configLo[i]+'\n')
-        fOut.write(lineList.configUp[i]+'\n')
-        fOut.write(lineList.refs[i]+'\n')
-    fOut.close()

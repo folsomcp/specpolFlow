@@ -76,8 +76,10 @@ def convert_list_to_mask(lineList, depthCutoff=0.0, atomsOnly = True,
               'Pm','Sm','Eu','Gd','Tb','Dy','Ho','Er','Tm','Yb','Lu','Hf',
               'Ta','W' ,'Re','Os','Ir','Pt','Au','Hg','Tl','Pb','Bi','Po',
               'At','Rn','Fr','Ra','Ac','Th','Pa','U' )
-
-    mask = iolsd.mask(nLines = lineList.nLines)
+    nLines = lineList.nLines
+    mask = iolsd.mask(np.zeros(nLines), np.zeros(nLines), np.zeros(nLines),
+                      np.zeros(nLines), np.zeros(nLines),
+                      np.zeros(nLines,dtype=int))
 
     skippedIon = []
     missingLandeIon = []
