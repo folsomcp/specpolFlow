@@ -6,8 +6,11 @@
 import numpy as np
 import astropy.units as u
 import astropy.constants as const
-import specpolFlow.iolsd
 import matplotlib.pyplot as plt
+try:
+    import specpolFlow.iolsd as iolsd
+except ModuleNotFoundError:
+    import iolsd
 
 def default_exclude_regions(velrange):
     '''
@@ -25,11 +28,11 @@ def default_exclude_regions(velrange):
     Hgamma = 434.05
     Hdelta = 410.17
     Hepsilon = 397.01
-    lines = np.array([Halpha,Hbeta,Hdelta,Hepsilon])*u.nm
+    lines = np.array([Halpha,Hbeta,Hgamma,Hdelta,Hepsilon])*u.nm
 
     Hjump = np.array([360,392])*u.nm
-    tellstart = np.array([587.5,627.5,684.0,717.0,757.0,790.0,809.0])   # *u.nm
-    tellend = np.array([592.0,632.5,705.3,735.0,771.0,795.0,990.0])     # *u.nm
+    tellstart = np.array([587.5,627.5,684.0,717.0,757.0,790.0,809.0])  # *u.nm
+    tellend   = np.array([592.0,632.5,705.3,735.0,771.0,795.0,990.0])  # *u.nm
 
     jumpend = (velrange/const.c*Hjump+Hjump).to(u.nm)/u.nm
     linestart = (-velrange/const.c*lines+lines).to(u.nm)/u.nm
@@ -64,7 +67,7 @@ def clean_model_mask(name_in, name_out, data):
 
 
     name = name_in
-    mask_i = specpolFlow.iolsd.mask(fname = name)
+    mask_i = iolsd.read_mask(fname = name)
 
     #Identifying if a line is inside or outside the regions
     dcard = []
@@ -110,13 +113,13 @@ import matplotlib.pyplot as plt
 def Excluded_Regions_Visual(input_file, input_mask, WLRegions):
     # reading the observed spectrum
     file_obs = input_file
-    data_obs = specpolFlow.iolsd.read_spectrum(file_obs)
+    data_obs = iolsd.read_spectrum(file_obs)
     # splitting the observed spectrum by order
     list_order = split_order(data_obs)
     
     # read in the mask 
     file_mask=input_mask
-    mask = specpolFlow.iolsd.mask(fname=file_mask)
+    mask = iolsd.read_mask(fname=file_mask)
 
     mask_used = mask.wl[mask.iuse==1]
     mask_not_used = mask.wl[mask.iuse==0]
