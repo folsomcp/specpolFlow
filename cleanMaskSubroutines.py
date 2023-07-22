@@ -2,6 +2,7 @@
 #Not realy meant to be stand alone utilities.
 
 import numpy as np
+import scipy
 import tkinter as tk
 import tkinter.ttk as ttk
 from matplotlib.backends.backend_tkagg import (
@@ -22,8 +23,8 @@ except ModuleNotFoundError:
     import iolsd
 
 
-def makeWin(fig, ax, mask, obsName, maskName, pltMaskU, pltMaskN,
-            pltModelI, excludeRanges, excludeFileName):
+def makeWin(fig, ax, mask, obs, obsName, maskName, pltMaskU, pltMaskN,
+            pltMaskF, pltModelI, excludeRanges, excludeFileName, fitDepthFlags):
     #Build GUI with tkinter
     root = tk.Tk(className='Clean Masks')
     #the className seems to set an icon title (at least in Ubuntu)
@@ -129,14 +130,42 @@ def makeWin(fig, ax, mask, obsName, maskName, pltMaskU, pltMaskN,
 
     #let the .grid() managed cells expand
     tools.columnconfigure(6, weight=10)
+    
+    #Set regions to be used for adjusting line depths
+    selectFitDepth = uiSelectFitDepth(canvas, mask, pltMaskU, pltMaskN, pltMaskF,
+                                      excludeRanges, fitDepthFlags)
+    butSelRange = ttk.Button(master=tools, text='select lines\nto fit depth',
+                             command=selectFitDepth.runSpanSelect)
+    ToolTip(butSelRange, 'Select lines to fit for depth in the mask')
+    butSelRange.grid(row=0, column=0, sticky=tk.W, padx=2, pady=2)
+    #Set regions to not be used for adjusting line depths
+    unselectFitDepth = uiUnselectFitDepth(canvas, mask, pltMaskU, pltMaskN, pltMaskF,
+                                          excludeRanges, fitDepthFlags)
+    butUnselRange = ttk.Button(master=tools, text='unselect lines\nto fit depth',
+                             command=unselectFitDepth.runSpanSelect)
+    ToolTip(butUnselRange, 'Unselect lines to fit for depth in the mask')
+    butUnselRange.grid(row=0, column=1, sticky=tk.W, padx=2, pady=2)
+    #Link the select and unselect buttons so they can turn eachother off
+    selectFitDepth.linkButton(butSelRange, unselectFitDepth)
+    unselectFitDepth.linkButton(butUnselRange, selectFitDepth)
+    #Apply the depth fitting
+    fitDepthsM = fitDepths(mask, obs, fitDepthFlags, root, canvas,
+                           pltMaskU, pltMaskN, pltMaskF)
+    butFitDepths = ttk.Button(master=tools, text='fit\ndepths',
+                               command=fitDepthsM.runFit)
+    ToolTip(butFitDepths, 'Fit the selected line depths, using the current LSD profile and observation')
+    butFitDepths.grid(row=0, column=3, sticky=tk.W, padx=2, pady=2)
+
     #Set regions to be included in the mask
-    incRangeM = uiIncludeRange(canvas, mask, pltMaskU, pltMaskN, excludeRanges)
+    incRangeM = uiIncludeRange(canvas, mask, pltMaskU, pltMaskN, pltMaskF,
+                               excludeRanges, fitDepthFlags)
     butIncRange = ttk.Button(master=tools, text='include\nlines',
                              command=incRangeM.runSpanSelect)
     ToolTip(butIncRange, 'Include selected lines in the mask')
     butIncRange.grid(row=0, column=7, sticky=tk.E, padx=2, pady=2)
     #Set regions to be excluded in the mask
-    excRangeM = uiExcludeRange(canvas, mask, pltMaskU, pltMaskN, excludeRanges)
+    excRangeM = uiExcludeRange(canvas, mask, pltMaskU, pltMaskN, pltMaskF,
+                               excludeRanges, fitDepthFlags)
     butExcRange = ttk.Button(master=tools, text='exclude\nlines',
                              command=excRangeM.runSpanSelect)
     ToolTip(butExcRange, 'Exclude selected lines from the mask')
@@ -229,21 +258,6 @@ def removeRange(ranges1, range2):
         else:
             rangesO += [r1]
     return rangesO
-
-
-class saveRanges:
-    #mini manager for the button that saves the set of exclude ranges to file
-    def __init__(self, fname, ranges):
-        self.fname = fname
-        self.ranges = ranges
-    def saveToFile(self):
-        #Save the set of exclude ranges to a file
-        fout = open(self.fname,'w')
-        fout.write('#exclude wavelength ranges\n')
-        for ran in self.ranges:
-            fout.write('{:9.3f} {:9.3f}\n'.format(ran[0], ran[1]))
-        fout.close()
-        return
 
 
 #A fairly simple, fairly general tooltip
@@ -486,14 +500,18 @@ class viewFuncs:
         return
 
 
-class uiIncludeRange:
-    def __init__(self, canvas, mask, pltMaskU, pltMaskN, excludeRanges):
+#A base class for uiExcludeRange and uiIncludeRange
+class uiRangeBase:
+    def __init__(self, canvas, mask, pltMaskU, pltMaskN, pltMaskF,
+                 excludeRanges, fitDepthFlags):
         self.canvas = canvas
         self.canvasWidget = canvas.get_tk_widget()
         self.mask = mask
         self.pltMaskU = pltMaskU
         self.pltMaskN = pltMaskN
+        self.pltMaskF = pltMaskF
         self.excludeRanges = excludeRanges
+        self.fitDepthFlags = fitDepthFlags
         self.active = False
         self.rangeSelect = rangeSelect(canvas, self)
 
@@ -541,90 +559,85 @@ class uiIncludeRange:
         self.canvasWidget.bind('<Button-1>', self.oldBindClick)
         self.canvasWidget.bind('<Button-3>', self.oldBindClick3)
         self.active = False
+
+
+class uiIncludeRange(uiRangeBase):
     def selectedWl(self, minval, maxval):
         #After a region has been selected, update the mask and 'exclude regions'
         self.mask.iuse[(self.mask.wl >= minval) & (self.mask.wl <= maxval)] = 1
-        maskUsed = self.mask[self.mask.iuse == 1]
-        maskNot = self.mask[self.mask.iuse == 0]
-        
         self.excludeRanges[:] = removeRange(self.excludeRanges, [minval,maxval])
         
-        #update the data in the plot for each spectal order
-        #segments should be a list of 2x2 arrays
-        segments = []
-        for miniM in maskUsed:
-            segments += [np.array([[miniM.wl, 1.0-miniM.depth],
-                                  [miniM.wl, 1.0]])]
-        self.pltMaskU.set_segments(segments)
-        segments = []
-        for miniM in maskNot:
-            segments += [np.array([[miniM.wl, 1.0-miniM.depth],
-                                  [miniM.wl, 1.0]])]
-        self.pltMaskN.set_segments(segments)
+        updateLinePlots(self.mask, self.fitDepthFlags,
+                        self.pltMaskU, self.pltMaskN, self.pltMaskF)
         self.canvas.draw()
 
         
-class uiExcludeRange:
-    def __init__(self, canvas, mask, pltMaskU, pltMaskN, excludeRanges):
-        self.canvas = canvas
-        self.canvasWidget = canvas.get_tk_widget()
-        self.mask = mask
-        self.pltMaskU = pltMaskU
-        self.pltMaskN = pltMaskN
-        self.excludeRanges = excludeRanges
-        self.active = False
-        self.rangeSelect = rangeSelect(canvas, self)
-        
-    def linkButton(self, button, otherRange):
-        self.button = button
-        self.otherRange = otherRange
-    def runSpanSelect(self):
-        #First turn off the other button (only include or exclude not both!)
-        bOtherActive = self.otherRange.active
-        if (bOtherActive == True):
-            self.otherRange.deactivate()
-        self.active = not self.active
-        if self.active:
-            self.button.configure(style='ActRange.TButton')
-            #get a string of tk info that we can use later to restore the current bindings
-            self.oldBindClick = self.canvasWidget.bind('<Button-1>')
-            #override the current binding
-            self.fidClick = self.canvasWidget.bind('<Button-1>',
-                                                   self.rangeSelect.onClick)
-            self.oldBindClick3 = self.canvasWidget.bind('<Button-3>')
-            self.canvasWidget.bind('<Button-3>', self.rangeSelect.cancel)
-        else:
-            self.deactivate()
-    def deactivate(self):
-        #stop span selector...
-        self.rangeSelect.deactivate()
-        self.button.configure(style='TButton')
-        #reset to the previous bindings once we are done
-        #(Safer to bind to something different, since unbind seems to have poorly defined behaviour)
-        self.canvasWidget.bind('<Button-1>', self.oldBindClick)
-        self.canvasWidget.bind('<Button-3>', self.oldBindClick3)
-        self.active = False
+class uiExcludeRange(uiRangeBase):
     def selectedWl(self, minval, maxval):
         #After a region has been selected, update the mask and 'exclude regions'
         self.mask.iuse[(self.mask.wl >= minval) & (self.mask.wl <= maxval)] = 0
-        maskUsed = self.mask[self.mask.iuse == 1]
-        maskNot = self.mask[self.mask.iuse == 0]
-
         self.excludeRanges[:] = combineRanges(self.excludeRanges,
                                               [[minval,maxval]])
         
-        #update the data in the plot for each spectal order
-        #segments should be a list of 2x2 arrays
+        updateLinePlots(self.mask, self.fitDepthFlags,
+                        self.pltMaskU, self.pltMaskN, self.pltMaskF)
+        self.canvas.draw()
+
+
+def updateLinePlots(mask, fitDepthFlags, pltMaskU, pltMaskN, pltMaskF):
+    #Update the plot of lines from the mask,
+    #with plots for lines used, lines excluded,
+    #and lines with depths to fit.
+    maskUsed = mask[mask.iuse == 1]
+    maskNot = mask[mask.iuse == 0]
+    #update the data in the plot of lines
+    segments = []
+    for miniM in maskUsed:
+        segments += [np.array([[miniM.wl, 1.0-miniM.depth],
+                              [miniM.wl, 1.0]])]
+    pltMaskU.set_segments(segments)
+    segments = []
+    for miniM in maskNot:
+        segments += [np.array([[miniM.wl, 1.0-miniM.depth],
+                              [miniM.wl, 1.0]])]
+    pltMaskN.set_segments(segments)
+    #including the plot of lines highlighted for depth fitting
+    maskFit = mask[(fitDepthFlags == 1) & (mask.iuse == 1)]
+    segments = []
+    for miniM in maskFit:
+        segments += [np.array([[miniM.wl, 1.0-miniM.depth],
+                               [miniM.wl, 1.0]])]
+    pltMaskF.set_segments(segments)
+    return
+
+
+class uiSelectFitDepth(uiRangeBase):
+    def selectedWl(self, minval, maxval):
+        #After a region has been selected, update selected lines
+        #update the data in the plot of lines
+        fitDF = self.fitDepthFlags
+        fitDF[(self.mask.wl >= minval) & (self.mask.wl <= maxval)] = 1
+        maskFit = self.mask[(fitDF == 1) & (self.mask.iuse == 1)]
         segments = []
-        for miniM in maskUsed:
+        for miniM in maskFit:
             segments += [np.array([[miniM.wl, 1.0-miniM.depth],
-                                  [miniM.wl, 1.0]])]
-        self.pltMaskU.set_segments(segments)
+                                   [miniM.wl, 1.0]])]
+        self.pltMaskF.set_segments(segments)
+        self.canvas.draw()
+
+
+class uiUnselectFitDepth(uiRangeBase):
+    def selectedWl(self, minval, maxval):
+        #After a region has been selected, update selected lines
+        #update the data in the plot of lines
+        fitDepthFlags = self.fitDepthFlags
+        fitDepthFlags[(self.mask.wl >= minval) & (self.mask.wl <= maxval)] = 0
+        maskFit = self.mask[(fitDepthFlags == 1) & (self.mask.iuse == 1)]
         segments = []
-        for miniM in maskNot:
+        for miniM in maskFit:
             segments += [np.array([[miniM.wl, 1.0-miniM.depth],
-                                  [miniM.wl, 1.0]])]
-        self.pltMaskN.set_segments(segments)
+                                   [miniM.wl, 1.0]])]
+        self.pltMaskF.set_segments(segments)
         self.canvas.draw()
 
 
@@ -702,6 +715,73 @@ class rangeSelect:
         #self.lastrect = self.canvasWidget.create_rectangle(self.x0, y0mod, x1, y1mod, dash=[3,3])
 
 
+class saveRanges:
+    #mini manager for the button that saves the set of exclude ranges to file
+    def __init__(self, fname, ranges):
+        self.fname = fname
+        self.ranges = ranges
+    def saveToFile(self):
+        #Save the set of exclude ranges to a file
+        fout = open(self.fname,'w')
+        fout.write('#exclude wavelength ranges\n')
+        for ran in self.ranges:
+            fout.write('{:9.3f} {:9.3f}\n'.format(ran[0], ran[1]))
+        fout.close()
+        return
+
+
+class fitDepths:
+    def __init__(self, mask, obs, fitDepthFlags, root, canvas,
+                 pltMaskU, pltMaskN, pltMaskF):
+        self.mask = mask
+        self.obs = obs
+        self.fitDepthFlags = fitDepthFlags
+        self.root = root
+        self.canvas = canvas
+        self.pltMaskU = pltMaskU
+        self.pltMaskN = pltMaskN
+        self.pltMaskF = pltMaskF
+        
+    def runFit(self):
+        #Fit line depths using a linear least squares method
+        #and then update the plots of lines from the mask.
+        #This automatically removes digenerate or near-digenerate
+        #lines (i.e. very near in wavelength) before fitting depths.
+
+        #First set a 'wait' cursor
+        oldCursor = self.root.cget('cursor')
+        self.root.config(cursor='watch')
+        self.root.update()
+
+        #Get the lines that are flagged to be fit (and used)
+        indUse1 = np.nonzero((self.fitDepthFlags == 1) & (self.mask.iuse == 1))
+        useMask1 = self.mask[indUse1]
+        if len(useMask1) > 0:
+            #Get the reference LSD profile
+            prof = iolsd.read_lsd('prof.dat') #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            #Remove digenerate (or nearly) lines
+            pixVel = prof.vel[1]-prof.vel[0]
+            removePoorLines(useMask1, pixVel, fracPix = 3.0, sumDepths=False)
+            self.mask.iuse[indUse1] = useMask1.iuse
+            #and save the good lines in the mask for fitting
+            indUse2 = np.nonzero(useMask1.iuse == 1)
+            useMask2 = useMask1[indUse2]
+            
+            normDepth = 0.4 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            #Fit in two steps, and save the result back to the mask
+            MD = buildMD(self.obs, useMask2, prof, normDepth)
+            weights = linlsqDepths(MD, useMask2, self.obs)
+            self.mask.depth[indUse1[0][indUse2]] = weights
+            #update the plot
+            updateLinePlots(self.mask, self.fitDepthFlags,
+                            self.pltMaskU, self.pltMaskN, self.pltMaskF)
+            self.canvas.draw()
+
+        #Return the cursor to normal
+        self.root.config(cursor=oldCursor)
+        return
+
+
 class updateLSD:
     def __init__(self, canvas, root, mask, obsName, maskName, pltModelI):
         self.canvas = canvas
@@ -727,3 +807,111 @@ class updateLSD:
             dline.set_data(modelSpec.wl, modelSpec.specI)
         self.canvas.draw()
         return
+
+
+def buildMD(obs, mask, prof, normDepth):
+    #Set up an matrix that that can be multiplied with a vector of line weights
+    #to produce a mode LSD spectrum, array dimensions are nObsPts x nMaskLines
+    #This has columns for each line in the mask that each essentially 
+    #contain the LSD profile, with the profile shifted to be centred 
+    #on the line's wavelength, and interpolated onto the wavelengths of 
+    #the observation (the row pixels).  The the dot product of this
+    #matrix with the vector of line mask weights then scales each copy of 
+    #the LSD profile by that line's weight, and then sums over all lines.
+    #Thus this dot product the LSD model spectrum.
+    cvel = 2.99792458e5 #c in km/s
+
+    #calculate wavelengths for the profile at each line in the mask here, since it is reusable
+    wlProfA = np.outer(prof.vel/cvel, mask.wl) + np.tile(mask.wl, (prof.npix,1))  #(prof.npix, mask.wl.shape)
+
+    #We can use a sparse "List of Lists" matrix to efficently build the desired
+    #matrix, but we have to start with the transpose of what we want for
+    #efficent access when adding (non-zero) entries to the lil_matrix.
+    Dlil = scipy.sparse.lil_matrix((mask.wl.shape[0], obs.wl.shape[0]))
+
+    for l in range(mask.wl.shape[0]):
+        #Get observation points in range of this line in the mask
+        iObsRange = np.where( (wlProfA[0,l] < obs.wl[:]) & (wlProfA[-1,l] > obs.wl[:]) )
+        #Interpolate the LSD profile for this line onto the observation
+        interpProfI = np.interp(obs.wl[iObsRange], wlProfA[:,l], 1.-prof.specI)
+
+        Dlil[l, iObsRange] = interpProfI / normDepth
+
+    #Convert the matrix into a more efficent sparse form (csr_matrix) for matrix math
+    Dout = Dlil.tocsr().T
+    
+    ##Output the model spectrum, for testing purposes only.
+    #weightI = mask.depth/normDepth
+    #specT = 1.-Dout.dot(weightI)
+    #fOutPre = open('outSpecBeforeTweak.dat', 'w')
+    #for i in range(obs.wl.shape[0]):
+    #    fOutPre.write('{:} {:}\n'.format(obs.wl[i], specT[i]))
+    #fOutPre.close()    
+    return Dout
+
+def linlsqDepths(maskMD, mask, obs):
+    #Perform the linear least squares fit to the observation
+    #to find the optimal line depths for the LSD mask.
+    #This follow the same logic as the LSD profile calculation in LSDpy,
+    #or most other linear least squares calculations. Here the model is 
+    #Y = D.W, for the vector of line depths W, and 2D matrix M.  For that 
+    #model with observations Yo, with S a diagonal matrix of 1/sigma
+    # chi^2 = (Yo - D.W)^T.(S^2).(Yo - D.W)
+    #Taking the derivative of chi^2 wrt W and setting it equal to 0 
+    #to find the minimum in chi^2 gives
+    # 0 = (-D)^T.(S^2).(Yo - D.W)*2
+    # W = (D^T.(S^2).D)^(-1).D^T.(S^2).Yo
+    #so we mostly just need to invert the matrix (D^T.(S^2).D)
+    #and also build D^T.(S^2).Yo
+
+    #We are working in shifted units with the continuum at 0 and lines +ve
+    obsI = 1. - obs.specI
+    
+    #Use some sparse matrices here to be efficient
+    #The dot products for alpha and beta can be slower than matrix inversion
+    #Use similar choices to LSDpy for sparse routines
+    sparseS2 = scipy.sparse.diags(obs.specSig**(-2), offsets=0)
+    MD = scipy.sparse.csr_matrix(maskMD) #probably already a sparse csr
+    
+    beta = MD.T.dot(sparseS2.dot(obsI))
+    alpha = MD.T.dot(sparseS2.dot(MD))
+
+    covar = np.linalg.inv(alpha.toarray())
+    lineWeights = np.dot(covar, beta)
+    #lineWeightErrs = np.sqrt(np.diag(covar)) #if errors are needed
+    return lineWeights
+
+
+def removePoorLines(mask, pixVel, fracPix = 1.0, sumDepths=True):
+    #Remove nearly degenerate lines from the mask.
+    #Reject lines separated by less than fracPix of an LSD (velocity) pixel.
+    #(Based on LSDpy)
+    depthCutoff = 0.6
+    nTrimmed = 0
+    for l in range(1,mask.wl.shape[0]):
+        #This loop is relatively inefficient but handles unsorted line masks
+        #and lines with multiple bad blends.
+        if mask.iuse[l] == 1:
+            deltas = np.abs(mask.wl[l] - mask.wl)/mask.wl[l]*2.99792458e5
+            iClose = np.nonzero((deltas < pixVel*fracPix) & (mask.iuse == 1))[0]
+            if iClose.shape[0] > 1:
+                #If other lines are too close to the current line
+                mask.iuse[iClose] = 0
+                deepestLine = np.argmax(mask.depth[iClose])
+                mask.iuse[iClose[deepestLine]] = 1
+                
+                #If we want to sum line depths, limit the maximum depth lines 
+                #can sum to, as a very rough approximation for saturation.
+                if sumDepths:
+                    summedDepth = np.sum(mask.depth[iClose])
+                    if summedDepth < depthCutoff:
+                        mask.depth[iClose[deepestLine]] = summedDepth
+                    else:
+                        mask.depth[iClose[deepestLine]] = max(depthCutoff, mask.depth[iClose[deepestLine]])
+                nTrimmed += np.count_nonzero(iClose) - 1
+    if nTrimmed > 0:
+        print('Modified line mask, removed {:n} too closely spaced lines'.format(nTrimmed))
+
+    ##If one wanted a shorter mask
+    #mask.prune()
+    return

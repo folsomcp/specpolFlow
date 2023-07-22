@@ -76,17 +76,22 @@ def cleanMaskUI(maskName, obsName, outMaskName=None,
         pltObsI = ax1.plot(obs.wl, obs.specI, 'k')
         maskUsed = mask[mask.iuse == 1]
         maskNot = mask[mask.iuse == 0]
-        pltMaskU = ax1.vlines(maskUsed.wl, ymin=1.0-maskUsed.depth, ymax=1.0,
-                              colors='b', lw=1)
         pltMaskN = ax1.vlines(maskNot.wl, ymin=1.0-maskNot.depth, ymax=1.0,
                               colors='r', lw=1)
+        pltMaskU = ax1.vlines(maskUsed.wl, ymin=1.0-maskUsed.depth, ymax=1.0,
+                              colors='b', lw=1)
+        pltMaskF = ax1.vlines([], ymin=[], ymax=1.0,
+                              colors='aqua', lw=1) #tab:green
         pltModelI = ax1.plot(modelSpec.wl,modelSpec.specI, 'm', lw=1)
         ax1.set_xlabel('Wavelength')
         ax1.set_ylabel('Flux')
+
+        fitDepthFlags = np.zeros_like(mask.wl)
         
         #Run the main interactive program
-        utils.makeWin(fig, ax1, mask, obsName, outMaskName, pltMaskU, pltMaskN,
-                      pltModelI, excludeRanges, excludeFileName)
+        utils.makeWin(fig, ax1, mask, obs, obsName, outMaskName, pltMaskU, 
+                      pltMaskN, pltMaskF, pltModelI, excludeRanges, 
+                      excludeFileName, fitDepthFlags)
     
     #Save the final result
     mask.save(outMaskName)
