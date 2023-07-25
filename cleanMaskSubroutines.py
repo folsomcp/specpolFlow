@@ -23,7 +23,7 @@ except ModuleNotFoundError:
     import iolsd
 
 
-def makeWin(fig, ax, mask, obs, obsName, maskName, pltMaskU, pltMaskN,
+def makeWin(fig, ax, mask, obs, lsdp, pltMaskU, pltMaskN,
             pltMaskF, pltModelI, excludeRanges, excludeFileName, fitDepthFlags):
     #Build GUI with tkinter
     root = tk.Tk(className='Clean Masks')
@@ -149,7 +149,7 @@ def makeWin(fig, ax, mask, obs, obsName, maskName, pltMaskU, pltMaskN,
     selectFitDepth.linkButton(butSelRange, unselectFitDepth)
     unselectFitDepth.linkButton(butUnselRange, selectFitDepth)
     #Apply the depth fitting
-    fitDepthsM = fitDepths(mask, obs, fitDepthFlags, root, canvas,
+    fitDepthsM = fitDepths(mask, obs, lsdp, fitDepthFlags, root, canvas,
                            pltMaskU, pltMaskN, pltMaskF)
     butFitDepths = ttk.Button(master=tools, text='fit\ndepths',
                                command=fitDepthsM.runFit)
@@ -181,7 +181,7 @@ def makeWin(fig, ax, mask, obs, obsName, maskName, pltMaskU, pltMaskN,
     butSaveRanges.grid(row=0, column=9, sticky=tk.E, padx=2, pady=2)
     
     #Update the LSD calculation and the plotted spectrum
-    updateLSDM = updateLSD(canvas, root, mask, obsName, maskName, pltModelI)
+    updateLSDM = updateLSD(canvas, root, mask, lsdp, pltModelI)
     butUpdateLSD = ttk.Button(master=tools, text='update LSD',
                               command=updateLSDM.rerunLSD)
     ToolTip(butUpdateLSD, 'Save the mask, run LSD, and update the model spectrum')
@@ -731,10 +731,11 @@ class saveRanges:
 
 
 class fitDepths:
-    def __init__(self, mask, obs, fitDepthFlags, root, canvas,
+    def __init__(self, mask, obs, lsdp, fitDepthFlags, root, canvas,
                  pltMaskU, pltMaskN, pltMaskF):
         self.mask = mask
         self.obs = obs
+        self.lsdp = lsdp
         self.fitDepthFlags = fitDepthFlags
         self.root = root
         self.canvas = canvas
@@ -758,7 +759,7 @@ class fitDepths:
         useMask1 = self.mask[indUse1]
         if len(useMask1) > 0:
             #Get the reference LSD profile
-            prof = iolsd.read_lsd('prof.dat') #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            prof = iolsd.read_lsd(self.lsdp.outName) 
             #Remove digenerate (or nearly) lines
             pixVel = prof.vel[1]-prof.vel[0]
             removePoorLines(useMask1, pixVel, fracPix = 3.0, sumDepths=False)
@@ -767,7 +768,7 @@ class fitDepths:
             indUse2 = np.nonzero(useMask1.iuse == 1)
             useMask2 = useMask1[indUse2]
             
-            normDepth = 0.4 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            normDepth = self.lsdp.normDepth
             #Fit in two steps, and save the result back to the mask
             MD = buildMD(self.obs, useMask2, prof, normDepth)
             weights = linlsqDepths(MD, useMask2, self.obs)
@@ -783,12 +784,11 @@ class fitDepths:
 
 
 class updateLSD:
-    def __init__(self, canvas, root, mask, obsName, maskName, pltModelI):
+    def __init__(self, canvas, root, mask, lsdp, pltModelI):
         self.canvas = canvas
         self.root = root
         self.mask = mask
-        self.obsName = obsName
-        self.maskName = maskName
+        self.lsdp = lsdp
         self.pltModelI = pltModelI
     def rerunLSD(self):
         #Recalculate the LSD profile and update the plot
@@ -797,8 +797,17 @@ class updateLSD:
         self.root.config(cursor='watch')
         self.root.update()
         #Run LSD
-        self.mask.save(self.maskName)
-        lsdProf, modelSpec = iolsd.run_lsdpy(obs=self.obsName, mask=self.maskName, fLSDPlotImg=0)
+        lsdp = self.lsdp
+        self.mask.save(lsdp.mask)
+        lsdProf, modelSpec = iolsd.run_lsdpy(obs=lsdp.obs, mask=lsdp.mask,
+            outName=lsdp.outName, velStart=lsdp.velStart, velEnd=lsdp.velEnd,
+            velPixel=lsdp.velPixel, normDepth=lsdp.normDepth,
+            normLande=lsdp.normLande, normWave=lsdp.normWave,
+            removeContPol=lsdp.removeContPol, trimMask=lsdp.trimMask,
+            sigmaClipIter=lsdp.sigmaClipIter, sigmaClip=lsdp.sigmaClip,
+            interpMode=lsdp.interpMode, outModelName=lsdp.outModelName,
+            fLSDPlotImg=lsdp.fLSDPlotImg, fSavePlotImg=lsdp.fSavePlotImg,
+            outPlotImgName=lsdp.outPlotImgName)
         #Return the cursor to normal
         self.root.config(cursor=oldCursor)
         
@@ -886,13 +895,14 @@ def removePoorLines(mask, pixVel, fracPix = 1.0, sumDepths=True):
     #Remove nearly degenerate lines from the mask.
     #Reject lines separated by less than fracPix of an LSD (velocity) pixel.
     #(Based on LSDpy)
+    cvel = 2.99792458e5 #c in km/s
     depthCutoff = 0.6
     nTrimmed = 0
     for l in range(1,mask.wl.shape[0]):
         #This loop is relatively inefficient but handles unsorted line masks
         #and lines with multiple bad blends.
         if mask.iuse[l] == 1:
-            deltas = np.abs(mask.wl[l] - mask.wl)/mask.wl[l]*2.99792458e5
+            deltas = np.abs(mask.wl[l] - mask.wl)/mask.wl[l]*cvel
             iClose = np.nonzero((deltas < pixVel*fracPix) & (mask.iuse == 1))[0]
             if iClose.shape[0] > 1:
                 #If other lines are too close to the current line
@@ -915,3 +925,45 @@ def removePoorLines(mask, pixVel, fracPix = 1.0, sumDepths=True):
     ##If one wanted a shorter mask
     #mask.prune()
     return
+
+
+class lsdParams:
+    def __init__(self, obs, mask, outName='prof.dat',
+                 velStart=-200., velEnd=200., velPixel=None,
+                 normDepth=0.2, normLande=1.2, normWave=500.,
+                 removeContPol=1, trimMask=0, 
+                 sigmaClipIter=0, sigmaClip=500., interpMode=1, 
+                 outModelName='outModelSpec.dat',
+                 fLSDPlotImg=0, fSavePlotImg=0, outPlotImgName=''):
+        """
+        A simple data structure to hold input parameters for LSD calculations,
+        and to set some sensible defaults.
+        """
+        self.obs = obs
+        self.mask = mask
+        self.outName = outName
+        self.velStart = velStart
+        self.velEnd = velEnd
+        self.normDepth = normDepth
+        self.normLande = normLande
+        self.normWave = normWave
+        self.removeContPol = removeContPol
+        self.trimMask = trimMask
+        self.sigmaClipIter = sigmaClipIter
+        self.sigmaClip = sigmaClip
+        self.interpMode = interpMode
+        self.outModelName = outModelName
+        self.fLSDPlotImg = fLSDPlotImg
+        self.fSavePlotImg = fSavePlotImg
+        self.outPlotImgName = outPlotImgName
+        
+        cvel = 2.99792458e5 #c in km/s
+        if velPixel == None:
+            #Get average observed wavelength spacing
+            obsSpec = iolsd.read_spectrum(self.obs)
+            wlStep = obsSpec.wl[1:] - obsSpec.wl[:-1]
+            indWlSteps = ((wlStep > 0.) & (wlStep < 0.1))
+            meanVelPix = np.average(wlStep[indWlSteps]/obsSpec.wl[:-1][indWlSteps]*cvel)
+            self.velPixel = round(meanVelPix, ndigits=2)
+        else:
+            self.velPixel = velPixel

@@ -64,11 +64,19 @@ def cleanMaskUI(maskName, obsName, outMaskName=None,
         
         #Make an initial LSD model spectrum
         print('Generating test LSD profile...')
+        lsdp = utils.lsdParams(obsName, outMaskName)
         #first save the current updated mask, so we can run LSDpy on it
         mask.save(outMaskName)
-        #then run LSDpy
-        lsdProf, modelSpec = iolsd.run_lsdpy(obs=obsName, mask=outMaskName,
-                                             fLSDPlotImg=0)
+        #then run LSDpy, with specific 'default' parameters
+        lsdProf, modelSpec = iolsd.run_lsdpy(obs=lsdp.obs, mask=lsdp.mask,
+            outName=lsdp.outName, velStart=lsdp.velStart, velEnd=lsdp.velEnd,
+            velPixel=lsdp.velPixel, normDepth=lsdp.normDepth,
+            normLande=lsdp.normLande, normWave=lsdp.normWave,
+            removeContPol=lsdp.removeContPol, trimMask=lsdp.trimMask,
+            sigmaClipIter=lsdp.sigmaClipIter, sigmaClip=lsdp.sigmaClip,
+            interpMode=lsdp.interpMode, outModelName=lsdp.outModelName,
+            fLSDPlotImg=lsdp.fLSDPlotImg, fSavePlotImg=lsdp.fSavePlotImg,
+            outPlotImgName=lsdp.outPlotImgName)
         
         #Make a plot of the reference observation, mask, and LSD model spectrum
         fig =  Figure()
@@ -81,15 +89,16 @@ def cleanMaskUI(maskName, obsName, outMaskName=None,
         pltMaskU = ax1.vlines(maskUsed.wl, ymin=1.0-maskUsed.depth, ymax=1.0,
                               colors='b', lw=1)
         pltMaskF = ax1.vlines([], ymin=[], ymax=1.0,
-                              colors='aqua', lw=1) #tab:green
+                              colors='aqua', lw=1)
         pltModelI = ax1.plot(modelSpec.wl,modelSpec.specI, 'm', lw=1)
         ax1.set_xlabel('Wavelength')
         ax1.set_ylabel('Flux')
 
-        fitDepthFlags = np.zeros_like(mask.wl)
+        #initialize an array of flags for fitting LSD line depths
+        fitDepthFlags = np.zeros_like(mask.wl, dtype=int)
         
         #Run the main interactive program
-        utils.makeWin(fig, ax1, mask, obs, obsName, outMaskName, pltMaskU, 
+        utils.makeWin(fig, ax1, mask, obs, lsdp, pltMaskU, 
                       pltMaskN, pltMaskF, pltModelI, excludeRanges, 
                       excludeFileName, fitDepthFlags)
     
