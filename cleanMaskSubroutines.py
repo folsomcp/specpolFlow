@@ -1,12 +1,12 @@
 #Additional subroutines used inside cleanMaskUI.py
-#Not realy meant to be stand alone utilities.
+#Not really meant to be stand alone utilities.
 
 import numpy as np
 import scipy
 import tkinter as tk
 import tkinter.ttk as ttk
-from matplotlib.backends.backend_tkagg import (
-    FigureCanvasTkAgg)
+import tkinter.messagebox as messagebox
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 #Try to import the default matplotlib toolbar
 try: #for matplotlib 3.x
     from matplotlib.backends.backend_tkagg import NavigationToolbar2Tk
@@ -15,7 +15,7 @@ except ImportError:  #If that fails this probably isn't matplotlib 3.x
     try: #for matplotlib 2.x
         from matplotlib.backends.backend_tkagg import NavigationToolbar2TkAgg
         mplToolbar=2
-    except ImportError: #not sure what failed, try just not using this extra toolbar
+    except ImportError: #if that fails, just don't use this extra toolbar
         mplToolbar=0
 try:
     import specpolFlow.iolsd as iolsd
@@ -145,7 +145,7 @@ def makeWin(fig, ax, mask, obs, lsdp, pltMaskU, pltMaskN,
                              command=unselectFitDepth.runSpanSelect)
     ToolTip(butUnselRange, 'Unselect lines to fit for depth in the mask')
     butUnselRange.grid(row=0, column=1, sticky=tk.W, padx=2, pady=2)
-    #Link the select and unselect buttons so they can turn eachother off
+    #Link the select and unselect buttons so they can turn each other off
     selectFitDepth.linkButton(butSelRange, unselectFitDepth)
     unselectFitDepth.linkButton(butUnselRange, selectFitDepth)
     #Apply the depth fitting
@@ -170,7 +170,7 @@ def makeWin(fig, ax, mask, obs, lsdp, pltMaskU, pltMaskN,
                              command=excRangeM.runSpanSelect)
     ToolTip(butExcRange, 'Exclude selected lines from the mask')
     butExcRange.grid(row=0, column=8, sticky=tk.E, padx=2, pady=2)
-    #Link the include and exclude buttons so they can turn eachother off
+    #Link the include and exclude buttons so they can turn each other off
     incRangeM.linkButton(butIncRange, excRangeM)
     excRangeM.linkButton(butExcRange, incRangeM)
     #Save the exclude ranges to a text file
@@ -179,6 +179,13 @@ def makeWin(fig, ax, mask, obs, lsdp, pltMaskU, pltMaskN,
                                command=saveRangesM.saveToFile)
     ToolTip(butSaveRanges, 'Save the excluded wavelength ranges to the {:} file'.format(excludeFileName))
     butSaveRanges.grid(row=0, column=9, sticky=tk.E, padx=2, pady=2)
+
+    #Modify LSD control parameters
+    modifyLSDparM = modifyLSDpar(root, lsdp)
+    butModLSD = ttk.Button(master=tools, text='LSD param.',
+                              command=modifyLSDparM.openWindow)
+    ToolTip(butModLSD, 'Modify the parameters related to the LSD calculation')
+    butModLSD.grid(row=3, column=8, sticky=tk.E, padx=2)
     
     #Update the LSD calculation and the plotted spectrum
     updateLSDM = updateLSD(canvas, root, mask, lsdp, pltModelI)
@@ -444,7 +451,7 @@ class viewFuncs:
             #get the canvas position in window pixel coordinates
             x0full, x1full = self.canvas.figure.axes[0].bbox.intervalx
             y0inv, y1inv = self.canvas.figure.axes[0].bbox.intervaly
-            #and correct for matplotlib using y in the opposide direction from tk
+            #and correct for matplotlib using y in the opposite direction from tk
             height = self.canvas.figure.bbox.height
             y0full = height - y1inv
             y1full = height - y0inv
@@ -459,7 +466,7 @@ class viewFuncs:
             datax1 = (self.x1rec - x0full)/(axesxrange)*(dataxrange) + axdatax0
             datay0 = (self.y0rec - y0full)/(axesyrange)*(-datayrange) + axdatay1
             datay1 = (self.y1rec - y0full)/(axesyrange)*(-datayrange) + axdatay1
-            #set the plotted range into the selected range in data coordiantes
+            #set the plotted range into the selected range in data coordinates
             if abs(datax1 - datax0) > 0. and abs(datay1 - datay0) > 0.:
                 self.ax.set_xlim(min(datax0, datax1), max(datax0, datax1))
                 self.ax.set_ylim(min(datay0, datay1), max(datay0, datay1))
@@ -682,7 +689,7 @@ class rangeSelect:
             
             #Call the creating object's function for processing this range.
             #This is a bit recursive, so there may be a small possibility
-            #to leak memory or odd behavior?
+            #to leak memory or odd behaviour?
             self.parentUIRange.selectedWl(min(self.datax0, self.datax1),
                                           max(self.datax0, self.datax1))
             self.deactivate()
@@ -696,7 +703,7 @@ class rangeSelect:
             self.bStartSelect = True
             self.canvasWidget.delete(self.lastrect)
             #Bind can take a string of tk binding info,
-            #and bind retuns such a string if called with just an event name,
+            #and bind returns such a string if called with just an event name,
             #so we can use that to restore a previous binding.
             self.funcid = self.canvasWidget.bind('<Motion>', self.oldBindMove)
 
@@ -746,7 +753,7 @@ class fitDepths:
     def runFit(self):
         #Fit line depths using a linear least squares method
         #and then update the plots of lines from the mask.
-        #This automatically removes digenerate or near-digenerate
+        #This automatically removes degenerate or near-degenerate
         #lines (i.e. very near in wavelength) before fitting depths.
 
         #First set a 'wait' cursor
@@ -760,7 +767,7 @@ class fitDepths:
         if len(useMask1) > 0:
             #Get the reference LSD profile
             prof = iolsd.read_lsd(self.lsdp.outName) 
-            #Remove digenerate (or nearly) lines
+            #Remove degenerate (or nearly) lines
             pixVel = prof.vel[1]-prof.vel[0]
             removePoorLines(useMask1, pixVel, fracPix = 3.0, sumDepths=False)
             self.mask.iuse[indUse1] = useMask1.iuse
@@ -780,6 +787,340 @@ class fitDepths:
 
         #Return the cursor to normal
         self.root.config(cursor=oldCursor)
+        return
+
+
+#Make a window for modifying some LSD calculation parameters,
+#includes associated functions for handling the UI
+class modifyLSDpar:
+    def __init__(self, parent, lsdp):
+        self.parent = parent
+        self.lsdp = lsdp
+        self.active = False
+        self.win = None
+
+        self.varSaveMod = tk.IntVar()
+        if self.lsdp.outModelName == '':
+            self.varSaveMod.set(0)
+        else:
+            self.varSaveMod.set(1)
+    
+    def closeWindow(self, *event):
+        #Update any input information
+        self.setVelStart()
+        self.setVelEnd()
+        self.setVelPix()
+        self.setNDepth()
+        self.setNWav()
+        self.setNLande()
+        self.setModName()
+        self.setProfName()
+        
+        self.active = False
+        try:
+            self.win.destroy()
+        except:
+            pass
+        return
+    
+    def openWindow(self, *event):
+        #If the window is already open do nothing
+        if self.active:
+            return
+        self.active = True
+        
+        self.win = tk.Toplevel(self.parent)
+        self.win.title("Set LSD parameters")
+        #Associate this window with its parent,
+        #and keep this window out of the window manager.
+        self.win.transient(self.parent)
+        #Send keyboard and mouse events only to this window,
+        #mostly deactivating other windows.
+        self.win.grab_set()
+        #Set what happens when the window manager asks to close the window.
+        self.win.protocol("WM_DELETE_WINDOW", self.closeWindow)
+
+        wframe = ttk.Labelframe(self.win, text='Set parameters for LSD profile',
+                                padding="10 10 10 10")
+        wframe.pack(fill=tk.BOTH, expand=1, padx=4, pady=4)
+
+        #Modify the velocity grid for the LSD profile
+        frameVels = ttk.Frame(wframe, padding="0 0 0 10")
+        frameVels.grid(row=0, column=0, sticky=(tk.N, tk.S, tk.E, tk.W))
+        labVelStart = ttk.Label(frameVels, text='start vel', justify='right')
+        labVelStart.grid(row=0, column=0, sticky=tk.E, pady=4, padx=4)
+        self.txtVelStart = tk.StringVar()
+        self.txtVelStart.set('{:.1f}'.format(self.lsdp.velStart))
+        entVelStart = ttk.Entry(master=frameVels, textvariable=self.txtVelStart,
+                                width=8, validate='focusout',
+                                validatecommand=self.setVelStart)
+        entVelStart.bind('<Key-Return>', self.setVelStart)
+        ToolTip(entVelStart, 'Set the starting velocity for the LSD profile (km/s)')
+        entVelStart.grid(row=0, column=1, sticky=tk.W, pady=4)
+        labVelEnd = ttk.Label(frameVels, text=' end vel', justify='right')
+        labVelEnd.grid(row=0, column=2, sticky=tk.E, pady=4, padx=4)
+        self.txtVelEnd = tk.StringVar()
+        self.txtVelEnd.set('{:.1f}'.format(self.lsdp.velEnd))
+        entVelEnd = ttk.Entry(master=frameVels, textvariable=self.txtVelEnd,
+                              width=8, validate='focusout',
+                              validatecommand=self.setVelEnd)
+        entVelEnd.bind('<Key-Return>', self.setVelEnd)
+        ToolTip(entVelEnd, 'Set the ending velocity for the LSD profile (km/s)')
+        entVelEnd.grid(row=0, column=3, sticky=tk.W, pady=4)
+        labVelPix = ttk.Label(frameVels, text=' pixel size', justify='right')
+        labVelPix.grid(row=0, column=4, sticky=tk.E, pady=4, padx=4)
+        self.txtVelPix = tk.StringVar()
+        self.txtVelPix.set('{:.2f}'.format(self.lsdp.velPixel))
+        entVelPix = ttk.Entry(master=frameVels, textvariable=self.txtVelPix,
+                              width=8, validate='focusout',
+                              validatecommand=self.setVelPix)
+        entVelPix.bind('<Key-Return>', self.setVelPix)
+        ToolTip(entVelPix, 'Set the pixel size of the LSD profile in km/s')
+        entVelPix.grid(row=0, column=5, sticky=tk.W, pady=4)
+        frameVels.columnconfigure(0, weight=1)
+        frameVels.columnconfigure(1, weight=1)
+        frameVels.columnconfigure(2, weight=1)
+        frameVels.columnconfigure(3, weight=1)
+        frameVels.columnconfigure(4, weight=1)
+        frameVels.columnconfigure(5, weight=1)
+        frameVels.rowconfigure(0, weight=1)
+
+        #Modify LSD normalization values
+        frameNorms = ttk.Frame(wframe, padding="0 0 0 10")
+        frameNorms.grid(row=1, column=0, sticky=(tk.N, tk.S, tk.E, tk.W))
+        labNDepth = ttk.Label(frameNorms, text='norm. depth', justify='right')
+        labNDepth.grid(row=0, column=0, sticky=tk.E, pady=4, padx=4)
+        self.txtNDepth = tk.StringVar()
+        self.txtNDepth.set('{:.2f}'.format(self.lsdp.normDepth))
+        entNDepth = ttk.Entry(master=frameNorms, textvariable=self.txtNDepth,
+                              width=8, validate='focusout',
+                            validatecommand=self.setNDepth)
+        entNDepth.bind('<Key-Return>', self.setNDepth)
+        ToolTip(entNDepth, 'Set the normalizing depth for the LSD mask/profile')
+        entNDepth.grid(row=0, column=1, sticky=tk.W, pady=4)
+        labNWav = ttk.Label(frameNorms, text=' norm. wavelength',
+                            justify='right')
+        labNWav.grid(row=0, column=2, sticky=tk.E, pady=4, padx=4)
+        self.txtNWav = tk.StringVar()
+        self.txtNWav.set('{:.1f}'.format(self.lsdp.normWave))
+        entNWav = ttk.Entry(master=frameNorms, textvariable=self.txtNWav,
+                            width=8, validate='focusout',
+                            validatecommand=self.setNWav)
+        entNWav.bind('<Key-Return>', self.setNWav)
+        ToolTip(entNWav, 'Set the normalizing wavelength for the LSD mask/profile (usually nm)')
+        entNWav.grid(row=0, column=3, sticky=tk.W, pady=4)
+        labNLande = ttk.Label(frameNorms, text=' norm. Lande',
+                              justify='right')
+        labNLande.grid(row=0, column=4, sticky=tk.E, pady=4, padx=4)
+        self.txtNLande = tk.StringVar()
+        self.txtNLande.set('{:.2f}'.format(self.lsdp.normLande))
+        entNLande = ttk.Entry(master=frameNorms, textvariable=self.txtNLande,
+                              width=8, validate='focusout',
+                            validatecommand=self.setNLande)
+        entNLande.bind('<Key-Return>', self.setNLande)
+        ToolTip(entNLande, 'Set the normalizing Landé factor for the LSD mask/profile')
+        entNLande.grid(row=0, column=5, sticky=tk.W, pady=4)
+        frameNorms.columnconfigure(0, weight=1)
+        frameNorms.columnconfigure(1, weight=1)
+        frameNorms.columnconfigure(2, weight=1)
+        frameNorms.columnconfigure(3, weight=1)
+        frameNorms.columnconfigure(4, weight=1)
+        frameNorms.columnconfigure(5, weight=1)
+        frameNorms.rowconfigure(0, weight=1)
+
+        #remove closely spaced lines in the LSD calculation?
+        self.varRemoveClose = tk.IntVar()
+        self.varRemoveClose.set(self.lsdp.trimMask)
+        checkRemoveClose = ttk.Checkbutton(wframe,
+                                           text='remove closely\nspaced lines',
+                                           variable=self.varRemoveClose,
+                                           command=self.setRemoveClose)
+        ToolTip(checkRemoveClose, "Remove very closely spaced lines in the mask when calculating the LSD profile")
+        checkRemoveClose.grid(row=2, column=0, padx=10, pady=4)
+
+        #Optionally save the model LSD spectrum
+        frameSaveMod = ttk.Frame(wframe, padding="0 0 0 10")
+        frameSaveMod.grid(row=3, column=0, sticky=(tk.N, tk.S, tk.E, tk.W))
+        checkSaveMod = ttk.Checkbutton(frameSaveMod,
+                                       text='save mode\nspectrum',
+                                       variable=self.varSaveMod,
+                                       command=self.setSaveMod)
+        ToolTip(checkSaveMod, "Save a copy of the model LSD spectrum to a file?")
+        checkSaveMod.grid(row=0, column=0, sticky=tk.E, pady=4)
+        labModName = ttk.Label(frameSaveMod, text='model\nfile name',
+                               justify='right')
+        labModName.grid(row=0, column=1, sticky=tk.E, pady=4, padx=4)
+        self.txtModName = tk.StringVar()
+        self.txtModName.set('{:}'.format(self.lsdp.outModelName))
+        entModName = ttk.Entry(master=frameSaveMod,
+                               textvariable=self.txtModName, width=20,
+                               validate='focusout',
+                               validatecommand=self.setModName)
+        entModName.bind('<Key-Return>', self.setModName)
+        ToolTip(entModName, 'File name for the output model LSD spectrum')
+        entModName.grid(row=0, column=2, sticky=tk.W, pady=4)
+        frameSaveMod.columnconfigure(0, weight=1)
+        frameSaveMod.columnconfigure(1, weight=1)
+        frameSaveMod.columnconfigure(2, weight=1)
+        frameSaveMod.rowconfigure(0, weight=1)
+        
+        #Set the output LSD profile file name, and optionally plot it.
+        frameProfs = ttk.Frame(wframe, padding="0 0 0 0")
+        frameProfs.grid(row=4, column=0, sticky=(tk.N, tk.S, tk.E, tk.W))
+        labProfName = ttk.Label(frameProfs, text='profile\nfile name',
+                                justify='right')
+        labProfName.grid(row=0, column=0, sticky=tk.E, pady=4, padx=4)
+        self.txtProfName = tk.StringVar()
+        self.txtProfName.set('{:}'.format(self.lsdp.outName))
+        entProfName = ttk.Entry(master=frameProfs,
+                                textvariable=self.txtProfName, width=20, 
+                                validate='focusout',
+                                validatecommand=self.setProfName)
+        entProfName.bind('<Key-Return>', self.setProfName)
+        ToolTip(entProfName, 'File name for the output LSD profile')
+        entProfName.grid(row=0, column=1, sticky=tk.W, pady=4)
+
+        self.varPltProf = tk.IntVar()
+        self.varPltProf.set(self.lsdp.fLSDPlotImg)
+        checkPltProf = ttk.Checkbutton(frameProfs, text='plot\nprofile',
+                                       variable=self.varPltProf,
+                                       command=self.setPlotProf)
+        ToolTip(checkPltProf, "Plot the LSD profile in a new window when updated?")
+        checkPltProf.grid(row=0, column=2, pady=4, padx=4, sticky=tk.W)
+        frameProfs.columnconfigure(0, weight=1)
+        frameProfs.columnconfigure(1, weight=1)
+        frameProfs.columnconfigure(2, weight=1)
+        frameProfs.rowconfigure(0, weight=1)
+        
+        wframe.columnconfigure(0, weight=1)
+        wframe.rowconfigure(0, weight=1)
+        wframe.rowconfigure(1, weight=1)
+        wframe.rowconfigure(2, weight=1)
+        wframe.rowconfigure(3, weight=1)
+        wframe.rowconfigure(4, weight=1)
+        
+        #Enter a local event loop, returning only when the given window
+        #is destroyed.
+        self.win.wait_window(self.win)
+
+    def setVelStart(self, *event):
+        try:  #Make sure this text is a number
+            val = float(self.txtVelStart.get())
+        except ValueError:
+            self.txtVelStart.set('{:.1f}'.format(self.lsdp.velStart))
+            return False
+        if val <= -1000.:  #and make sure the value is sensible
+            val = -999.0
+            self.txtVelStart.set('{:.1f}'.format(val))
+        elif (val > self.lsdp.velEnd - 10.):
+            val = self.lsdp.velEnd - 10.
+            self.txtVelStart.set('{:.1f}'.format(val))
+        self.lsdp.velStart = val
+        return True
+    def setVelEnd(self, *event):
+        try:  #Make sure this text is a number
+            val = float(self.txtVelEnd.get())
+        except ValueError:
+            self.txtVelEnd.set('{:.1f}'.format(self.lsdp.velEnd))
+            return False
+        if val >= 1000.:  #and make sure the value is sensible
+            val = 999.0
+            self.txtVelEnd.set('{:.1f}'.format(val))
+        elif (val < self.lsdp.velStart + 10.):
+            val = self.lsdp.velStart + 10.
+            self.txtVelEnd.set('{:.1f}'.format(val))
+        self.lsdp.velEnd = val
+        return True
+    def setVelPix(self, *event):
+        try:  #Make sure this text is a number
+            val = float(self.txtVelPix.get())
+        except ValueError:
+            self.txtVelPix.set('{:.2f}'.format(self.lsdp.velPixel))
+            return False
+        if val <= 0:
+            self.txtVelPix.set('{:.2f}'.format(self.lsdp.velPixel))
+            return False
+        elif val < 0.1:
+            val = 0.1
+            self.txtVelPix.set('{:.2f}'.format(val))
+        elif val > (self.lsdp.velEnd - self.lsdp.velStart)/8.0:
+            val = (self.lsdp.velEnd - self.lsdp.velStart)/8.0
+            self.txtVelPix.set('{:.2f}'.format(val))
+        self.lsdp.velPixel = val
+        return True
+    def setNDepth(self, *event):
+        try:
+            val = float(self.txtNDepth.get())
+        except ValueError:
+            self.txtNDepth.set('{:.2f}'.format(self.lsdp.normDepth))
+            return False
+        if val <= 0:
+            self.txtNDepth.set('{:.2f}'.format(self.lsdp.normDepth))
+            return False
+        elif val > 1.0:
+            val = 1.0
+            self.txtNDepth.set('{:.2f}'.format(val))
+        self.lsdp.normDepth = val
+        return True
+    def setNWav(self, *event):
+        try:
+            val = float(self.txtNWav.get())
+        except ValueError:
+            self.txtNWav.set('{:.1f}'.format(self.lsdp.normWave))
+            return False
+        if val <= 0:
+            self.txtNWav.set('{:.1f}'.format(self.lsdp.normWave))
+            return False
+        elif val > 100000.0:
+            val = 100000.0
+            self.txtNWav.set('{:.1f}'.format(val))
+        self.lsdp.normWave = val
+        return True
+    def setNLande(self, *event):
+        try:
+            val = float(self.txtNLande.get())
+        except ValueError:
+            self.txtNLande.set('{:.2f}'.format(self.lsdp.normLande))
+            return False
+        if val <= 0:
+            self.txtNLande.set('{:.2f}'.format(self.lsdp.normLande))
+            return False
+        elif val > 10.0:
+            val = 10.0
+            self.txtNLande.set('{:.2f}'.format(val))
+        self.lsdp.normLande = val
+        return True
+
+    def setRemoveClose(self, *event):
+        val = self.varRemoveClose.get()
+        self.lsdp.trimMask = int(val)
+        return
+    
+    def setSaveMod(self, *event):
+        val = self.varSaveMod.get()
+        if val == 0:
+            self.lsdp.outModelName = ''
+        else:
+            self.lsdp.outModelName = self.txtModName.get()
+        return
+    def setModName(self, *event):
+        flag = self.varSaveMod.get()
+        if flag != 0:
+            self.lsdp.outModelName = self.txtModName.get()
+        else:
+            self.lsdp.outModelName = ''
+        return
+    def setProfName(self, *event):
+        val = self.txtProfName.get()
+        if val != '':
+            self.lsdp.outName = val
+        return
+    def setPlotProf(self, *event):
+        val = self.varPltProf.get()
+        if val == 0:
+            self.lsdp.fLSDPlotImg = 0
+        else:
+            self.lsdp.fLSDPlotImg = 1
         return
 
 
@@ -833,9 +1174,9 @@ def buildMD(obs, mask, prof, normDepth):
     #calculate wavelengths for the profile at each line in the mask here, since it is reusable
     wlProfA = np.outer(prof.vel/cvel, mask.wl) + np.tile(mask.wl, (prof.npix,1))  #(prof.npix, mask.wl.shape)
 
-    #We can use a sparse "List of Lists" matrix to efficently build the desired
+    #We can use a sparse "List of Lists" matrix to efficiently build the desired
     #matrix, but we have to start with the transpose of what we want for
-    #efficent access when adding (non-zero) entries to the lil_matrix.
+    #efficient access when adding (non-zero) entries to the lil_matrix.
     Dlil = scipy.sparse.lil_matrix((mask.wl.shape[0], obs.wl.shape[0]))
 
     for l in range(mask.wl.shape[0]):
@@ -846,7 +1187,7 @@ def buildMD(obs, mask, prof, normDepth):
 
         Dlil[l, iObsRange] = interpProfI / normDepth
 
-    #Convert the matrix into a more efficent sparse form (csr_matrix) for matrix math
+    #Convert the matrix into a more efficient sparse form (csr_matrix) for matrix math
     Dout = Dlil.tocsr().T
     
     ##Output the model spectrum, for testing purposes only.
@@ -917,7 +1258,8 @@ def removePoorLines(mask, pixVel, fracPix = 1.0, sumDepths=True):
                     if summedDepth < depthCutoff:
                         mask.depth[iClose[deepestLine]] = summedDepth
                     else:
-                        mask.depth[iClose[deepestLine]] = max(depthCutoff, mask.depth[iClose[deepestLine]])
+                        mask.depth[iClose[deepestLine]] = max(depthCutoff,
+                                                mask.depth[iClose[deepestLine]])
                 nTrimmed += np.count_nonzero(iClose) - 1
     if nTrimmed > 0:
         print('Modified line mask, removed {:n} too closely spaced lines'.format(nTrimmed))
@@ -933,7 +1275,7 @@ class lsdParams:
                  normDepth=0.2, normLande=1.2, normWave=500.,
                  removeContPol=1, trimMask=0, 
                  sigmaClipIter=0, sigmaClip=500., interpMode=1, 
-                 outModelName='outModelSpec.dat',
+                 outModelName='',
                  fLSDPlotImg=0, fSavePlotImg=0, outPlotImgName=''):
         """
         A simple data structure to hold input parameters for LSD calculations,
