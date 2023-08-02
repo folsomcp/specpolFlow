@@ -845,88 +845,58 @@ class modifyLSDpar:
         wframe.pack(fill=tk.BOTH, expand=1, padx=4, pady=4)
 
         #Modify the velocity grid for the LSD profile
-        frameVels = ttk.Frame(wframe, padding="0 0 0 10")
-        frameVels.grid(row=0, column=0, sticky=(tk.N, tk.S, tk.E, tk.W))
-        labVelStart = ttk.Label(frameVels, text='start vel', justify='right')
-        labVelStart.grid(row=0, column=0, sticky=tk.E, pady=4, padx=4)
+        labVelStart = ttk.Label(wframe, text='start vel', justify='right')
         self.txtVelStart = tk.StringVar()
         self.txtVelStart.set('{:.1f}'.format(self.lsdp.velStart))
-        entVelStart = ttk.Entry(master=frameVels, textvariable=self.txtVelStart,
+        entVelStart = ttk.Entry(master=wframe, textvariable=self.txtVelStart,
                                 width=8, validate='focusout',
                                 validatecommand=self.setVelStart)
         entVelStart.bind('<Key-Return>', self.setVelStart)
         ToolTip(entVelStart, 'Set the starting velocity for the LSD profile (km/s)')
-        entVelStart.grid(row=0, column=1, sticky=tk.W, pady=4)
-        labVelEnd = ttk.Label(frameVels, text=' end vel', justify='right')
-        labVelEnd.grid(row=0, column=2, sticky=tk.E, pady=4, padx=4)
+        labVelEnd = ttk.Label(wframe, text=' end vel', justify='right')
         self.txtVelEnd = tk.StringVar()
         self.txtVelEnd.set('{:.1f}'.format(self.lsdp.velEnd))
-        entVelEnd = ttk.Entry(master=frameVels, textvariable=self.txtVelEnd,
+        entVelEnd = ttk.Entry(master=wframe, textvariable=self.txtVelEnd,
                               width=8, validate='focusout',
                               validatecommand=self.setVelEnd)
         entVelEnd.bind('<Key-Return>', self.setVelEnd)
         ToolTip(entVelEnd, 'Set the ending velocity for the LSD profile (km/s)')
-        entVelEnd.grid(row=0, column=3, sticky=tk.W, pady=4)
-        labVelPix = ttk.Label(frameVels, text=' pixel size', justify='right')
-        labVelPix.grid(row=0, column=4, sticky=tk.E, pady=4, padx=4)
+        labVelPix = ttk.Label(wframe, text=' pixel size', justify='right')
         self.txtVelPix = tk.StringVar()
         self.txtVelPix.set('{:.2f}'.format(self.lsdp.velPixel))
-        entVelPix = ttk.Entry(master=frameVels, textvariable=self.txtVelPix,
+        entVelPix = ttk.Entry(master=wframe, textvariable=self.txtVelPix,
                               width=8, validate='focusout',
                               validatecommand=self.setVelPix)
         entVelPix.bind('<Key-Return>', self.setVelPix)
         ToolTip(entVelPix, 'Set the pixel size of the LSD profile in km/s')
-        entVelPix.grid(row=0, column=5, sticky=tk.W, pady=4)
-        frameVels.columnconfigure(0, weight=1)
-        frameVels.columnconfigure(1, weight=1)
-        frameVels.columnconfigure(2, weight=1)
-        frameVels.columnconfigure(3, weight=1)
-        frameVels.columnconfigure(4, weight=1)
-        frameVels.columnconfigure(5, weight=1)
-        frameVels.rowconfigure(0, weight=1)
 
         #Modify LSD normalization values
-        frameNorms = ttk.Frame(wframe, padding="0 0 0 10")
-        frameNorms.grid(row=1, column=0, sticky=(tk.N, tk.S, tk.E, tk.W))
-        labNDepth = ttk.Label(frameNorms, text='norm. depth', justify='right')
-        labNDepth.grid(row=0, column=0, sticky=tk.E, pady=4, padx=4)
+        labNDepth = ttk.Label(wframe, text='norm. depth', justify='right')
         self.txtNDepth = tk.StringVar()
         self.txtNDepth.set('{:.2f}'.format(self.lsdp.normDepth))
-        entNDepth = ttk.Entry(master=frameNorms, textvariable=self.txtNDepth,
+        entNDepth = ttk.Entry(master=wframe, textvariable=self.txtNDepth,
                               width=8, validate='focusout',
                             validatecommand=self.setNDepth)
         entNDepth.bind('<Key-Return>', self.setNDepth)
         ToolTip(entNDepth, 'Set the normalizing depth for the LSD mask/profile')
-        entNDepth.grid(row=0, column=1, sticky=tk.W, pady=4)
-        labNWav = ttk.Label(frameNorms, text=' norm. wavelength',
+        labNWav = ttk.Label(wframe, text=' norm. wavelength',
                             justify='right')
-        labNWav.grid(row=0, column=2, sticky=tk.E, pady=4, padx=4)
         self.txtNWav = tk.StringVar()
         self.txtNWav.set('{:.1f}'.format(self.lsdp.normWave))
-        entNWav = ttk.Entry(master=frameNorms, textvariable=self.txtNWav,
+        entNWav = ttk.Entry(master=wframe, textvariable=self.txtNWav,
                             width=8, validate='focusout',
                             validatecommand=self.setNWav)
         entNWav.bind('<Key-Return>', self.setNWav)
         ToolTip(entNWav, 'Set the normalizing wavelength for the LSD mask/profile (usually nm)')
-        entNWav.grid(row=0, column=3, sticky=tk.W, pady=4)
-        labNLande = ttk.Label(frameNorms, text=' norm. Lande',
+        labNLande = ttk.Label(wframe, text=' norm. Lande',
                               justify='right')
-        labNLande.grid(row=0, column=4, sticky=tk.E, pady=4, padx=4)
         self.txtNLande = tk.StringVar()
         self.txtNLande.set('{:.2f}'.format(self.lsdp.normLande))
-        entNLande = ttk.Entry(master=frameNorms, textvariable=self.txtNLande,
+        entNLande = ttk.Entry(master=wframe, textvariable=self.txtNLande,
                               width=8, validate='focusout',
                             validatecommand=self.setNLande)
         entNLande.bind('<Key-Return>', self.setNLande)
         ToolTip(entNLande, 'Set the normalizing Landé factor for the LSD mask/profile')
-        entNLande.grid(row=0, column=5, sticky=tk.W, pady=4)
-        frameNorms.columnconfigure(0, weight=1)
-        frameNorms.columnconfigure(1, weight=1)
-        frameNorms.columnconfigure(2, weight=1)
-        frameNorms.columnconfigure(3, weight=1)
-        frameNorms.columnconfigure(4, weight=1)
-        frameNorms.columnconfigure(5, weight=1)
-        frameNorms.rowconfigure(0, weight=1)
 
         #remove closely spaced lines in the LSD calculation?
         self.varRemoveClose = tk.IntVar()
@@ -936,68 +906,80 @@ class modifyLSDpar:
                                            variable=self.varRemoveClose,
                                            command=self.setRemoveClose)
         ToolTip(checkRemoveClose, "Remove very closely spaced lines in the mask when calculating the LSD profile")
-        checkRemoveClose.grid(row=2, column=0, padx=10, pady=4)
 
         #Optionally save the model LSD spectrum
-        frameSaveMod = ttk.Frame(wframe, padding="0 0 0 10")
-        frameSaveMod.grid(row=3, column=0, sticky=(tk.N, tk.S, tk.E, tk.W))
-        checkSaveMod = ttk.Checkbutton(frameSaveMod,
-                                       text='save mode\nspectrum',
+        checkSaveMod = ttk.Checkbutton(wframe,
+                                       text='save model\nspectrum',
                                        variable=self.varSaveMod,
                                        command=self.setSaveMod)
         ToolTip(checkSaveMod, "Save a copy of the model LSD spectrum to a file?")
-        checkSaveMod.grid(row=0, column=0, sticky=tk.E, pady=4)
-        labModName = ttk.Label(frameSaveMod, text='model\nfile name',
+        labModName = ttk.Label(wframe, text='model\nfile name',
                                justify='right')
-        labModName.grid(row=0, column=1, sticky=tk.E, pady=4, padx=4)
         self.txtModName = tk.StringVar()
         self.txtModName.set('{:}'.format(self.lsdp.outModelName))
-        entModName = ttk.Entry(master=frameSaveMod,
-                               textvariable=self.txtModName, width=20,
+        entModName = ttk.Entry(master=wframe,
+                               textvariable=self.txtModName, width=25,
                                validate='focusout',
                                validatecommand=self.setModName)
         entModName.bind('<Key-Return>', self.setModName)
         ToolTip(entModName, 'File name for the output model LSD spectrum')
-        entModName.grid(row=0, column=2, sticky=tk.W, pady=4)
-        frameSaveMod.columnconfigure(0, weight=1)
-        frameSaveMod.columnconfigure(1, weight=1)
-        frameSaveMod.columnconfigure(2, weight=1)
-        frameSaveMod.rowconfigure(0, weight=1)
         
         #Set the output LSD profile file name, and optionally plot it.
-        frameProfs = ttk.Frame(wframe, padding="0 0 0 0")
-        frameProfs.grid(row=4, column=0, sticky=(tk.N, tk.S, tk.E, tk.W))
-        labProfName = ttk.Label(frameProfs, text='profile\nfile name',
+        labProfName = ttk.Label(wframe, text='profile\nfile name',
                                 justify='right')
-        labProfName.grid(row=0, column=0, sticky=tk.E, pady=4, padx=4)
         self.txtProfName = tk.StringVar()
         self.txtProfName.set('{:}'.format(self.lsdp.outName))
-        entProfName = ttk.Entry(master=frameProfs,
-                                textvariable=self.txtProfName, width=20, 
+        entProfName = ttk.Entry(master=wframe,
+                                textvariable=self.txtProfName, width=25, 
                                 validate='focusout',
                                 validatecommand=self.setProfName)
         entProfName.bind('<Key-Return>', self.setProfName)
         ToolTip(entProfName, 'File name for the output LSD profile')
-        entProfName.grid(row=0, column=1, sticky=tk.W, pady=4)
 
         self.varPltProf = tk.IntVar()
         self.varPltProf.set(self.lsdp.fLSDPlotImg)
-        checkPltProf = ttk.Checkbutton(frameProfs, text='plot\nprofile',
+        checkPltProf = ttk.Checkbutton(wframe, text='plot\nprofile',
                                        variable=self.varPltProf,
                                        command=self.setPlotProf)
         ToolTip(checkPltProf, "Plot the LSD profile in a new window when updated?")
-        checkPltProf.grid(row=0, column=2, pady=4, padx=4, sticky=tk.W)
-        frameProfs.columnconfigure(0, weight=1)
-        frameProfs.columnconfigure(1, weight=1)
-        frameProfs.columnconfigure(2, weight=1)
-        frameProfs.rowconfigure(0, weight=1)
-        
+
+        #Lay out the widgits in the window
+        labVelStart.grid(row=0, column=0, sticky=tk.E, pady=4, padx=4)
+        entVelStart.grid(row=0, column=1, sticky=tk.W, pady=4)
+        labVelEnd.grid(row=1, column=0, sticky=tk.E, pady=4, padx=4)
+        entVelEnd.grid(row=1, column=1, sticky=tk.W, pady=4)
+        labVelPix.grid(row=2, column=0, sticky=tk.E, pady=4, padx=4)
+        entVelPix.grid(row=2, column=1, sticky=tk.W, pady=4)
+
+        labNDepth.grid(row=0, column=2, sticky=tk.E, pady=4, padx=4)
+        entNDepth.grid(row=0, column=3, sticky=tk.W, pady=4)
+        labNWav.grid(row=1, column=2, sticky=tk.E, pady=4, padx=4)
+        entNWav.grid(row=1, column=3, sticky=tk.W, pady=4)
+        labNLande.grid(row=2, column=2, sticky=tk.E, pady=4, padx=4)
+        entNLande.grid(row=2, column=3, sticky=tk.W, pady=4)
+
+        checkRemoveClose.grid(row=3, column=0, columnspan=4, padx=4, pady=4)
+
+        checkSaveMod.grid(row=4, column=0, columnspan=1, pady=4)
+        labModName.grid(row=4, column=1, sticky=tk.E, pady=4, padx=4)
+        entModName.grid(row=4, column=2, columnspan=2, sticky=tk.W, pady=4)
+
+        labProfName.grid(row=5, column=1, sticky=tk.E, pady=4, padx=4)
+        entProfName.grid(row=5, column=2, columnspan=3, sticky=tk.W, pady=4)
+        checkPltProf.grid(row=6, column=0, columnspan=4, pady=4, padx=4)
+
         wframe.columnconfigure(0, weight=1)
+        wframe.columnconfigure(1, weight=1)
+        wframe.columnconfigure(2, weight=1)
+        wframe.columnconfigure(3, weight=1)
+        #wframe.columnconfigure(4, weight=1)
         wframe.rowconfigure(0, weight=1)
         wframe.rowconfigure(1, weight=1)
         wframe.rowconfigure(2, weight=1)
         wframe.rowconfigure(3, weight=1)
         wframe.rowconfigure(4, weight=1)
+        wframe.rowconfigure(5, weight=1)
+        wframe.rowconfigure(6, weight=1)
         
         #Enter a local event loop, returning only when the given window
         #is destroyed.
