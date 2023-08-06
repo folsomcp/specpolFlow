@@ -92,7 +92,13 @@ class lsd_prof:
         
         oFile = open(fname, 'w')
         if self.header != None:
-            oFile.write(self.header)
+            if self.header == "":
+                #For blank headers include some placeholder text
+                oFile.write('#LSD profile\n')
+            else:
+                oFile.write(self.header)
+                #Make sure there is a line break after the first header text
+                if self.header[-1] != '\n': oFile.write('\n')
             oFile.write(' {:d} 6\n'.format(self.npix))
         
         for i in range(self.npix):
