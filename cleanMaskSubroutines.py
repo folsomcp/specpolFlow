@@ -155,6 +155,16 @@ def makeWin(fig, ax, mask, obs, lsdp, pltMaskU, pltMaskN,
                                command=fitDepthsM.runFit)
     ToolTip(butFitDepths, 'Fit the selected line depths, using the current LSD profile and observation')
     butFitDepths.grid(row=0, column=3, sticky=tk.W, padx=2, pady=2)
+    #Undo the depth fitting
+    undoDepthsM = undoDepths(mask, fitDepthFlags, canvas,
+                             pltMaskU, pltMaskN, pltMaskF)
+    butUndoDepths = ttk.Button(master=tools, text='undo\nfit',
+                               command=undoDepthsM.undo)
+    ToolTip(butUndoDepths, 'Undo all line depth fitting of currently selected lines, reverting them to the initial mask depths')
+    butUndoDepths.grid(row=0, column=4, sticky=tk.W, padx=2, pady=2)
+    
+    speratorFitting = ttk.Separator(tools, orient=tk.VERTICAL)
+    speratorFitting.grid(row=0, column=5, sticky='NS', padx=2, pady=2)
 
     #Set regions to be included in the mask
     incRangeM = uiIncludeRange(canvas, mask, pltMaskU, pltMaskN, pltMaskF,
@@ -738,6 +748,7 @@ class saveRanges:
 
 
 class fitDepths:
+    #mini manager to run the fitting of line depths
     def __init__(self, mask, obs, lsdp, fitDepthFlags, root, canvas,
                  pltMaskU, pltMaskN, pltMaskF):
         self.mask = mask
@@ -787,6 +798,27 @@ class fitDepths:
 
         #Return the cursor to normal
         self.root.config(cursor=oldCursor)
+        return
+
+class undoDepths:
+    #mini manager to undo the fitting of line depths
+    def __init__(self, mask, fitDepthFlags, canvas,
+                 pltMaskU, pltMaskN, pltMaskF):
+        self.mask = mask
+        self.fitDepthFlags = fitDepthFlags
+        self.canvas = canvas
+        self.pltMaskU = pltMaskU
+        self.pltMaskN = pltMaskN
+        self.pltMaskF = pltMaskF
+        self.oldDepths = np.zeros_like(mask.depth)
+        self.oldDepths[:] = mask.depth[:] #make a copy instead of a reference
+
+    def undo(self):
+        fUse = (self.fitDepthFlags == 1) & (self.mask.iuse == 1)
+        self.mask.depth[fUse] = self.oldDepths[fUse]
+        updateLinePlots(self.mask, self.fitDepthFlags,
+                        self.pltMaskU, self.pltMaskN, self.pltMaskF)
+        self.canvas.draw()
         return
 
 
