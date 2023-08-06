@@ -87,7 +87,6 @@ class lsd_prof:
         This saves to a text file in Donati's format.
         
         :param fname: the name of the file the LSD profile to save to.
-        :param header: optionally, one line of header text for the output file.  This text string should end with a newline.
         """
         
         oFile = open(fname, 'w')
@@ -99,12 +98,22 @@ class lsd_prof:
                 oFile.write(self.header)
                 #Make sure there is a line break after the first header text
                 if self.header[-1] != '\n': oFile.write('\n')
-            oFile.write(' {:d} 6\n'.format(self.npix))
-        
-        for i in range(self.npix):
-            oFile.write('{:>12.6f} {:>13.6e} {:>13.6e} {:>13.6e} {:>13.6e} {:>13.6e} {:>13.6e}\n'.format(
-                self.vel[i], self.specI[i], self.specSigI[i], self.specV[i],
-                self.specSigV[i], self.specN1[i], self.specSigN1[i]))
+            if self.numParam <= 3:
+                oFile.write(' {:d} 6\n'.format(self.npix))
+            elif self.numParam == 4:  #if Null1 & Null2 exist
+                oFile.write(' {:d} 8\n'.format(self.npix))
+
+        if self.numParam <= 3:
+            for i in range(self.npix):
+                oFile.write('{:>12.6f} {:>13.6e} {:>13.6e} {:>13.6e} {:>13.6e} {:>13.6e} {:>13.6e}\n'.format(
+                    self.vel[i], self.specI[i], self.specSigI[i], self.specV[i],
+                    self.specSigV[i], self.specN1[i], self.specSigN1[i]))
+        elif self.numParam == 4:  #if Null1 & Null2 exist
+            for i in range(self.npix):
+                oFile.write('{:>12.6f} {:>13.6e} {:>13.6e} {:>13.6e} {:>13.6e} {:>13.6e} {:>13.6e} {:>13.6e} {:>13.6e}\n'.format(
+                    self.vel[i], self.specI[i], self.specSigI[i], self.specV[i],
+                    self.specSigV[i], self.specN1[i], self.specSigN1[i],
+                    self.specN2[i], self.specSigN2[i]))
         oFile.close()
         return
 
