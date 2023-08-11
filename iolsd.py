@@ -661,6 +661,41 @@ class mask:
                 self.wl[i], self.element[i], self.depth[i],
                 self.excite[i], self.lande[i], self.iuse[i]))
         return
+    
+    def clean_mask(self,data):
+        '''
+        Clean the line mask
+
+        :param data: dictionary of start and stop of regions where lines are excluded.
+        '''
+        L = data['WLStart'].size
+
+        regions = np.zeros((L,2))
+
+        regions[:,0] = data['WLStart'][:]
+        regions[:,1] = data['WLFinish'][:]
+
+        #Identifying if a line is inside or outside the regions
+        dcard = []
+        for lines in self.wl:
+            for j in range(0,np.size(regions[:,0])):
+                if regions[j,0] < lines < regions[j,1]:
+                    dcard.append(lines)
+
+        #Creating a list with the mask.wl elements
+        mask_list = self.wl.tolist()
+
+        for line in dcard:
+            index = (mask_list).index(line)
+            self.iuse[index] = 0
+        
+        l = np.size(self.wl)
+        spec_lines = []
+        for j in range(0,l):
+            if self.iuse[j] == 1:
+                spec_lines.append(self.wl[j])
+        print('Masks cleaned!')
+        return self
 
 
 def read_mask(fname):
