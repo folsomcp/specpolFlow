@@ -695,7 +695,7 @@ class mask:
             if self.iuse[j] == 1:
                 spec_lines.append(self.wl[j])
         print('Masks cleaned!')
-        return self
+        return
 
 
 def read_mask(fname):
