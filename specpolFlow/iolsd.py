@@ -462,7 +462,6 @@ def run_lsdpy(obs=None, mask=None, outName='prof.dat',
 ###################################
 ###################################
 
-
 class mask:
     """
     The data for the LSD line mask.
@@ -518,30 +517,28 @@ class mask:
             self.iuse[key] = newval.iuse[:]
 
     def __len__(self):
-        return self.wl.size
+        return len(self.wl)
     
     def prune(self):
         """
-        Remove unused lines from the mask.
+        Return a mask with unused lines removed from the mask.
         
         Remove lines if iuse index is set to 0,
         restricting the mask to only lines used in LSD.
-        This deletes the unused lines, but may be convenient
-        for more efficient processing of the mask later.
         """
         #Restrict the mask to only lines flagged to be used
         ind2 = np.where(self.iuse != 0)
-        self.wl = self.wl[ind2]
-        self.element = self.element[ind2]
-        self.depth = self.depth[ind2]
-        self.excite = self.excite[ind2]
-        self.lande = self.lande[ind2]
-        self.iuse = self.iuse[ind2]
-        return
+        return mask(self.wl[ind2],
+                        self.element[ind2],
+                        self.depth[ind2],
+                        self.excite[ind2],
+                        self.lande[ind2],
+                        self.iuse[ind2]
+                        )
         
-    def set_weights(self, normDepth, normWave, normLande):
+    def get_weights(self, normDepth, normWave, normLande):
         """
-        Calculate the weights of the lines used for LSD calculations.
+        Returns the calculated the weights of the lines used for LSD calculations.
         
         This assumes the Stokes I lines are weighted as depth,
         and Stokes V is weighted as depth*wavelength*Lande factor
@@ -549,10 +546,11 @@ class mask:
         :param normDepth: the normalizing line depth for the mask/LSD profile
         :param normWave: the normalizing wavelength (nm) for the mask/LSD profile
         :param normLande: the normalizing effective Lande factor for the mask/LSD profile
+        :return: weightI, weightV
         """
-        self.weightI = self.depth / normDepth
-        self.weightV = self.depth*self.wl*self.lande / (normDepth*normWave*normLande)
-        return
+        weightI = self.depth / normDepth
+        weightV = self.depth*self.wl*self.lande / (normDepth*normWave*normLande)
+        return weightI, weightV
     
     def save(self, fname):
         """
@@ -636,6 +634,21 @@ def read_mask(fname):
     
     return mask(wl, element, depth, excite, lande, iuse)
 
+
+###################################
+###################################
+
+class ExcludeMaskRegion:
+    '''
+    '''
+
+    def __init__(self, start, stop, type):
+        self.start = start
+        self.stop = stop
+        self.type = type
+
+###################################
+###################################
 
 class observation:
     """
