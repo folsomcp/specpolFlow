@@ -713,12 +713,12 @@ class observation:
     def __len__(self):
         return len(self.wl)
 
-    def save(self, fname, noHeader=False):
+    def save(self, fname, saveHeader=True):
         '''
         Write the observation into a .s LibreESPRIT style format
         Optionally skip writing the two lines of header
 
-        :param noHeader: flag to skip writing the header if True
+        :param saveHeader: optional flag to skip writing the header if False
         '''
 
         #Note, the LibreESPRIT .s format header counts the number of columns
@@ -729,12 +729,14 @@ class observation:
         
         with open(fname, 'w') as f:
             #Optionaly write 2 lines of header            
-            if noHeader is False:
+            if saveHeader:
                 if self.header is None:
                     f.write('*** Spectrum of\n')
                 else:
                     f.write(self.header)
-                f.write('{:7i} {:1i}\n'.format(int(self.wl.size)), ncols)
+                    #Make sure there is a line break after the first header text
+                    if self.header[-1] != '\n': f.write('\n')
+                f.write('{:7n} {:1n}\n'.format(int(self.wl.size), ncols))
             
             if ncols == 5:
                 for i in range(0,self.wl.size):
