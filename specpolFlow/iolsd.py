@@ -674,7 +674,6 @@ class observation:
         self.specN2=specN2
         self.specSig=specSig
         
-        
     def __getitem__(self, key):
         """Overloaded getitem function. Returns an observation object with only the values at the specified index(s).
 
@@ -712,9 +711,9 @@ class observation:
             self.specN2[key] = newval.specN2[:]
 
     def __len__(self):
-        return self.wl.size
+        return len(self.wl)
 
-    def write_s(self, fname, noHeader=False):
+    def save(self, fname, noHeader=False):
         '''
         Write the observation into a .s LibreESPRIT style format
         Optionally skip writing the two lines of header
@@ -730,8 +729,8 @@ class observation:
         
         with open(fname, 'w') as f:
             #Optionaly write 2 lines of header            
-            if noHeader == False:
-                if self.header == None:
+            if noHeader is False:
+                if self.header is None:
                     f.write('*** Spectrum of\n')
                 else:
                     f.write(self.header)
@@ -747,7 +746,6 @@ class observation:
                     f.write('{:10.4f} {:11.4e} {:11.4e}\n'.format(
                         self.wl[i], self.specI[i], self.specSig[i]))
         return
-
 
 def read_spectrum(fname, sortByWavelength=False):
     """
@@ -862,6 +860,8 @@ def read_spectrum(fname, sortByWavelength=False):
     return(observation(obs_wl, obs_specI, obs_specV, obs_specN1, obs_specN2,
                        obs_specSig, header=obs_header))
 
+###################################
+###################################
 
 class line_list:
     """

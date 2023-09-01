@@ -1,3 +1,7 @@
+*** Colin will check the [:] in the set items for a
+lsd[2] = lsd[3] type of command and check if it is needed
+
+
 Some convention:
 
 filename : fname
@@ -15,7 +19,7 @@ Name for the classes ?
 * LineList
 
 
-Class: lsd_obj -> 
+Class: LSD -> 
     * _init_
     * def save(self, fname)
     * def __len__(self)
@@ -44,12 +48,12 @@ def run_lsdpy(obs=None, mask=None, outName='prof.dat',
 
 
 
-Class: mask_obj
+Class: Mask
     * _init_
     * def __getitem__(self, key):
     * def __setitem__(self, key, newval):
     * def __len__(self):
-    * def __len__(self):
+   
     * def prune(self):
     * def get_weights(self, normDepth, normWave, normLande):
     * def save(self, fname): 
@@ -63,6 +67,18 @@ Class: mask_obj
 -> read_mask()
 
 [ ] Class: ExcludeMaskRegion
+
+region[0][0,1]
+
+region[0].star, region[0].end
+
+region.start[0]
+
+[region1, region2] -> 
+
+region.start
+region.stop
+
         * set item
         * write item
         * write
@@ -82,32 +98,52 @@ Class: mask_obj
 
 
 
+Class: Spectrum
 
+    * def __init__(self,wl, specI, specV, specN1, specN2, specSig, header=None)
+    
+    * def __getitem__(self, key): 
+    * def __setitem__(self, key, newval):
+    * def __len__(self):
+    
+    * def save(self, fname, noHeader=False):
 
+    * [later] Add a split order class function (see cleanMask.py split_order or Colin's normplot) 
+    * [later] Add a little wrapper that takes a wavelength (and a range?), cut a line, put in an lsd object and calls lsd.rvfit. 
+    
+ [ ] Colin need to check the \n in the reading of the header to see whether a \n is needed or not when writing the header back in a .s file
 
+ [ ] Would be better is the converters read other format file, create a spectrum object and write it back with the class.save method. 
 
-
-
-
-Class: spectrum_obj
-
-    * [ ] Add a split order class function (see cleanMask.py split_order or Colin's normplot) 
 
 
 
 -> read_spectrum()
+    [ ] Right now is only works with the full polarization parameters. Colin will add some functionality for a 2 column version (just wave and flux)
 
-Class: line_list_obj
+
+
+Class: LineList
+    *  def __init__(self, ion, wl, loggf, Elo, Jlo, Eup, Jup, landeLo, landeUp,
+                 landeEff, rad, stark, waals, depth, configLo, configUp, refs):
+    * def __getitem__(self, key):
+    * def __setitem__(self, key, newval):
 
 -> read_VALD()
 
 
+
+
+
+
+
+
 [ ] Put the rvfit into LSD?
-[ ] Add a rvfit to spectrum (putting the line into a lsd object and calling rvfit?)
+
+
 
 
 [ ] Clean Mask needs some more structure
-
 
 ## Standalone functions
 
