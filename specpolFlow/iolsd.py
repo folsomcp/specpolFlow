@@ -164,15 +164,15 @@ class lsd_prof:
         if not(isinstance(newval, lsd_prof)):
             raise TypeError()
         else:
-            self.vel[key] = newval.vel[:]
-            self.specI[key] = newval.specI[:]
-            self.specSigI[key] = newval.specSigI[:]
-            self.specV[key] = newval.specV[:]
-            self.specSigV[key] = newval.specSigV[:]
-            self.specN1[key] = newval.specN1[:]
-            self.specSigN1[key] = newval.specSigN1[:]
-            self.specN2[key] = newval.specN2[:]
-            self.specSigN2[key] = newval.specSigN2[:]
+            self.vel[key] = newval.vel
+            self.specI[key] = newval.specI
+            self.specSigI[key] = newval.specSigI
+            self.specV[key] = newval.specV
+            self.specSigV[key] = newval.specSigV
+            self.specN1[key] = newval.specN1
+            self.specSigN1[key] = newval.specSigN1
+            self.specN2[key] = newval.specN2
+            self.specSigN2[key] = newval.specSigN2
 
 
     def norm(self, normValue):
@@ -509,12 +509,12 @@ class mask:
         if not(isinstance(newval, mask)):
             raise TypeError()
         else:
-            self.wl[key] = newval.wl[:]
-            self.element[key] = newval.element[:]
-            self.depth[key] = newval.depth[:]
-            self.excite[key] = newval.excite[:]
-            self.lande[key] = newval.lande[:]
-            self.iuse[key] = newval.iuse[:]
+            self.wl[key] = newval.wl
+            self.element[key] = newval.element
+            self.depth[key] = newval.depth
+            self.excite[key] = newval.excite
+            self.lande[key] = newval.lande
+            self.iuse[key] = newval.iuse
 
     def __len__(self):
         return len(self.wl)
@@ -703,12 +703,12 @@ class observation:
         if not(isinstance(newval, observation)):
             raise TypeError()
         else:
-            self.wl[key] = newval.wl[:]
-            self.specI[key] = newval.specI[:]
-            self.specSig[key] = newval.specSig[:]
-            self.specV[key] = newval.specV[:]
-            self.specN1[key] = newval.specN1[:]
-            self.specN2[key] = newval.specN2[:]
+            self.wl[key] = newval.wl
+            self.specI[key] = newval.specI
+            self.specSig[key] = newval.specSig
+            self.specV[key] = newval.specV
+            self.specN1[key] = newval.specN1
+            self.specN2[key] = newval.specN2
 
     def __len__(self):
         return len(self.wl)
@@ -947,23 +947,23 @@ class line_list:
         if not(isinstance(newval, line_list)):
             raise TypeError()
         else:
-            self.ion[key]      = newval.ion[:]
-            self.wl[key]       = newval.wl[:]
-            self.loggf[key]    = newval.loggf[:]
-            self.Elo[key]      = newval.Elo[:]
-            self.Jlo[key]      = newval.Jlo[:]
-            self.Eup[key]      = newval.Eup[:]
-            self.Jup[key]      = newval.Jup[:]
-            self.landeLo[key]  = newval.landeLo[:]
-            self.landeUp[key]  = newval.landeUp[:]
-            self.landeEff[key] = newval.landeEff[:]
-            self.rad[key]      = newval.rad[:]
-            self.stark[key]    = newval.stark[:]
-            self.waals[key]    = newval.waals[:]
-            self.depth[key]    = newval.depth[:]
-            self.configLo[key] = newval.configLo[:]
-            self.configUp[key] = newval.configUp[:]
-            self.refs[key]     = newval.refs[:]
+            self.ion[key]      = newval.ion
+            self.wl[key]       = newval.wl
+            self.loggf[key]    = newval.loggf
+            self.Elo[key]      = newval.Elo
+            self.Jlo[key]      = newval.Jlo
+            self.Eup[key]      = newval.Eup
+            self.Jup[key]      = newval.Jup
+            self.landeLo[key]  = newval.landeLo
+            self.landeUp[key]  = newval.landeUp
+            self.landeEff[key] = newval.landeEff
+            self.rad[key]      = newval.rad
+            self.stark[key]    = newval.stark
+            self.waals[key]    = newval.waals
+            self.depth[key]    = newval.depth
+            self.configLo[key] = newval.configLo
+            self.configUp[key] = newval.configUp
+            self.refs[key]     = newval.refs
             self.nLines   = self.wl.size
 
     def __len__(self):
