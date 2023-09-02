@@ -634,7 +634,6 @@ def read_mask(fname):
     
     return mask(wl, element, depth, excite, lande, iuse)
 
-
 ###################################
 ###################################
 
@@ -749,7 +748,8 @@ class observation:
                         self.wl[i], self.specI[i], self.specSig[i]))
         return
 
-def read_spectrum(fname, sortByWavelength=False):
+
+def read_spectrum(fname, trimBadPix=False, sortByWavelength=False):
     """
     Read in the observed spectrum and save it.
     
@@ -760,11 +760,17 @@ def read_spectrum(fname, sortByWavelength=False):
     and also 3 column spectra (wavelength, I, errors).
 
     :param fname: the name of the file to read.
-    :param sortByWavelength: reorder the points in the spectrum to always increase in wavelength, if set to True.
+    :param sortByWavelength: reorder the points in the spectrum to always
+                             increase in wavelength, if set to True.
+    :param trimBadPix: optionally remove the more obviously bad pixels if True.
+                       Removes pixels with negative flux or error bars of zero,
+                       pixels within 3sigma of zero (large error bars),
+                       and pixels with extremely large values.
+    :return: a Spectrum object containing the observation.
     """
-    ## Reading manually is ~4 times faster than np.loadtxt for a large files
+    # Reading manually is often faster than np.loadtxt for a large files
     fObs = open(fname, 'r')
-    #Check if the file starts with data or a header (assume it is two lines)
+    #Check if the file starts with data or a header (assume two lines of header)
     line = fObs.readline()
     words = line.split()
     try:
@@ -798,25 +804,21 @@ def read_spectrum(fname, sortByWavelength=False):
                     print('Apparent Stokes I only spectrum')
                     print('Generating place holder V and N columns')
                 else:
-                    print('{:} column spectrum: unknown format!'.format(ncolumns))
-                    import sys
-                    sys.exit()
+                    print('{:} column spectrum: unknown format!\n'.format(ncolumns))
+                    raise ValueError('Reading {:} as an {:} column spectrum: unknown format!'.format(fname, ncolumns))
         if len(words) == ncolumns:
             if ncolumns == 6:
-                if(float(words[1]) > 0. and float(words[5]) > 0.):
-                    nLines += 1
+                nLines += 1
             elif ncolumns == 3:
-                if(float(words[1]) > 0. and float(words[2]) > 0.):
-                    nLines += 1
+                nLines += 1
         else:
-            print('ERROR: reading observation, line {:}, {:} columns :\n{:}'.format(nLines, len(words), line))
+            print('ERROR: reading observation, '
+                  +'line {:}, {:} columns :\n{:}'.format(
+                      nLines, len(words), line))
 
-    obs_wl = np.zeros(nLines)
-    obs_specI = np.zeros(nLines)
-    obs_specV = np.zeros(nLines)
-    obs_specN1 = np.zeros(nLines)
-    obs_specN2 = np.zeros(nLines)
-    obs_specSig = np.zeros(nLines)
+    obs = observation(np.zeros(nLines), np.zeros(nLines), np.zeros(nLines),
+                      np.zeros(nLines), np.zeros(nLines), np.zeros(nLines),
+                      header=obs_header)
     
     i = 0
     #Rewind to start then advance the file pointer 2 lines
@@ -828,39 +830,36 @@ def read_spectrum(fname, sortByWavelength=False):
     for line in fObs:
         words = line.split()
         if (len(words) == ncolumns and ncolumns == 6):
-            if(float(words[1]) > 0. and float(words[5]) > 0.):
-                obs_wl[i] = float(words[0])
-                obs_specI[i] = float(words[1])
-                obs_specV[i] = float(words[2])
-                obs_specN1[i] = float(words[3])
-                obs_specN2[i] = float(words[4])
-                obs_specSig[i] = float(words[5])
-                i += 1
+            obs.wl[i] = float(words[0])
+            obs.specI[i] = float(words[1])
+            obs.specV[i] = float(words[2])
+            obs.specN1[i] = float(words[3])
+            obs.specN2[i] = float(words[4])
+            obs.specSig[i] = float(words[5])
+            i += 1
         elif (len(words) == ncolumns and ncolumns == 3):
-            if(float(words[1]) > 0. and float(words[2]) > 0.):
-                obs_wl[i] = float(words[0])
-                obs_specI[i] = float(words[1])
-                obs_specSig[i] = float(words[2])
-                obs_specV[i] = 0.
-                obs_specN1[i] = 0.
-                obs_specN2[i] = 0.
-                i += 1
+            obs.wl[i] = float(words[0])
+            obs.specI[i] = float(words[1])
+            obs.specSig[i] = float(words[2])
+            i += 1
             
     fObs.close()
+
+    #Optionally, remove bad pixels.
+    if trimBadPix:
+        use_flag = (obs.specI > 0.)
+        if not np.all(obs.specSig == 0):  #(all zeros => no error column)
+            use_flag = use_flag & (obs.specSig > 0.)
+        use_flag = use_flag & (obs.specI > 3*obs.specSig)
+        use_flag = use_flag & (obs.specI < 10*np.percentile(obs.specI, 99.9))
+        obs = obs[use_flag]
     
     #Optionally, sort the observation so wavelength is always increasing
     if sortByWavelength:
-        obs_ind = np.argsort(obs_wl)
-        
-        obs_wl = obs_wl[obs_ind]
-        obs_specI = obs_specI[obs_ind]
-        obs_specV = obs_specV[obs_ind]
-        obs_specN1 = obs_specN1[obs_ind]
-        obs_specN2 = obs_specN2[obs_ind]
-        obs_specSig = obs_specSig[obs_ind]
+        obs_ind = np.argsort(obs.wl)
+        obs = obs[obs_ind]
     
-    return(observation(obs_wl, obs_specI, obs_specV, obs_specN1, obs_specN2,
-                       obs_specSig, header=obs_header))
+    return obs
 
 ###################################
 ###################################
