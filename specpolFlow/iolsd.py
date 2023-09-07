@@ -970,6 +970,25 @@ class line_list:
     def __len__(self):
         return self.nLines
 
+    def __str__(self):
+        """
+        Generate a nicely formatted string of line data for printing
+        """
+        strList = []
+        outStr = '\n'
+        for line in self:
+            fmt = ("'{:s}',{:17.4f},{:7.3f},{:8.4f},{:5.1f},{:8.4f},{:5.1f},"
+                   "{:7.3f},{:7.3f},{:7.3f},{:6.3f},{:6.3f},{:8.3f},{:6.3f},")
+            if len(line.ion) == 3: fmt = fmt[:7] + ' ' + fmt[7:]
+            strList.append(fmt.format(line.ion, line.wl, line.loggf,
+                                line.Elo, line.Jlo, line.Eup, line.Jup,
+                                line.landeLo, line.landeUp, line.landeEff,
+                                line.rad, line.stark, line.waals, line.depth))
+            strList.append("'  {:>88}'".format(line.configLo))
+            strList.append("'  {:>88}'".format(line.configUp))
+            strList.append("'{:}'".format(line.refs))
+        return outStr.join(strList)
+
     def write_VALD(self, fname):
         """
         Write a line list to a text file.
@@ -982,22 +1001,16 @@ class line_list:
         """
         
         fOut = open(fname, 'w')
-        fOut.write("{:11.5f},{:11.5f},{:5d},{:7d},{:4.1f}, Wavelength region, lines selected, lines processed, Vmicro\n".format(
-            self.wl[0], self.wl[-1], self.nLines, 999999, 0.0))
-        fOut.write("                                                                     Lande factors       Damping parameters  Central\n")
-        fOut.write("Spec Ion       WL_air(A)  log gf* E_low(eV) J lo E_up(eV)  J up  lower   upper    mean   Rad.   Stark  Waals  depth\n")
-        
-        for i, line in enumerate(self):
-            fmt = "'{:s}',{:17.4f},{:7.3f},{:8.4f},{:5.1f},{:8.4f},{:5.1f},{:7.3f},{:7.3f},{:7.3f},{:6.3f},{:6.3f},{:8.3f},{:6.3f},\n"
-
-            if len(line.ion) == 3: fmt = fmt[:7] + ' ' + fmt[7:]
-            fOut.write(fmt.format(
-                line.ion, line.wl, line.loggf, line.Elo, line.Jlo,
-                line.Eup, line.Jup, line.landeLo, line.landeUp, line.landeEff,
-                line.rad, line.stark, line.waals, line.depth))
-            fOut.write("'  {:}'\n".format(line.configLo))
-            fOut.write("'  {:}'\n".format(line.configUp))
-            fOut.write("'{:}'\n".format(line.refs))
+        fOut.write(("{:11.5f},{:12.5f},{:5d},{:7d},{:4.1f}, Wavelength "
+                    "region, lines selected, lines processed, Vmicro\n"
+                    ).format(self.wl[0], self.wl[-1], self.nLines, 999999, 0.))
+        fOut.write("                                                 "
+                   "                    Lande factors       "
+                   "Damping parameters   Central\n")
+        fOut.write("Spec Ion       WL_air(A)  log gf* E_low(eV) J lo "
+                   "E_up(eV)  J up  lower   upper    mean   Rad.  "
+                   "Stark   Waals   depth\n")
+        fOut.write(str(self)+'\n')
         fOut.close()
         return
     
