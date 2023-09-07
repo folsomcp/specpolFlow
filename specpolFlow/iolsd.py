@@ -905,9 +905,9 @@ class line_list:
         self.stark    = stark
         self.waals    = waals
         self.depth    = depth
-        self.configLo = configLo #['' for i in range(nLines)]
-        self.configUp = configUp #['' for i in range(nLines)]
-        self.refs     = refs #["'_          unknown source'" for i in range(nLines)]
+        self.configLo = configLo
+        self.configUp = configUp
+        self.refs     = refs
         self.nLines   = self.wl.size
 
     def __getitem__(self, key):
@@ -988,7 +988,8 @@ class line_list:
         fOut.write("Spec Ion       WL_air(A)  log gf* E_low(eV) J lo E_up(eV)  J up  lower   upper    mean   Rad.   Stark  Waals  depth\n")
         
         for i, line in enumerate(self):
-            fmt = "'{:s}',{:16.4f},{:8.3f},{:8.4f},{:5.1f},{:8.4f},{:5.1f},{:7.3f},{:7.3f},{:7.3f},{:6.3f},{:6.3f},{:6.3f},{:6.3f},\n"
+            fmt = "'{:s}',{:17.4f},{:7.3f},{:8.4f},{:5.1f},{:8.4f},{:5.1f},{:7.3f},{:7.3f},{:7.3f},{:6.3f},{:6.3f},{:8.3f},{:6.3f},\n"
+
             if len(line.ion) == 3: fmt = fmt[:7] + ' ' + fmt[7:]
             fOut.write(fmt.format(
                 line.ion, line.wl, line.loggf, line.Elo, line.Jlo,
@@ -1009,8 +1010,8 @@ def line_list_zeros(nLines):
     :param nLines: the number of lines in the line_list of zeros
     :rtype: line_list
     """
-    ion      = ['' for i in range(nLines)]
-    wl      = np.zeros(nLines)
+    ion      = np.tile(np.array([''], dtype='U6'), nLines)
+    wl       = np.zeros(nLines)
     loggf    = np.zeros(nLines)
     Elo      = np.zeros(nLines)
     Jlo      = np.zeros(nLines)
@@ -1023,12 +1024,12 @@ def line_list_zeros(nLines):
     stark    = np.zeros(nLines)
     waals    = np.zeros(nLines)
     depth    = np.zeros(nLines)
-    configLo = ['' for i in range(nLines)]
-    configUp = ['' for i in range(nLines)]
-    refs = ["'_          unknown source'" for i in range(nLines)]
+    configLo = np.tile(np.array([''], dtype='U128'), nLines)
+    configUp = np.tile(np.array([''], dtype='U128'), nLines)
+    refs = np.tile(np.array(['_          unknown source'],dtype='U180'), nLines)
     lList = line_list(ion, wl, loggf, Elo, Jlo, Eup, Jup, landeLo,
-                           landeUp, landeEff, rad, stark, waals, depth,
-                           configLo, configUp, refs)
+                      landeUp, landeEff, rad, stark, waals, depth,
+                      configLo, configUp, refs)
     return lList
 
 def read_VALD(fname):
@@ -1059,7 +1060,7 @@ def read_VALD(fname):
                 #Stark damping, van der Waals damping, central depth
                 vals = txtLine.split(',')
                 llist.ion[j]      = vals[0].strip('\'')
-                llist.wl[j]      = float(vals[1])
+                llist.wl[j]       = float(vals[1])
                 llist.loggf[j]    = float(vals[2])
                 llist.Elo[j]      = float(vals[3])
                 llist.Jlo[j]      = float(vals[4])
