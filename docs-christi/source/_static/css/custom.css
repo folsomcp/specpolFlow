@@ -1,0 +1,15 @@
+/* Changing some color settings in ReadtheDocs Sphinx theme */
+/* Last updated: Christi, 2023 Sep 7  */
+
+.wy-side-nav-search {
+    background: #F0F8FF;
+}
+.wy-nav-side {
+    background: #FFFFFF;
+}
+.wy-menu-vertical a {
+    color: hsl(0,0%,25%);
+}
+.wy-menu-vertical a:hover {
+    background-color: #d9d9d9;
+}
