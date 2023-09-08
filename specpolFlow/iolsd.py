@@ -721,10 +721,14 @@ class observation:
         '''
 
         #Note, the LibreESPRIT .s format header counts the number of columns
-        #not counting the first wavelength column
+        #data columns not counting the first wavelength column
         ncols = 5
         #Support 3 column (intensity only) spectra
-        if np.all(self.specV == 0.): ncols = 2
+        if np.all(self.specV == 0.):
+            ncols = 2
+            #and 2 column (intensity only, no errorbars) spectra
+            if np.all(self.specSig == 0):
+                ncols = 1
         
         with open(fname, 'w') as f:
             #Optionaly write 2 lines of header            
@@ -738,14 +742,18 @@ class observation:
                 f.write('{:7n} {:1n}\n'.format(int(self.wl.size), ncols))
             
             if ncols == 5:
-                for i in range(0,self.wl.size):
+                for i in range(self.wl.size):
                     f.write('{:10.4f} {:11.4e} {:11.4e} {:11.4e} {:11.4e} {:11.4e}\n'.format(
                         self.wl[i], self.specI[i], self.specV[i],
                         self.specN1[i], self.specN2[i], self.specSig[i]))
             elif ncols == 2:
-                for i in range(0,self.wl.size):
+                for i in range(self.wl.size):
                     f.write('{:10.4f} {:11.4e} {:11.4e}\n'.format(
                         self.wl[i], self.specI[i], self.specSig[i]))
+            elif ncols == 1:
+                for i in range(self.wl.size):
+                    f.write('{:10.4f} {:11.4e}\n'.format(
+                        self.wl[i], self.specI[i]))
         return
 
 
@@ -770,47 +778,43 @@ def read_spectrum(fname, trimBadPix=False, sortByWavelength=False):
     """
     # Reading manually is often faster than np.loadtxt for a large files
     fObs = open(fname, 'r')
-    #Check if the file starts with data or a header (assume two lines of header)
-    line = fObs.readline()
-    words = line.split()
-    try:
-        float(words[0])
-        float(words[1])
-        float(words[2])
-        line2 = fObs.readline()
-        words2 = line2.split()
-        if(len(line2) > 2 and len(words) == len(words2)):
-            #If the first line behaves like spectrum data,
-            #and the second line is similar to the first line
+    #Check if the file starts with data or a header (assume 2 lines of header)
+    line1 = fObs.readline()
+    line2 = fObs.readline()
+    line3 = fObs.readline()
+    #assume at least the 3rd line contains real data
+    ncolumns = len(line3.split())
+    if ncolumns != 6 and ncolumns != 3 and ncolumns != 2:
+        print('{:} column spectrum: unknown format!\n'.format(ncolumns))
+        raise ValueError(('Reading {:} as an {:} column spectrum: '
+                          'unknown format!').format(fname, ncolumns))
+    
+    if len(line1.split()) == ncolumns and len(line2.split()) == ncolumns:
+        #If the column counts are consistent there may be no header
+        try:
+            #and if the first line starts with numbers, probably no header
+            float(line1.split()[0])
+            float(line1.split()[1])
+            float(line2.split()[0])
+            float(line2.split()[1])
             obs_header = None
-            fObs.seek(0)
-        else:
+            nHeader = 0
+        except ValueError:
             #Otherwise assume there are two lines of header,
-            #the first one being a comment the second should be
-            #dimensions of the file but we figure that by reading the file.
-            obs_header = line
-    except ValueError:
-        obs_header = line
-        fObs.readline()
+            #one line of with comment and a second with file dimensions,
+            #but we figure that by reading the file.
+            obs_header = line1
+            nHeader = 2
+    else:
+        obs_header = line1
+        nHeader = 2
 
     #Get the number of lines of data in the file
-    nLines = 0
+    nLines = 3 - nHeader #we've alread read 3 lines
     for line in fObs:
         words = line.split()
-        if(nLines == 0):
-            ncolumns = len(words)
-            if (ncolumns != 6):
-                if(ncolumns == 3):
-                    print('Apparent Stokes I only spectrum')
-                    print('Generating place holder V and N columns')
-                else:
-                    print('{:} column spectrum: unknown format!\n'.format(ncolumns))
-                    raise ValueError('Reading {:} as an {:} column spectrum: unknown format!'.format(fname, ncolumns))
         if len(words) == ncolumns:
-            if ncolumns == 6:
-                nLines += 1
-            elif ncolumns == 3:
-                nLines += 1
+            nLines += 1
         else:
             print('ERROR: reading observation, '
                   +'line {:}, {:} columns :\n{:}'.format(
@@ -820,14 +824,13 @@ def read_spectrum(fname, trimBadPix=False, sortByWavelength=False):
                       np.zeros(nLines), np.zeros(nLines), np.zeros(nLines),
                       header=obs_header)
     
-    i = 0
     #Rewind to start then advance the file pointer 2 lines
     fObs.seek(0)
-    if obs_header != None:
+    if obs_header is not None:
         fObs.readline()
         fObs.readline()
     #Then read the actual data of the file
-    for line in fObs:
+    for i, line in enumerate(fObs):
         words = line.split()
         if (len(words) == ncolumns and ncolumns == 6):
             obs.wl[i] = float(words[0])
@@ -836,12 +839,13 @@ def read_spectrum(fname, trimBadPix=False, sortByWavelength=False):
             obs.specN1[i] = float(words[3])
             obs.specN2[i] = float(words[4])
             obs.specSig[i] = float(words[5])
-            i += 1
         elif (len(words) == ncolumns and ncolumns == 3):
             obs.wl[i] = float(words[0])
             obs.specI[i] = float(words[1])
             obs.specSig[i] = float(words[2])
-            i += 1
+        elif (len(words) == ncolumns and ncolumns == 2):
+            obs.wl[i] = float(words[0])
+            obs.specI[i] = float(words[1])
             
     fObs.close()
 
