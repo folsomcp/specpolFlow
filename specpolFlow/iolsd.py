@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 
 ###################################
 ###################################
-class lsd_prof:
+class LSD:
     """
     Holds the LSD profile data.
 
@@ -36,7 +36,7 @@ class lsd_prof:
         """
         Initialize an LSD profile, using data from an existing profile. 
 
-        :param self: lsd_prof being created
+        :param self: LSD being created
         :param vel: velocity grid for the LSD profile
         :param specI: the Stokes I profile
         :param specSigI: the uncertainties on Stokes I
@@ -125,19 +125,19 @@ class lsd_prof:
         """
         Return the length of each array in an LSD profile. They should all be the same length, so it just returns the length of the velocity array. 
 
-        :param self: lsd_prof whose length is being checked
+        :param self: LSD whose length is being checked
 
         :rtype: int
         """
         return len(self.vel)
 
     def __getitem__(self, key):
-        """Overloaded getitem function. Returns an lsd_prof with only the values at the specified index(s).
+        """Overloaded getitem function. Returns an LSD with only the values at the specified index(s).
 
-        :param self: lsd_prof being queried
+        :param self: LSD being queried
         :param key: the index or slice being checked
 
-        :rtype: lsd_prof
+        :rtype: LSD
         """
         vel_s = self.vel[key]
         specI_s = self.specI[key]
@@ -148,20 +148,20 @@ class lsd_prof:
         specSigN1_s = self.specSigN1[key]
         specN2_s = self.specN2[key]
         specSigN2_s = self.specSigN2[key]
-        slice_prof = lsd_prof(vel_s, specI_s, specSigI_s, specV_s, specSigV_s,
+        slice_prof = LSD(vel_s, specI_s, specSigI_s, specV_s, specSigV_s,
                               specN1_s, specSigN1_s, specN2_s, specSigN2_s, self.header)
         slice_prof.numParam = self.numParam
         return slice_prof
 
     def __setitem__(self, key, newval):
         """
-        Overloaded setitem function. Sets all values of the lsd_prof at the specified location equal to the input profile's values.
+        Overloaded setitem function. Sets all values of the LSD at the specified location equal to the input profile's values.
 
-        :param self: lsd_prof object being edited
+        :param self: LSD object being edited
         :param key: the index or slice being overwritten
-        :param newval: lsd_prof whose values are to replace the overwritten ones
+        :param newval: LSD whose values are to replace the overwritten ones
         """
-        if not(isinstance(newval, lsd_prof)):
+        if not(isinstance(newval, LSD)):
             raise TypeError()
         else:
             self.vel[key] = newval.vel
@@ -174,16 +174,15 @@ class lsd_prof:
             self.specN2[key] = newval.specN2
             self.specSigN2[key] = newval.specSigN2
 
-
     def norm(self, normValue):
         """
         Return a renormalize an LSD profile, divide the I, V, and null profiles by a value.
         
         :param normValue: the value to renormalize (divide) the LSD profile by
-        :rtype: lsd_prof
+        :rtype: LSD
         """
  
-        new = lsd_prof(self.vel, 
+        new = LSD(self.vel, 
                         self.specI/normValue, self.specSigI/normValue, 
                         self.specV/normValue, self.specSigV/normValue,
                         self.specN1/normValue, self.specSigN1/normValue, 
@@ -198,13 +197,13 @@ class lsd_prof:
         Return a LSD profile with a shift to the velocities of the LSD profile
         
         :param velShift: the change in velocity to be added
-        :rtype: lsd_prof
+        :rtype: LSD
         """
         # VERO: old def that changes the original object. 
         # Can be removed in cleanup later.
         #self.vel = self.vel + velShift
         #return self
-        new = lsd_prof(self.vel-velShift, 
+        new = LSD(self.vel-velShift, 
                         self.specI, self.specSigI, 
                         self.specV, self.specSigV,
                         self.specN1, self.specSigN1, 
@@ -222,7 +221,7 @@ class lsd_prof:
         :rtype: lsd object
         '''
 
-        new = lsd_prof(self.vel, 
+        new = LSD(self.vel, 
                         1.0 - ((1.0-self.specI) * scale_int), self.specSigI * scale_int, 
                         self.specV*scale_pol, self.specSigV*scale_pol,
                         self.specN1*scale_pol, self.specSigN1*scale_pol, 
@@ -301,6 +300,13 @@ class lsd_prof:
         plt.subplots_adjust(hspace=.0)
         return(fig, ax)
 
+    def rvfit():
+        return
+
+    def cogI():
+        return
+
+
 def read_lsd(fname):
     """
     function that reads in a LSD profile.
@@ -309,7 +315,7 @@ def read_lsd(fname):
     The two lines of header in Donati's format is optional.
     
     :param fname: the name of the file containing the LSD profile
-    :rtype: returns an instance of the lsd_prof class, defined in this module
+    :rtype: returns an instance of the LSD class, defined in this module
     """
     #check if this file has a header
     fcheck = open(fname, 'r')
@@ -353,7 +359,7 @@ def read_lsd(fname):
               and np.all(specN1 == 0.0) and np.all(specSigN1 == 0.0)):
             ncols = 3
         else:
-            prof = lsd_prof(vel, specI, specSigI, specV, specSigV,
+            prof = LSD(vel, specI, specSigI, specV, specSigV,
                             specN1, specSigN1, specN2, specSigN2, header=header)
     if ncols == 7:
         vel = __prof[0,:]
@@ -368,14 +374,14 @@ def read_lsd(fname):
               and np.all(specN1 == 0.0) and np.all(specSigN1 == 0.0)):
             ncols = 3
         else:
-            prof = lsd_prof(vel, specI, specSigI, specV, specSigV,
+            prof = LSD(vel, specI, specSigI, specV, specSigV,
                         specN1, specSigN1, header=header)
     
     if ncols == 3:
         vel = __prof[0,:]
         specI = __prof[1,:]
         specSigI = __prof[2,:]
-        prof = lsd_prof(vel, specI, specSigI, header=header)
+        prof = LSD(vel, specI, specSigI, header=header)
 
     #For unsupported formats or numbers of columns
     if ncols != 3 and ncols != 7 and ncols != 9:
@@ -392,7 +398,7 @@ def run_lsdpy(obs=None, mask=None, outName='prof.dat',
          removeContPol=None, trimMask=None, sigmaClipIter=None, sigmaClip=None, 
          interpMode=None, outModelName='',
          fLSDPlotImg=None, fSavePlotImg=None, outPlotImgName=None):
-    """Run the LSDpy code and return an lsd_prof object.
+    """Run the LSDpy code and return an LSD object.
     (A convenience wrapper around the lsdpy.main() function.)
     
     Any arguments not specified will be read from the file inlsd.dat.
@@ -454,7 +460,7 @@ def run_lsdpy(obs=None, mask=None, outName='prof.dat',
         sigmaClipIter, sigmaClip, interpMode, 1, outModelName, 
         fLSDPlotImg, fSavePlotImg, outPlotImgName)
 
-    prof = lsd_prof(vel, sI, sIerr, sV, sVerr, sN1, sN1err, header=headerTxt)
+    prof = LSD(vel, sI, sIerr, sV, sVerr, sN1, sN1err, header=headerTxt)
     modelSpec = observation(specList[0], specList[1], specList[2], specList[3],
                             np.zeros_like(specList[0]), np.zeros_like(specList[0]))
     return prof, modelSpec
@@ -462,9 +468,9 @@ def run_lsdpy(obs=None, mask=None, outName='prof.dat',
 ###################################
 ###################################
 
-class mask:
+class Mask:
     """
-    The data for the LSD line mask.
+    The data for the LSD line Mask.
 
     This usually contains arrays:
     
@@ -476,7 +482,7 @@ class mask:
     """
     def __init__(self, wl, element, depth, excite, lande, iuse):
         """
-        Generate a mask object
+        Generate a Mask object
         """
         self.wl = wl
         self.element = element
@@ -486,10 +492,10 @@ class mask:
         self.iuse = iuse
 
     def __getitem__(self, key):
-        """Overloaded getitem function. Returns a mask object with only the values at the specified index(s).
+        """Overloaded getitem function. Returns a Mask object with only the values at the specified index(s).
 
         :param key: the index or slice being checked
-        :rtype: mask
+        :rtype: Mask
         """
         wl_s = self.wl[key]
         element_s = self.element[key]
@@ -497,16 +503,16 @@ class mask:
         excite_s = self.excite[key]
         lande_s = self.lande[key]
         iuse_s = self.iuse[key]
-        return mask(wl_s, element_s, depth_s, excite_s, lande_s, iuse_s)
+        return Mask(wl_s, element_s, depth_s, excite_s, lande_s, iuse_s)
 
     def __setitem__(self, key, newval):
         """
         Overloaded setitem function. Sets all values of the mask at the specified location equal to the input mask's values.
 
         :param key: the index or slice being overwritten
-        :param newval: mask whose values are to replace the overwritten ones
+        :param newval: Mask whose values are to replace the overwritten ones
         """
-        if not(isinstance(newval, mask)):
+        if not(isinstance(newval, Mask)):
             raise TypeError()
         else:
             self.wl[key] = newval.wl
@@ -521,14 +527,14 @@ class mask:
     
     def prune(self):
         """
-        Return a mask with unused lines removed from the mask.
+        Return a Mask with unused lines removed from the Mask.
         
         Remove lines if iuse index is set to 0,
-        restricting the mask to only lines used in LSD.
+        restricting the Mask to only lines used in LSD.
         """
-        #Restrict the mask to only lines flagged to be used
+        #Restrict the Mask to only lines flagged to be used
         ind2 = np.where(self.iuse != 0)
-        return mask(self.wl[ind2],
+        return Mask(self.wl[ind2],
                         self.element[ind2],
                         self.depth[ind2],
                         self.excite[ind2],
@@ -554,9 +560,9 @@ class mask:
     
     def save(self, fname):
         """
-        Save the line mask to a text file, in Donati's and LSDpy format.
+        Save the line Mask to a text file, in Donati's and LSDpy format.
         
-        :param fname: the file name to output the mask to.
+        :param fname: the file name to output the Mask to.
         """
         
         nlines = self.wl.shape[0]
@@ -589,7 +595,7 @@ class mask:
                 if regions[j,0] < lines < regions[j,1]:
                     dcard.append(lines)
 
-        #Creating a list with the mask.wl elements
+        #Creating a list with the Mask.wl elements
         mask_list = self.wl.tolist()
 
         for line in dcard:
@@ -618,7 +624,7 @@ def read_mask(fname):
     * Flag for whether the line is used (1=use, 0=skip).
 
     :param fname: the name of the file to read.
-    :rtype: mask
+    :rtype: Mask
     """
     tmpMask = np.loadtxt(fname, skiprows=1, unpack=True)
     
@@ -632,19 +638,101 @@ def read_mask(fname):
     lande = tmpMask[4, ind]
     iuse = tmpMask[5, ind].astype(int)
     
-    return mask(wl, element, depth, excite, lande, iuse)
+    return Mask(wl, element, depth, excite, lande, iuse)
 
 ###################################
 ###################################
 
-class ExcludeMaskRegion:
+class ExcludeMaskRegions:
     '''
+    Class for a region object that records spectral regions to exclude from a Mask.
     '''
 
     def __init__(self, start, stop, type):
         self.start = start
         self.stop = stop
         self.type = type
+
+    def __getitem__(self, key):
+        """Overloaded getitem function. Returns a region object with only the values at the specified index(s).
+
+        :param key: the index or slice being checked
+        :rtype: ExcludeMaskRegions
+        """
+        return ExcludeMaskRegions(self.start[key], self.stop[key], self.type[key])
+
+    def __setitem__(self, key, newval):
+        """
+        Overloaded setitem function. Sets all values of the Mask at the specified location equal to the input mask's values.
+
+        :param key: the index or slice being overwritten
+        :param newval: Mask whose values are to replace the overwritten ones
+        """ 
+        if not(isinstance(newval, ExcludeMaskRegions)):
+            raise TypeError()
+        else:
+            self.start[key] = newval.start
+            self.stop[key] = newval.stop
+            self.type[key] = newval.type
+
+    def save(self, fname):
+        '''
+        Save the ExcludeMaskRegions object to a text file.
+        
+        :param fname: the file path/name
+        """
+        '''
+        with open(fname, 'w') as ofile:
+            for item in self:
+                ofile.write('{} {} {}\n'.format(item.start, item.stop, item.type))
+        return
+
+def get_Balmer_regions_default(velrange=500):
+    '''
+    Returns a ExcludeMaskRegion object with regions around Balmer H-lines (alpha to epsilon) 
+    up to a given radial velocity, and a region that exclude the Balmer jump (from 360-392 nm)
+    
+    :param velrange: (default 500 km/s) velocity range around the H-line to be excluded.
+    :rtype: ExcludeMaskRegion
+    '''
+
+    c = 299792.458 # Speed of light in km/s
+    # Mask should be in nm
+    wavelengths = [
+        656.281
+        486.14,
+        434.05,
+        410.17,
+        397.01
+    ]
+    types = [
+            'Halpha',
+            'Hbeta',
+            'Hgamma',
+            'Hdelta',
+            'Hepsilon'
+            'Hjump'
+    ]
+    start = []
+    stop = []
+    for w in wavelengths:
+        start.append(velrange/c*w + w)
+        stop.append(-1*velrange/c*w + w)
+
+    # Adding the Balmer jump
+    start.append(360)
+    stop.append(392)
+
+    return ExcludeMaskRegions(start, stop, types)
+
+def get_telluric_regions_default():
+    '''
+    Returns a ExcludeMaskRegions
+    '''
+    return
+
+
+
 
 ###################################
 ###################################
