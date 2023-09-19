@@ -306,7 +306,6 @@ class LSD:
     def cogI():
         return
 
-
 def read_lsd(fname):
     """
     function that reads in a LSD profile.
@@ -610,7 +609,6 @@ class Mask:
         print('Masks cleaned!')
         return
 
-
 def read_mask(fname):
     """
     Read in an LSD line mask and return a mask object.
@@ -675,6 +673,15 @@ class ExcludeMaskRegions:
             self.stop[key] = newval.stop
             self.type[key] = newval.type
 
+    def __add__(self, other):
+        '''
+        Overloaded addition function to concatenate two ExcludeMaskRegions objects
+        '''
+        start = np.concatenate([self.start, other.start])
+        stop = np.concatenate([self.stop, other.stop])
+        type = np.concatenate([self.type, other.type])
+        return ExcludeMaskRegions(start, stop, type)
+
     def save(self, fname):
         '''
         Save the ExcludeMaskRegions object to a text file.
@@ -686,6 +693,36 @@ class ExcludeMaskRegions:
             for item in self:
                 ofile.write('{} {} {}\n'.format(item.start, item.stop, item.type))
         return
+
+    def to_dict(self):
+        '''
+        Function to return the ExcludeMaskRegion as a dictionary. 
+        This is useful to transform ExcludeMaskRegions objects to Panda dataframes
+        '''
+        return({'start':self.start, 'stop':self.stop,'type':self.type})
+
+def read_exclude_mask_regions(fname):
+    '''
+    Read in a ExcludeMaskRegion file into an ExcludeMaskRegion object. 
+
+    :param fname: the path/name of the file
+    :rtype ExcludeMaskRegion: 
+    '''
+    start = []
+    stop = []
+    type = []
+    with open(fname, 'r') as f:
+        nLines = 0
+        for txtLine in f:
+            split = txtLine.split() # split by WS
+            start.append(split[0]) 
+            stop.append(split[1]) 
+            type.append(' '.join(split[2:])) # join all the rest with ' ' in case there was multiple words
+    
+    start = np.asarray(start, dtype=float)
+    stop = np.asarray(stop, dtype=float)
+    
+    return ExcludeMaskRegions(start, stop, np.array(type))
 
 def get_Balmer_regions_default(velrange=500):
     '''
@@ -699,7 +736,7 @@ def get_Balmer_regions_default(velrange=500):
     c = 299792.458 # Speed of light in km/s
     # Mask should be in nm
     wavelengths = [
-        656.281
+        656.281,
         486.14,
         434.05,
         410.17,
@@ -710,29 +747,29 @@ def get_Balmer_regions_default(velrange=500):
             'Hbeta',
             'Hgamma',
             'Hdelta',
-            'Hepsilon'
+            'Hepsilon',
             'Hjump'
     ]
     start = []
     stop = []
     for w in wavelengths:
-        start.append(velrange/c*w + w)
-        stop.append(-1*velrange/c*w + w)
+        start.append(-1*velrange/c*w + w)
+        stop.append(velrange/c*w + w)
 
     # Adding the Balmer jump
     start.append(360)
     stop.append(392)
 
-    return ExcludeMaskRegions(start, stop, types)
+    return ExcludeMaskRegions(np.array(start), np.array(stop), np.array(types,dtype=object))
 
 def get_telluric_regions_default():
     '''
-    Returns a ExcludeMaskRegions
+    Returns a ExcludeMaskRegions object with regions with heavy telluric regions in the optical
     '''
-    return
+    start = np.array([587.5,627.5,684.0,717.0,757.0,790.0,809.0])  # nm
+    stop   = np.array([592.0,632.5,705.3,735.0,771.0,795.0,990.0])  # nm
 
-
-
+    return ExcludeMaskRegions(start, stop, np.array(['telluric']*len(start),dtype=object))
 
 ###################################
 ###################################
@@ -843,7 +880,6 @@ class observation:
                     f.write('{:10.4f} {:11.4e}\n'.format(
                         self.wl[i], self.specI[i]))
         return
-
 
 def read_spectrum(fname, trimBadPix=False, sortByWavelength=False):
     """

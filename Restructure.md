@@ -1,8 +1,11 @@
 TODO in order
 
 Vero: 
-[ ] finish the Regions class
-wait for colin to tidy the class names
+[x] finish the Regions class
+    [x] defaults
+    [x] read
+    [x] test the save, slice, read, and defaults.
+    [x] overload the + operator
 [ ] check the mask class for consistency (and also .clean instead of .clean_mask is class function)
 [ ] in mask class, use the region class to return mask
 [ ] Bz into the LSD class. 
@@ -185,3 +188,9 @@ repo / specpolFlow / all of the source files
      / Tutorials
 
 [ ] arrange the __init__ file the way we want it. 
+
+
+## To add later:
+
+* ExcludeMaskRegions default for the Pashen and Bracken series, for spirou usage. 
+* ExcludeMaskRegions default for the telluric regions in the IR? 
