@@ -522,11 +522,12 @@ class Mask:
             self.iuse[key] = newval.iuse
 
     def __len__(self):
+        '''Overloaded len function that returns the number of lines in the mask'''
         return len(self.wl)
     
     def prune(self):
         """
-        Return a Mask with unused lines removed from the Mask.
+        Return a Mask object with unused lines removed from the Mask.
         
         Remove lines if iuse index is set to 0,
         restricting the Mask to only lines used in LSD.
@@ -543,7 +544,8 @@ class Mask:
         
     def get_weights(self, normDepth, normWave, normLande):
         """
-        Returns the calculated the weights of the lines used for LSD calculations.
+        Returns the calculated the LSD weights of all the lines in the mask
+        (no matter is iuse is 0 or 1).
         
         This assumes the Stokes I lines are weighted as depth,
         and Stokes V is weighted as depth*wavelength*Lande factor
@@ -565,13 +567,13 @@ class Mask:
         """
         
         nlines = self.wl.shape[0]
-        oFile = open(fname, 'w')
-        oFile.write('{:d}\n'.format(nlines))
-        
-        for i in range(nlines):
-            oFile.write('{:9.4f} {:6.2f} {:6.3f} {:6.3f} {:6.3f} {:2d}\n'.format(
-                self.wl[i], self.element[i], self.depth[i],
-                self.excite[i], self.lande[i], self.iuse[i]))
+        with open(fname, 'w') as oFile:
+            oFile.write('{:d}\n'.format(nlines))
+            for i in range(nlines):
+                oFile.write('{:9.4f} {:6.2f} {:6.3f} {:6.3f} {:6.3f} {:2d}\n'.format(
+                    self.wl[i], self.element[i], self.depth[i],
+                    self.excite[i], self.lande[i], self.iuse[i]))
+
         return
     
     def clean_mask(self,data):
@@ -611,7 +613,7 @@ class Mask:
 
 def read_mask(fname):
     """
-    Read in an LSD line mask and return a mask object.
+    Read in an LSD line mask file and returns a Mask object.
 
     The mask file should one line of header and columns of:
     * Wavelength (nm)
