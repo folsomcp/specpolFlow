@@ -17,9 +17,9 @@ Colin:
     wait until V has moved the Bz to the LSD class for that one..
 [ ] check whether we can split off some part of ioLSD
 * def plot(self, figsize=(10,10), sameYRange=True, plotZeroLevel=True, **kwargs):
-    [ ] add fig=None, ax=None so that another call can overplot another LSD profile. 
+    [x] add fig=None, ax=None so that another call can overplot another LSD profile. 
+    [x] add a command line wrapper around LSD.plot()
     [ ] maybe add an option for scatter with errors and just lines. 
-
 
 
 

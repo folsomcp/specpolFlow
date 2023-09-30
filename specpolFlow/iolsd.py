@@ -36,7 +36,6 @@ class LSD:
         """
         Initialize an LSD profile, using data from an existing profile. 
 
-        :param self: LSD being created
         :param vel: velocity grid for the LSD profile
         :param specI: the Stokes I profile
         :param specSigI: the uncertainties on Stokes I
@@ -120,21 +119,18 @@ class LSD:
         oFile.close()
         return
 
-    #overloaded functions
     def __len__(self):
         """
         Return the length of each array in an LSD profile. They should all be the same length, so it just returns the length of the velocity array. 
-
-        :param self: LSD whose length is being checked
 
         :rtype: int
         """
         return len(self.vel)
 
     def __getitem__(self, key):
-        """Overloaded getitem function. Returns an LSD with only the values at the specified index(s).
+        """
+        Returns an LSD with only the values at the specified index(s).
 
-        :param self: LSD being queried
         :param key: the index or slice being checked
 
         :rtype: LSD
@@ -155,9 +151,8 @@ class LSD:
 
     def __setitem__(self, key, newval):
         """
-        Overloaded setitem function. Sets all values of the LSD at the specified location equal to the input profile's values.
+        Sets all values of the LSD at the specified location equal to the input profile's values.
 
-        :param self: LSD object being edited
         :param key: the index or slice being overwritten
         :param newval: LSD whose values are to replace the overwritten ones
         """
@@ -199,10 +194,6 @@ class LSD:
         :param velShift: the change in velocity to be added
         :rtype: LSD
         """
-        # VERO: old def that changes the original object. 
-        # Can be removed in cleanup later.
-        #self.vel = self.vel + velShift
-        #return self
         new = LSD(self.vel-velShift, 
                         self.specI, self.specSigI, 
                         self.specV, self.specSigV,
@@ -214,12 +205,13 @@ class LSD:
         return new
 
     def scale(self, scale_int, scale_pol):
-        '''Return a LSD profile with rescaled amplitudes of the LSD profile (see also set_weights())
+        """
+        Return a LSD profile with rescaled amplitudes of the LSD profile (see also set_weights())
         
         :param scale_int: scale the intensity profile by this
         :param scale_pol: scale the polarization and null profiles by this
         :rtype: lsd object
-        '''
+        """
 
         new = LSD(self.vel, 
                         1.0 - ((1.0-self.specI) * scale_int), self.specSigI * scale_int, 
@@ -232,25 +224,34 @@ class LSD:
         return new
 
     def set_weights(self, wint_old, wpol_old, wint_new, wpol_new):
-        '''Change the weight of the LSD profile (see also scale())
+        """
+        Change the weight of the LSD profile (see also scale())
         
         :param wint_old: The current intensity weight (d)
         :param wpol_old: The current polarization weight (g*d*lambda)
         :param wint_new: The new intensity weight (d)
         :param wpol_new: The new polarization weight (g*d*lambda)
         :rtype: lsd object
-        '''
-        return(self.scale(wint_new/wint_old, wpol_new/wpol_old))
+        """
+        return self.scale(wint_new/wint_old, wpol_new/wpol_old)
    
-    def plot(self, figsize=(10,10), sameYRange=True, plotZeroLevel=True, **kwargs):
-        '''Plot the LSD profile
+    def plot(self, figsize=(10,10), sameYRange=True, plotZeroLevel=True,
+             fig=None, **kwargs):
+        """
+        Plot the LSD profile
+
+        This generates a matplotlib figure. To display the figure, after
+        running this function, use 'import matplotlib.pyplot as plt' and
+        'plt.show()'. To save the figure you can use 
+        'fig.savefig("fileName.pdf")' on the new figure object.
         
-        :param self: the lsd object to plot 
         :param figsize: the size of the figure being created
         :param sameYRange: optionally set the Stokes V and Null plots to have the same y scale
         :param plotZeroLevel: optionally include a dashed line at 0 for the V and Null plots.
+        :param fig: optional, a matplotlib figure used for plotting the LSD 
+                    profile. By default (or if None) a new figure will be generated.
         :rtype: returns an fig, ax matplotlib container. 
-        '''
+        """
 
         #Chose y-axis limits for the V and N plots so that they can have the same scale
         #use 1.05 time biggest divergence from zero
@@ -265,40 +266,53 @@ class LSD:
         #Get the number of Stokes parameters to plot
         #(Check the number of non-zero data field)
         #Support just Stokes I; Stokes I, V, Null1; Stokes I, V, Null1, Null2
-        nplots = self.numParam
-        
-        fig, ax = plt.subplots(nplots,1,figsize=figsize,sharex=True)
+        npar = self.numParam
+
+        firstPlt = True
+        if fig == None:
+            fig, ax = plt.subplots(npar, 1, figsize=figsize, sharex=True)
+        else:
+            ax = fig.axes
+            firstPlt = False
+
+        #set up a custom color cycle, with black then the default colors
+        if firstPlt:
+            prop_cycle = plt.rcParams['axes.prop_cycle']
+            colorList = ['#000000'] + prop_cycle.by_key()['color']
+
         #If there is only 1 plot (only a Stokes I spectrum),
         #wrap the matplotlib axis in a list to make it iterable
-        if not isinstance(ax, np.ndarray): ax = [ax]
+        if not (isinstance(ax, np.ndarray) or isinstance(ax, list)): ax = [ax]
+        #protect against the number of axes not matching self.numParam
         for i, axi in enumerate(ax):
-            if i == nplots - 1: #Stokes I
-                axi.errorbar(self.vel, self.specI, yerr=self.specSigI, xerr=None,
-                            fmt='o', ms=3,ecolor='0.5',c='k',**kwargs)
+            if firstPlt: axi.set_prop_cycle(color=colorList)
+            if i == len(ax) - 1: #Stokes I (always the last/bottom plot)
+                axi.errorbar(self.vel, self.specI, yerr=self.specSigI, 
+                             xerr=None, fmt='o', ms=3, ecolor='0.5', **kwargs)
                 axi.set_xlim(xmin=np.min(self.vel),xmax=np.max(self.vel))
                 axi.set_ylabel('I')
                 axi.set_xlabel('Velocity (km/s)')
-            elif i == 0: #Stokes V (if nplots > 1)
-                axi.errorbar(self.vel, self.specV, yerr=self.specSigV, xerr=None,
-                             fmt='o', ms=3, ecolor='0.5',c='k',**kwargs)
+            elif (i == 0) and (npar > 1): #Stokes V
+                axi.errorbar(self.vel, self.specV, yerr=self.specSigV, 
+                             xerr=None, fmt='o', ms=3, ecolor='0.5', **kwargs)
                 if plotZeroLevel: axi.axhline(y=0.0, ls='--', c='k', alpha=0.4)
                 if sameYRange: axi.set_ylim(ymin=-plotVLims,ymax=plotVLims)
                 axi.set_ylabel('V')
-            elif i == 1: #Null1
-                axi.errorbar(self.vel, self.specN1, yerr=self.specSigN1, xerr=None,
-                             fmt='o', ms=3,ecolor='0.5',c='k',**kwargs)
+            elif (i == 1) and (npar > 2): #Null1
+                axi.errorbar(self.vel, self.specN1, yerr=self.specSigN1, 
+                             xerr=None, fmt='o', ms=3, ecolor='0.5', **kwargs)
                 if plotZeroLevel: axi.axhline(y=0.0, ls='--', c='k', alpha=0.4)
                 if sameYRange: axi.set_ylim(ymin=-plotVLims,ymax=plotVLims)
                 axi.set_ylabel('N1')
-            elif i == 2: #Null2
-                axi.errorbar(self.vel, self.specN2, yerr=self.specSigN2, xerr=None,
-                             fmt='o', ms=3,ecolor='0.5',c='k',**kwargs)
+            elif (i == 2) and (npar > 3): #Null2
+                axi.errorbar(self.vel, self.specN2, yerr=self.specSigN2, 
+                             xerr=None, fmt='o', ms=3, ecolor='0.5', **kwargs)
                 if plotZeroLevel: axi.axhline(y=0.0, ls='--', c='k', alpha=0.4)
                 if sameYRange: axi.set_ylim(ymin=-plotVLims,ymax=plotVLims)
                 axi.set_ylabel('N2')
         
         plt.subplots_adjust(hspace=.0)
-        return(fig, ax)
+        return fig, ax
 
     def rvfit():
         return
@@ -397,7 +411,8 @@ def run_lsdpy(obs=None, mask=None, outName='prof.dat',
          removeContPol=None, trimMask=None, sigmaClipIter=None, sigmaClip=None, 
          interpMode=None, outModelName='',
          fLSDPlotImg=None, fSavePlotImg=None, outPlotImgName=None):
-    """Run the LSDpy code and return an LSD object.
+    """
+    Run the LSDpy code and return an LSD object.
     (A convenience wrapper around the lsdpy.main() function.)
     
     Any arguments not specified will be read from the file inlsd.dat.
@@ -491,7 +506,8 @@ class Mask:
         self.iuse = iuse
 
     def __getitem__(self, key):
-        """Overloaded getitem function. Returns a Mask object with only the values at the specified index(s).
+        """
+        Returns a Mask object with only the values at the specified index(s).
 
         :param key: the index or slice being checked
         :rtype: Mask
@@ -506,7 +522,7 @@ class Mask:
 
     def __setitem__(self, key, newval):
         """
-        Overloaded setitem function. Sets all values of the mask at the specified location equal to the input mask's values.
+        Sets all values of the mask at the specified location equal to the input mask's values.
 
         :param key: the index or slice being overwritten
         :param newval: Mask whose values are to replace the overwritten ones
@@ -522,7 +538,9 @@ class Mask:
             self.iuse[key] = newval.iuse
 
     def __len__(self):
-        '''Overloaded len function that returns the number of lines in the mask'''
+        """
+        Returns the number of lines in the mask
+        """
         return len(self.wl)
     
     def prune(self):
@@ -545,7 +563,7 @@ class Mask:
     def get_weights(self, normDepth, normWave, normLande):
         """
         Returns the calculated the LSD weights of all the lines in the mask
-        (no matter is iuse is 0 or 1).
+        (no matter if iuse is 0 or 1).
         
         This assumes the Stokes I lines are weighted as depth,
         and Stokes V is weighted as depth*wavelength*Lande factor
@@ -577,11 +595,11 @@ class Mask:
         return
     
     def clean_mask(self,data):
-        '''
+        """
         Clean the line mask
 
         :param data: dictionary of start and stop of regions where lines are excluded.
-        '''
+        """
         L = data['WLStart'].size
 
         regions = np.zeros((L,2))
@@ -644,9 +662,9 @@ def read_mask(fname):
 ###################################
 
 class ExcludeMaskRegions:
-    '''
+    """
     Class for a region object that records spectral regions to exclude from a Mask.
-    '''
+    """
 
     def __init__(self, start, stop, type):
         self.start = start
@@ -654,7 +672,8 @@ class ExcludeMaskRegions:
         self.type = type
 
     def __getitem__(self, key):
-        """Overloaded getitem function. Returns a region object with only the values at the specified index(s).
+        """
+        Returns a region object with only the values at the specified index(s).
 
         :param key: the index or slice being checked
         :rtype: ExcludeMaskRegions
@@ -663,7 +682,7 @@ class ExcludeMaskRegions:
 
     def __setitem__(self, key, newval):
         """
-        Overloaded setitem function. Sets all values of the Mask at the specified location equal to the input mask's values.
+        Sets all values of the Mask at the specified location equal to the input mask's values.
 
         :param key: the index or slice being overwritten
         :param newval: Mask whose values are to replace the overwritten ones
@@ -676,40 +695,39 @@ class ExcludeMaskRegions:
             self.type[key] = newval.type
 
     def __add__(self, other):
-        '''
+        """
         Overloaded addition function to concatenate two ExcludeMaskRegions objects
-        '''
+        """
         start = np.concatenate([self.start, other.start])
         stop = np.concatenate([self.stop, other.stop])
         type = np.concatenate([self.type, other.type])
         return ExcludeMaskRegions(start, stop, type)
 
     def save(self, fname):
-        '''
+        """
         Save the ExcludeMaskRegions object to a text file.
         
         :param fname: the file path/name
         """
-        '''
         with open(fname, 'w') as ofile:
             for item in self:
                 ofile.write('{} {} {}\n'.format(item.start, item.stop, item.type))
         return
 
     def to_dict(self):
-        '''
+        """
         Function to return the ExcludeMaskRegion as a dictionary. 
         This is useful to transform ExcludeMaskRegions objects to Panda dataframes
-        '''
-        return({'start':self.start, 'stop':self.stop,'type':self.type})
+        """
+        return {'start':self.start, 'stop':self.stop,'type':self.type}
 
 def read_exclude_mask_regions(fname):
-    '''
+    """
     Read in a ExcludeMaskRegion file into an ExcludeMaskRegion object. 
 
     :param fname: the path/name of the file
     :rtype ExcludeMaskRegion: 
-    '''
+    """
     start = []
     stop = []
     type = []
@@ -724,7 +742,7 @@ def read_exclude_mask_regions(fname):
     start = np.asarray(start, dtype=float)
     stop = np.asarray(stop, dtype=float)
     
-    return ExcludeMaskRegions(start, stop, np.array(type))
+    return ExcludeMaskRegions(start, stop, np.array(type, dtype=object))
 
 def get_Balmer_regions_default(velrange=500):
     '''
@@ -801,9 +819,9 @@ class observation:
         self.specSig=specSig
         
     def __getitem__(self, key):
-        """Overloaded getitem function. Returns an observation object with only the values at the specified index(s).
+        """
+        Returns an observation object with only the values at the specified index(s).
 
-        :param self: observation being queried
         :param key: the index or slice being checked
 
         :rtype: observation
@@ -820,9 +838,8 @@ class observation:
 
     def __setitem__(self, key, newval):
         """
-        Overloaded setitem function. Sets all values of the observation at the specified location equal to the input observation's values.
+        Sets all values of the observation at the specified location equal to the input observation's values.
 
-        :param self: observation object being edited
         :param key: the index or slice being overwritten
         :param newval: observation whose values are to replace the overwritten ones
         """
@@ -1041,7 +1058,8 @@ class line_list:
         self.nLines   = self.wl.size
 
     def __getitem__(self, key):
-        """Overloaded getitem function. Returns a line_list with only the values at the specified index(s).
+        """
+        Returns a line_list with only the values at the specified index(s).
 
         :param key: the index or slice being checked
         :rtype: line_list
@@ -1070,7 +1088,7 @@ class line_list:
 
     def __setitem__(self, key, newval):
         """
-        Overloaded setitem function. Sets all values of the line_list at the specified location equal to the input line_list values.
+        Sets all values of the line_list at the specified location equal to the input line_list values.
 
         :param key: the index or slice being overwritten
         :param newval: line_list used to replace the values given by key
