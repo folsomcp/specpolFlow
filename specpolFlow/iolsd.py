@@ -6,7 +6,108 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import copy
+import scipy.special as specialf
 
+
+##################
+##################
+
+def integrate_bz(vel, spec, specSig, geff, lambda0, cog_val, specI, specSigI, norm_val):
+    '''
+    Helper function that is used in the Bz calculations. Internal.
+    to integrate one Stokes parameter. 
+
+    :param vel: (numpy array) the velocity array
+    :param spec: (numpy array) the associated Stokes parameter array
+    :param specSig: (numpy array) the associated error bar on the Stokes parameter
+    :param geff: the effective lande factor of the profile
+    :param lambda0: the nominal wavelength of the profile
+    :cog_val: the chose center of gravity value (km/s)
+    :specI: (numpy array) the associated Stokes I parameter
+    :specSigI: (numpy array) the associated error bar on Stokes I
+    '''
+    #Evaluate the integral equation for Bz.  Only intended for use in calcBz.
+    
+    # This is the constant for the Zeeman splitting
+    # Lambda_B = constant * lambda0**2 B
+    # lambda_B_constant = e/(4*pi*m_e*c) = 4.668644778304102e-05 in cgs units
+    lambda_B_constant = 4.668644778304102e-12 #to match/cancel lambda0 in nm
+    cvel = 2.99792458e5 #c in km/s to match/cancel the LSD profile velocities
+    
+    # set the velocity step for error propagation
+    deltav = (vel[1] - vel[0]) # This is in km/s
+    
+    # Calculation of the integral in the numerator of the Bz function
+    # with a trapezoidal numerical integral
+    # For the error calculation, we propagate like we would for
+    # summation in a numerical integral.
+    fnum = np.trapz( (vel - cog_val) * spec, x=vel-cog_val ) #in (km/s)^2
+    sfnum = np.sqrt(np.sum( (vel - cog_val )**2 * specSig**2 ) * deltav**2)
+    
+    # Calculation of the integral in the denominator of the Bz function
+    # with a trapezoidal numerical integral
+    # For the square error calculation, we propagate like we would for
+    # summation in a numerical integral.
+    ri0v = np.trapz(norm_val-specI, x=vel ) # in km/s
+    si0v = np.sqrt(np.sum(specSigI**2 )* deltav**2) # in km/s
+    
+    # Make the actual Bz calculation.
+    # for the units to work out, lambda0 should be in nm
+    bl = -1*fnum / ( ri0v*geff*lambda0*cvel*lambda_B_constant)
+    blSig = np.abs(bl * np.sqrt( (sfnum/fnum)**2 + (si0v/ri0v)**2 ))
+    return bl, blSig
+
+def plot_bz_calc(lsd, lsd_in, lsd_bz, velrange, p_bzwidth, norm_val, cog_val, cog):
+    """
+    Generate a plot showing the center of gravity and integration ranges used in the calculation of Bz from and LSD profile.
+    Called by the main calcBz function. Internal
+
+    :param lsd: the full LSD profile to plot
+    :param lsd_in: slice of an LSD profile with the range used for COG calculation
+    :param lsd_bz: slice of an LSD profile with the range used for integration of Bz
+    :param velrange: the velocity range used for COG calculation
+    :param p_bzwidth: the velocity range used for integration of Bz
+    :param norm_val: the continuum level used for normalization
+    :param cog_val: the final COG used for Bz calculation
+    :param cog: the input COG flag/value given by the user
+    :return: a matplotlib figure object
+    """
+    #This function relies on the plot method of the LSD profile class
+    fig, ax = lsd.plot(sameYRange=False)
+    
+    for item in ax:
+        if velrange != None:
+            item.axvline(x=velrange[0], ls='--', label='velrange')
+            item.axvline(x=velrange[1], ls='--')
+        item.axvline(x=p_bzwidth[0], ls='dotted', label='bzwidth')
+        item.axvline(x=p_bzwidth[1], ls='dotted')
+        
+    ax[-1].axhline(y=norm_val, ls='--', c='pink', label='Ic')
+    
+    # for the plot, calculate and display all of the possible methods
+    # for calculating the cog.
+    for item in ax:
+        item.axvline(x=lsd_in.cog_min(), label='cog min I', lw=3, alpha=0.5, c='blue')
+        item.axvline(x=lsd_in.cog_I(norm_val), label='cog I',lw=3, alpha=0.5, c='red')
+        item.axvline(x=lsd_in.cog_IV(norm_val), label='cog I*V',lw=3, alpha=0.5, c='orange')
+        item.axvline(x=lsd_in.cog_V(), label='cog V',lw=3, alpha=0.5, c='green')
+        item.axvline(x=cog_val, label='chosen cog: {}'.format(cog), ls='--', c='k')
+       
+    ax[-1].legend(loc=0)
+    
+    red = lsd_bz.vel > cog_val
+    blue = lsd_bz.vel < cog_val
+    ax[0].fill_between(lsd_bz.vel[red], lsd_bz.specV[red], step='mid', color='red')
+    ax[0].fill_between(lsd_bz.vel[blue], lsd_bz.specV[blue], step='mid', color='blue')
+    if(len(ax) > 2):
+        ax[1].fill_between(lsd_bz.vel[red], lsd_bz.specN1[red], step='mid', color='red')
+        ax[1].fill_between(lsd_bz.vel[blue], lsd_bz.specN1[blue], step='mid', color='blue')
+    if(len(ax) > 3):
+        ax[2].fill_between(lsd_bz.vel[red], lsd_bz.specN2[red], step='mid', color='red')
+        ax[2].fill_between(lsd_bz.vel[blue], lsd_bz.specN2[blue], step='mid', color='blue')
+    
+    return fig
 
 ###################################
 ###################################
@@ -303,8 +404,231 @@ class LSD:
     def rvfit():
         return
 
-    def cogI():
-        return
+    def cog_I(self, Ic=1.0):
+        '''
+        Helper function to return the center of gravity of a Stokes I LSD profile, 
+        for a given continuum level (default =1.0)
+
+        :param self: LSD object
+        :param Ic: (float, default=1.0) the continnum level to use the the COG calculation
+        '''
+        nominator = np.trapz(self.vel * (Ic-self.specI), x=self.vel)
+        denominator = np.trapz( Ic-self.specI, x=self.vel )
+        return nominator/denominator
+
+    def cog_IV(self, Ic=1.0):
+        '''
+        Helper function to return the center of gravity of a (Stokes I)*(Stoke V) for a LSD profile, 
+        for a given continuum level (default =1.0)
+
+        :param self: LSD object
+        :param Ic: (float, default=1.0) the continnum level to use the the COG calculation
+        '''
+        nominator = np.trapz(self.vel * np.abs( self.specV * (Ic-self.specI) ), x=self.vel )
+        denominator = np.trapz( np.abs( self.specV * (Ic-self.specI) ), x=self.vel )
+        return nominator/denominator
+
+    def cog_V(self):
+        '''
+        Helper function to return the center of gravity of a Stokes V LSD profile, 
+
+        :param self: LSD object
+        '''
+        nominator = np.trapz(self.vel * np.abs(self.specV), x=self.vel )
+        denominator = np.trapz( np.abs(self.specV), x=self.vel )
+        return(nominator/denominator)        
+
+    def cog_min(self):
+        '''
+        Helper function to return the velocity of the minimum of a Stokes I profile
+        
+        :param self: a LSD object
+        '''
+        
+        cog_min = self.vel[self.specI.argmin()]
+        if cog_min.size > 1:
+            cog_min = cog_min[0]
+        return cog_min 
+
+    def calc_fap(self):
+        '''Helper function to return the V, null1, and null2 FAP for a given LSD object
+
+        The False Alarm Probability (FAP) is the probability that the observed
+        data are consistent with the null hypothesis of no magnetic field.
+        In this case, the null hypothesis is a flat line in Stokes V
+        (an offset from 0 is allowed to account for continuum polarization).
+        The probability is evaluated from chi^2.
+        
+        If you would like a specific range in velocity, simply slice the LSD object beforehand. 
+        Note that the calcBz function also returns the FAP inside the spectral line, 
+        over the same velocity range as used in the Bz calculation. 
+
+        :param self: LSD object (input)
+
+        :return: FAP V, FAP N1, FAP N2. 
+        '''
+
+        approxDOF = (self.npix-1.)
+
+        #'fitting' the flat line (essentially an average weighted by 1/sigma^2)
+        contV = np.sum(self.specV/self.specSigV**2) / np.sum(1./self.specSigV**2)
+        chi2V = np.sum(((self.specV - contV)/self.specSigV)**2)
+        probV = 1.0-specialf.gammainc(approxDOF/2., chi2V/2.)
+        #repeat for the Null1 and Null2 profiles (if they exist)
+        probN1 = 0.
+        probN2 = 0.
+        
+        if self.numParam > 2:
+            contN1 = np.sum(self.specN1/self.specSigN1**2) / np.sum(1./self.specSigN1**2)
+            chi2N1 = np.sum(((self.specN1 - contN1)/self.specSigN1)**2)
+            probN1 = 1.0-specialf.gammainc(approxDOF/2., chi2N1/2.)
+        if self.numParam > 3:
+            contN2 = np.sum(self.specN2/self.specSigN2**2) / np.sum(1./self.specSigN2**2)
+            chi2N2 = np.sum(((self.specN2 - contN2)/self.specSigN2)**2)
+            probN2 = 1.0-specialf.gammainc(approxDOF/2., chi2N2/2.)
+        
+        return(probV, probN1, probN2)
+
+    def calc_bz(self, cog='I', norm='auto', lambda0=500., geff=1.2, velrange=None, bzwidth=None, plot=True):
+        '''Calculate the Bz of an LSD profile
+        
+        :param self: lsd object (input). It is assumed that the lsd.vel is in km/s.
+        :param cog: The value, or calculation method for the center of gravity. The choices are:
+                    'I': center of gravity of I,
+                    'V': center of gravity of V,
+                    'IV': center of gravity of I*V,
+                    a float: a user defined value in km/s.
+        :param norm: calculation method for the continuum. The choices are:
+                        'auto': the median of I outside of velrange (if defined) or the full range (if velrange is not defined)
+                        float: a user defined value to use for Ic.
+        :param lambda0: wavelength of the transition in nanometer (default=500).
+                        For an LSD profile, this is the lambda value the LSD profile shape was scaled with.
+        :param geff: effective Lande factor of the transition.
+                    For an LSD profile, this is the geff value the LSD profile shape was scaled with.
+        :param velrange: range of velocity to use for the determination of the
+                        line center and the continuum. If not defined, the whole range
+                        will be used. If bzwidth is not defined, this range will also be
+                        used for the line Bz calculation.
+        :param bzwidth: distance from the line center to use in the Bz calculation.
+                        One element = same on each side of line center.
+                        Two elements, left and right of line center.
+                        Not defined: using velrange.
+        :param plot: whether or not a graph is generated, and returned.
+        :return: a dictionary with Bz (in G) and FAP calculations,
+                optionally a matplotlib figure.
+        '''
+        
+        # Velrange is used to identify the position of the line,
+        # for calculating the cog, and for calculating the position
+        # of the continuum.
+        # If Velrange is not defined, it will use the whole range.
+        # The range for calculating Bz itself is controlled by bzwidth below
+        if velrange != None:
+            inside = np.logical_and(self.vel>=velrange[0], self.vel<=velrange[1])
+            lsd_in = self[inside]
+            lsd_out = self[np.logical_not(inside)]
+        else:
+            lsd_in=copy.deepcopy(self)
+        
+        # Check if norm is a string.
+        if isinstance(norm, str):
+            print('using AUTO method for the normalization')
+            if velrange != None:
+                print('  using the median of the continuum outside of the line')
+                norm_val = np.median(lsd_out.specI)
+            else:
+                print('  no range in velocity given, using the median of the whole specI to determine continuum')
+                norm_val = np.median(lsd_in.specI)
+        else:
+            norm_val = copy.copy(norm)
+            print('using given norm value')
+
+        # Check if cog is a string.
+        if isinstance(cog, str):
+            # calculate the cog for the chosen method
+            if cog == 'I':
+                cog_val = lsd_in.cog_I(norm_val)
+            elif cog == 'min':
+                cog_val = lsd_in.cog_min()
+            elif cog == 'IV':
+                cog_val = lsd_in.cog_IV(norm_val)
+            elif cog == 'V':
+                cog_val = lsd_in.cog_V()
+            else:
+                raise ValueError('calcBz got unrecognized value for cog: {:}'.format(cog))
+        else:
+            cog_val=copy.copy(cog)
+        
+        # Now we define the position of the line for the Bz calculation itself.
+        # If the keyword bzwidth is defined, we use that range from the chosen cog.
+        if bzwidth == None:
+            # No bzwidth. using vrange if defined
+            if velrange != None:
+                print('no bzwidth defined, using velrange to calculate Bz')
+                lsd_bz = copy.copy(lsd_in)
+                # saving the range for plotting later.
+                p_bzwidth = np.copy(velrange)
+            else:
+                print('no bzwidth nor velrange defined, using full velocity range to calculate Bz')
+                p_bzwidth = [self.vel.min(), self.vel.max()]
+                lsd_bz = copy.copy(self)
+        else:
+            # Check whether it is a numpy array
+            if isinstance(bzwidth, list) or isinstance(bzwidth, tuple):
+                if len(bzwidth) == 1:
+                    #print('list with one element')
+                    # keeping the actual bz calculation range for plotting later.
+                    p_bzwidth = [cog_val-bzwidth, cog_val+bzwidth]
+                    lsd_bz = self[ np.logical_and(self.vel >= p_bzwidth[0], self.vel <= p_bzwidth[1]) ]
+                elif len(bzwidth) == 2:
+                    #print('list with two elements')
+                    p_bzwidth = [cog_val-bzwidth[0], cog_val+bzwidth[1]]
+                    lsd_bz = self[ np.logical_and(self.vel >= p_bzwidth[0], self.vel <= p_bzwidth[1]) ]
+                else:
+                    print('bzwidth has too many elements (need one or two)')
+                    raise ValueError('bzwidth has too many elements {:} (need 1 or 2)'.format(len(bzwidth)))
+            else:
+                p_bzwidth = [cog_val-bzwidth, cog_val+bzwidth]
+                lsd_bz = self[ np.logical_and(self.vel >= p_bzwidth[0], self.vel <= p_bzwidth[1]) ]
+
+        # Actual calculation of the Bz:
+        # Call the integration function for each V, Null1, Null2 parameter
+        blv, blvSig = integrate_bz(lsd_bz.vel, lsd_bz.specV, lsd_bz.specSigV, 
+                    geff, lambda0, cog_val, lsd_bz.specI, lsd_bz.specSigI, norm_val)
+        if self.numParam > 2:
+            bln1, bln1Sig = integrate_bz(lsd_bz.vel, lsd_bz.specN1, lsd_bz.specSigN1,
+                    geff, lambda0, cog_val, lsd_bz.specI, lsd_bz.specSigI, norm_val)
+        else: bln1, bln1Sig = (0.0, 0.0)
+        if self.numParam > 3:
+            bln2, bln2Sig = integrate_bz(lsd_bz.vel, lsd_bz.specN2, lsd_bz.specSigN2,
+                    geff, lambda0, cog_val, lsd_bz.specI, lsd_bz.specSigI, norm_val)
+        else: bln2, bln2Sig = (0.0, 0.0)
+        
+        # Get the FAP in the same range as the one used for Bz
+        FAP_V, FAP_N1, FAP_N2 = lsd_bz.calc_fap()
+        
+        result = {
+                'Ic': norm_val,
+                'cog': cog_val,
+                'Bzwidth min': p_bzwidth[0],
+                'Bzwidth max': p_bzwidth[1],
+                'V bz (G)': blv,
+                'V bz sig (G)': blvSig,
+                'V FAP': FAP_V,
+                'N1 bz (G)': bln1,
+                'N1 bz sig (G)': bln1Sig,
+                'N1 FAP': FAP_N1,
+                'N2 bz (G)': bln2,
+                'N2 bz sig (G)': bln2Sig,
+                'N2 FAP': FAP_N2
+                }
+
+        if plot:
+            fig  = plot_bz_calc(self, lsd_in, lsd_bz, velrange,
+                            p_bzwidth, norm_val, cog_val, cog)
+            return result,fig
+        else:
+            return result
 
 def read_lsd(fname):
     """
@@ -576,40 +900,22 @@ class Mask:
 
         return
     
-    def clean_mask(self,data):
+    def clean(self, regions):
         '''
-        Clean the line mask
-
-        :param data: dictionary of start and stop of regions where lines are excluded.
-        '''
-        L = data['WLStart'].size
-
-        regions = np.zeros((L,2))
-
-        regions[:,0] = data['WLStart'][:]
-        regions[:,1] = data['WLFinish'][:]
-
-        #Identifying if a line is inside or outside the regions
-        dcard = []
-        for lines in self.wl:
-            for j in range(0,np.size(regions[:,0])):
-                if regions[j,0] < lines < regions[j,1]:
-                    dcard.append(lines)
-
-        #Creating a list with the Mask.wl elements
-        mask_list = self.wl.tolist()
-
-        for line in dcard:
-            index = (mask_list).index(line)
-            self.iuse[index] = 0
+        Use a ExcludeMaskRegions object and returns a Mask Object in which
+        set the iuse column is set to zero for
+        for spectral lines with wavelengths in these regions. 
         
-        l = np.size(self.wl)
-        spec_lines = []
-        for j in range(0,l):
-            if self.iuse[j] == 1:
-                spec_lines.append(self.wl[j])
-        print('Masks cleaned!')
-        return
+        :param regions: An ExcludeMaskRegions object
+        '''
+        # Making a copy of the 
+        mask_clean = copy.deepcopy(self)
+        nregions = len(regions)
+        for i in range(0,nregions):
+            is_in = np.logical_and( (self.wl>=regions[i].start), (self.wl<=regions[i].stop) )
+            mask_clean.iuse[is_in] = 0
+
+        return mask_clean
 
 def read_mask(fname):
     """
@@ -674,6 +980,10 @@ class ExcludeMaskRegions:
             self.start[key] = newval.start
             self.stop[key] = newval.stop
             self.type[key] = newval.type
+
+    def __len__(self):
+        '''Overloaded len function that returns the number of lines in the mask'''
+        return len(self.start)
 
     def __add__(self, other):
         '''

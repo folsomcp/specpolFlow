@@ -1,14 +1,24 @@
 TODO in order
 
+Note from Vero: I tried to limit the use of external packages as much as possible, but I added the copy package to make a deepcopy of the Mask object in the cleaning routine. 
+I could get away with it if you'd like, but it it will be less elegant. 
+(Cannot use the constructor directly)
+
 Vero: 
 [x] finish the Regions class
     [x] defaults
     [x] read
     [x] test the save, slice, read, and defaults.
     [x] overload the + operator
-[ ] check the mask class for consistency (and also .clean instead of .clean_mask is class function)
-[ ] in mask class, use the region class to return mask
+[x] check the mask class for consistency (and also .clean instead of .clean_mask is class function)
+[x] in mask class, use the region class to return mask
 [ ] Bz into the LSD class. 
+    [x] The cog calculations
+    [x] The FAP
+    [x] The helper integration functions
+    [x] The helper plotting function
+    [x] The Bz function itself
+    [x] Test the code in the Bz standalone tutorial
 
 Colin:
 [ ] tidy up the class names linelist and spectrum
@@ -21,6 +31,8 @@ Colin:
     [ ] maybe add an option for scatter with errors and just lines. 
 
 
+More TODOs that are for filling in the docs:
+[ ] The ExcludeMaskRegions tutorial has all the important code, but needs some actual text. 
 
 
 
