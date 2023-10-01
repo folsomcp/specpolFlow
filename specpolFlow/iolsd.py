@@ -788,7 +788,7 @@ def run_lsdpy(obs=None, mask=None, outName='prof.dat',
                           (if saved) (Default = 'figProf.pdf')
     :rtype: Returns an LSD profile object.  Also the model spectrum (the fit
                           to the observation, i.e. the convolution of the line
-                          mask and LSD profile), inside an 'observation' object.
+                          mask and LSD profile), inside an 'Spectrum' object.
     """
     import LSDpy
 
@@ -799,7 +799,7 @@ def run_lsdpy(obs=None, mask=None, outName='prof.dat',
         fLSDPlotImg, fSavePlotImg, outPlotImgName)
 
     prof = LSD(vel, sI, sIerr, sV, sVerr, sN1, sN1err, header=headerTxt)
-    modelSpec = observation(specList[0], specList[1], specList[2], specList[3],
+    modelSpec = Spectrum(specList[0], specList[1], specList[2], specList[3],
                             np.zeros_like(specList[0]), np.zeros_like(specList[0]))
     return prof, modelSpec
 
@@ -1104,7 +1104,7 @@ def get_telluric_regions_default():
 ###################################
 ###################################
 
-class observation:
+class Spectrum:
     """
     Contains an observed spectrum, usually spectropolarimetric data.
 
@@ -1130,11 +1130,11 @@ class observation:
         
     def __getitem__(self, key):
         """
-        Returns an observation object with only the values at the specified index(s).
+        Returns an Spectrum object with only the values at the specified index(s).
 
         :param key: the index or slice being checked
 
-        :rtype: observation
+        :rtype: Spectrum
         """
         wl_s = self.wl[key]
         specI_s = self.specI[key]
@@ -1143,17 +1143,17 @@ class observation:
         specN1_s = self.specN1[key]
         specN2_s = self.specN2[key]
         #The header may be None but that is ok.
-        slice_obs = observation(wl_s, specI_s, specV_s, specN1_s, specN2_s, specSig_s, header=self.header)
-        return slice_obs
+        slice_spec = Spectrum(wl_s, specI_s, specV_s, specN1_s, specN2_s, specSig_s, header=self.header)
+        return slice_spec
 
     def __setitem__(self, key, newval):
         """
-        Sets all values of the observation at the specified location equal to the input observation's values.
+        Sets all values of the Spectrum at the specified location equal to the input Spectrum's values.
 
         :param key: the index or slice being overwritten
-        :param newval: observation whose values are to replace the overwritten ones
+        :param newval: Spectrum whose values are to replace the overwritten ones
         """
-        if not(isinstance(newval, observation)):
+        if not(isinstance(newval, Spectrum)):
             raise TypeError()
         else:
             self.wl[key] = newval.wl
@@ -1168,7 +1168,7 @@ class observation:
 
     def save(self, fname, saveHeader=True):
         '''
-        Write the observation into a .s LibreESPRIT style format
+        Write the Spectrum into a .s LibreESPRIT style format
         Optionally skip writing the two lines of header
 
         :param saveHeader: optional flag to skip writing the header if False
@@ -1273,7 +1273,7 @@ def read_spectrum(fname, trimBadPix=False, sortByWavelength=False):
                   +'line {:}, {:} columns :\n{:}'.format(
                       nLines, len(words), line))
 
-    obs = observation(np.zeros(nLines), np.zeros(nLines), np.zeros(nLines),
+    obs = Spectrum(np.zeros(nLines), np.zeros(nLines), np.zeros(nLines),
                       np.zeros(nLines), np.zeros(nLines), np.zeros(nLines),
                       header=obs_header)
     
@@ -1321,7 +1321,7 @@ def read_spectrum(fname, trimBadPix=False, sortByWavelength=False):
 ###################################
 ###################################
 
-class line_list:
+class LineList:
     """
     Container for a set of spectral line data, usually from VALD.
 
@@ -1369,10 +1369,10 @@ class line_list:
 
     def __getitem__(self, key):
         """
-        Returns a line_list with only the values at the specified index(s).
+        Returns a LineList with only the values at the specified index(s).
 
         :param key: the index or slice being checked
-        :rtype: line_list
+        :rtype: LineList
         """
         ion      = self.ion[key]
         wl       = self.wl[key]
@@ -1391,19 +1391,19 @@ class line_list:
         configLo = self.configLo[key]
         configUp = self.configUp[key]
         refs     = self.refs[key]
-        lList =  line_list(ion, wl, loggf, Elo, Jlo, Eup, Jup, landeLo,
+        lList =  LineList(ion, wl, loggf, Elo, Jlo, Eup, Jup, landeLo,
                            landeUp, landeEff, rad, stark, waals, depth,
                            configLo, configUp, refs)
         return lList
 
     def __setitem__(self, key, newval):
         """
-        Sets all values of the line_list at the specified location equal to the input line_list values.
+        Sets all values of the LineList at the specified location equal to the input LineList values.
 
         :param key: the index or slice being overwritten
-        :param newval: line_list used to replace the values given by key
+        :param newval: LineList used to replace the values given by key
         """
-        if not(isinstance(newval, line_list)):
+        if not(isinstance(newval, LineList)):
             raise TypeError()
         else:
             self.ion[key]      = newval.ion
@@ -1453,7 +1453,7 @@ class line_list:
         This outputs using the VALD version 3 'extract stellar' 'long' format.
         
         A few details (e.g. references) are omitted since they are not saved
-        in the line_list class.
+        in the LineList class.
         
         :param fname: the file name to save the output to
         """
@@ -1478,8 +1478,8 @@ def line_list_zeros(nLines):
     
     Used by read_VALD (It can be a bit faster to allocate all the array space at once)
     
-    :param nLines: the number of lines in the line_list of zeros
-    :rtype: line_list
+    :param nLines: the number of lines in the LineList of zeros
+    :rtype: LineList
     """
     ion      = np.tile(np.array([''], dtype='U6'), nLines)
     wl       = np.zeros(nLines)
@@ -1498,19 +1498,19 @@ def line_list_zeros(nLines):
     configLo = np.tile(np.array([''], dtype='U128'), nLines)
     configUp = np.tile(np.array([''], dtype='U128'), nLines)
     refs = np.tile(np.array(['_          unknown source'],dtype='U180'), nLines)
-    lList = line_list(ion, wl, loggf, Elo, Jlo, Eup, Jup, landeLo,
+    lList = LineList(ion, wl, loggf, Elo, Jlo, Eup, Jup, landeLo,
                       landeUp, landeEff, rad, stark, waals, depth,
                       configLo, configUp, refs)
     return lList
 
 def read_VALD(fname):
     """
-    Read a list of spectral line data from VALD and return a line_list
+    Read a list of spectral line data from VALD and return a LineList
 
     This expects VALD version 3 line list, in an 'extract stellar' 'long' format.
 
     :param fname: the file name for the VALD line list.
-    :rtype: line_list object, containing arrays of line data
+    :rtype: LineList object, containing arrays of line data
     """
     fVald = open(fname, 'r')
     i = 0

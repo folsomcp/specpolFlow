@@ -21,7 +21,7 @@ Vero:
     [x] Test the code in the Bz standalone tutorial
 
 Colin:
-[ ] tidy up the class names linelist and spectrum
+[x] tidy up the class names linelist and spectrum
 [ ] move rvfits to the LSD class
 [ ] moving the __main__ to scripts in the CommandLineScript
     wait until V has moved the Bz to the LSD class for that one..
@@ -32,6 +32,7 @@ Colin:
     [ ] maybe add an option for scatter with errors and just lines. 
 
 
+
 More TODOs that are for filling in the docs:
 [ ] The ExcludeMaskRegions tutorial has all the important code, but needs some actual text. 
 
@@ -39,6 +40,16 @@ More TODOs that are for filling in the docs:
 *** Colin will check the [:] in the set items for a
 lsd[2] = lsd[3] type of command and check if it is needed
 -> DONE!
+
+Name changes to be aware of for other scripts:
+* lsd_prof => LSD
+* mask => Mask
+* line_list => LineList
+* observation => Spectrum
+* mask.set_weights() => Mask.get_weights()
+* mask.clean_mask() => Mask.clean()
+* observation.write_s() => Spectrum.save()
+
 
 Some convention:
 
@@ -75,7 +86,7 @@ Class: LSD ->
     * def scale(self, scale_int, scale_pol):
 
     * def plot(self, figsize=(10,10), sameYRange=True, plotZeroLevel=True, **kwargs):
-        [ ] add fig=None, ax=None so that another call can overplot another LSD profile. 
+        [x] add fig=None, ax=None so that another call can overplot another LSD profile. 
         [ ] maybe add an option for scatter with errors and just lines. 
 
 -> read_lsd()
@@ -144,7 +155,7 @@ Class: Spectrum
     * [later] Add a split order class function (see cleanMask.py split_order or Colin's normplot) 
     * [later] Add a little wrapper that takes a wavelength (and a range?), cut a line, put in an lsd object and calls lsd.rvfit. 
     
- [x ] Colin need to check the \n in the reading of the header to see whether a \n is needed or not when writing the header back in a .s file
+ [x] Colin need to check the \n in the reading of the header to see whether a \n is needed or not when writing the header back in a .s file
 
  [ ] Would be better is the converters reading other format file, create a spectrum object and write it back with the class.save method. 
 
