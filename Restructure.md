@@ -27,13 +27,13 @@ Colin:
     wait until V has moved the Bz to the LSD class for that one..
 [ ] check whether we can split off some part of ioLSD
 * def plot(self, figsize=(10,10), sameYRange=True, plotZeroLevel=True, **kwargs):
-    [ ] add fig=None, ax=None so that another call can overplot another LSD profile. 
+    [x] add fig=None, ax=None so that another call can overplot another LSD profile. 
+    [x] add a command line wrapper around LSD.plot()
     [ ] maybe add an option for scatter with errors and just lines. 
 
 
 More TODOs that are for filling in the docs:
 [ ] The ExcludeMaskRegions tutorial has all the important code, but needs some actual text. 
-
 
 
 *** Colin will check the [:] in the set items for a
