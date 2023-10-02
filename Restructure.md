@@ -22,15 +22,19 @@ Vero:
 
 Colin:
 [x] tidy up the class names linelist and spectrum
-[ ] move rvfits to the LSD class
+[x] move rvfits to the LSD class
 [ ] moving the __main__ to scripts in the CommandLineScript
     wait until V has moved the Bz to the LSD class for that one..
+    [x] rvFit.py
+    [ ] bz.py
+    [ ] makeMask.py
+    [ ] cleanMaskUI.py
 [ ] check whether we can split off some part of ioLSD
 * def plot(self, figsize=(10,10), sameYRange=True, plotZeroLevel=True, **kwargs):
     [x] add fig=None, ax=None so that another call can overplot another LSD profile. 
     [x] add a command line wrapper around LSD.plot()
     [ ] maybe add an option for scatter with errors and just lines. 
-
+[ ] update makeMask.py, cleanMaskUI.py, with new class & funciton names
 
 
 More TODOs that are for filling in the docs:
@@ -49,6 +53,8 @@ Name changes to be aware of for other scripts:
 * mask.set_weights() => Mask.get_weights()
 * mask.clean_mask() => Mask.clean()
 * observation.write_s() => Spectrum.save()
+* calcBz() => LSD.calc_bz()
+* fitGaussianRV() => LSD.fit_gaussian_rv()
 
 
 Some convention:
