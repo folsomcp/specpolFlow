@@ -27,7 +27,7 @@ Colin:
     wait until V has moved the Bz to the LSD class for that one..
     [x] rvFit.py
     [x] bz.py
-    [ ] makeMask.py
+    [x] makeMask.py
     [ ] cleanMaskUI.py
 [ ] check whether we can split off some part of ioLSD
 * def plot(self, figsize=(10,10), sameYRange=True, plotZeroLevel=True, **kwargs):
