@@ -951,14 +951,8 @@ class Mask:
         Remove lines if iuse index is set to 0,
         restricting the Mask to only lines used in LSD.
         """
-        #Restrict the Mask to only lines flagged to be used
-        ind2 = np.where(self.iuse != 0)
-        return Mask(self.wl[ind2],
-                    self.element[ind2],
-                    self.depth[ind2],
-                    self.excite[ind2],
-                    self.lande[ind2],
-                    self.iuse[ind2] )
+        trimmedMask = self[self.iuse != 0]
+        return trimmedMask
         
     def get_weights(self, normDepth, normWave, normLande):
         """
@@ -1097,7 +1091,7 @@ class ExcludeMaskRegions:
         """
         with open(fname, 'w') as ofile:
             for item in self:
-                ofile.write('{} {} {}\n'.format(item.start, item.stop, item.type))
+                ofile.write('{:.4f} {:.4f} {}\n'.format(item.start, item.stop, item.type))
         return
 
     def to_dict(self):
@@ -1172,7 +1166,7 @@ def get_telluric_regions_default():
     '''
     Returns a ExcludeMaskRegions object with regions with heavy telluric regions in the optical
     '''
-    start = np.array([587.5,627.5,684.0,717.0,757.0,790.0,809.0])  # nm
+    start = np.array([587.5,627.5,686.0,717.0,759.0,790.0,809.0])  # nm
     stop   = np.array([592.0,632.5,705.3,735.0,771.0,795.0,990.0])  # nm
 
     return ExcludeMaskRegions(start, stop, np.array(['telluric']*len(start),dtype=object))

@@ -28,7 +28,7 @@ Colin:
     [x] rvFit.py
     [x] bz.py
     [x] makeMask.py
-    [ ] cleanMaskUI.py
+    [x] cleanMaskUI.py
 [ ] check whether we can split off some part of ioLSD
 * def plot(self, figsize=(10,10), sameYRange=True, plotZeroLevel=True, **kwargs):
     [x] add fig=None, ax=None so that another call can overplot another LSD profile. 
