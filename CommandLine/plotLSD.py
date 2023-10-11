@@ -16,7 +16,7 @@ except ModuleNotFoundError:
     sys.path.insert(0, os.path.join(loc0, '..', '..'))
     import specpolFlow as pol
 
-###############################################################
+
 #For running as a terminal program
 if __name__ == "__main__":
     #Take input file names as command line arguments,

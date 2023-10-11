@@ -23,22 +23,26 @@ Vero:
 Colin:
 [x] tidy up the class names linelist and spectrum
 [x] move rvfits to the LSD class
-[ ] moving the __main__ to scripts in the CommandLineScript
+[x] moving the __main__ to scripts in the CommandLineScript
     wait until V has moved the Bz to the LSD class for that one..
     [x] rvFit.py
     [x] bz.py
     [x] makeMask.py
     [x] cleanMaskUI.py
-[ ] check whether we can split off some part of ioLSD
+[x] check whether we can split off some part of ioLSD [mostly seperates cleanly]
 * def plot(self, figsize=(10,10), sameYRange=True, plotZeroLevel=True, **kwargs):
     [x] add fig=None, ax=None so that another call can overplot another LSD profile. 
     [x] add a command line wrapper around LSD.plot()
     [ ] maybe add an option for scatter with errors and just lines. 
-[ ] update makeMask.py, cleanMaskUI.py, with new class & funciton names
+[x] update makeMask.py, cleanMaskUI.py, with new class & funciton names
 
 
 More TODOs that are for filling in the docs:
 [ ] The ExcludeMaskRegions tutorial has all the important code, but needs some actual text. 
+
+Maybes:
+[ ] fine tune telluric exclude regions?
+[ ] add Paschen line exclude regions?
 
 
 *** Colin will check the [:] in the set items for a
@@ -55,6 +59,67 @@ Name changes to be aware of for other scripts:
 * observation.write_s() => Spectrum.save()
 * calcBz() => LSD.calc_bz()
 * fitGaussianRV() => LSD.fit_gaussian_rv()
+
+
+A possible more extensive file structure modificaiton
+
+specpolFlow/
+|- _init__.py
+|- CommandLineScripts/
+|  |- plotLSD.py
+|  |- bz.py
+|  |- rvFit.py
+|  |- makeMask.py
+|  |- cleanMaskUI.py
+|  |- [peridogram thing?]
+|
+|- specpolFlow/
+|  |- _init__.py
+|  |- profileLSD.py
+|  |   |- class LSD
+|  |   |- def read_lsd()
+|  |   |- def plot_bz_calc()
+|  |   |- def run_lsdpy()
+|  |   |- def _integrate_bz()
+|  |   |- def _gaussProf()
+|  |- mask.py
+|  |   |- class Mask
+|  |   |- def read_mask
+|  |   |- class ExcludeMaskRegions
+|  |   |- def read_exclude_mask_regions
+|  |   |- def get_Balmer_regions_default
+|  |   |- def get_telluric_regions_default
+|  |   |- def make_mask  [from makeMask.py, could be in lineList.py]
+|  |   |- def convert_list_to_mask [from makeMask.py, could be in lineList.py]
+|  |   |- def filter_mask [from makeMask.py, could be in lineList.py]
+|  |- obsSpec.py
+|  |   |- class Spectrum
+|  |   |- def read_spectrum
+|  |- lineList.py
+|  |   |- class LineList
+|  |   |- def line_list_zeros
+|  |   |- def read_VALD
+|  |   |- def estimateLande [from makeMask.py]
+|  |   |- def get_LS_numbers [from makeMask.py]
+|  |   |- def get_JJ_numbers [from makeMask.py]
+|  |   |- def get_JK_numbers [from makeMask.py]
+|  |   |- def _parseFraction [from makeMask.py]
+|  |   |- def getEffectiveLande [from makeMask.py]
+|  |- cleanMaskUI.py
+|  |   |- def clean_mask_ui
+|  |   |  [could be merged w mask.py, but depends on most other modules]
+|  |   |  [could be merged w cleanMaskUISubroutines.py, but that complicatedthe namespace]
+|  |- cleanMaskUISubroutines.py
+|  |   |- [no real changes here, not in __init__.py]
+|
+|- converters/   [maybe this could be in "specpolFlow/"? ]
+   |- _init__.py
+   |- espadons.py
+   |- spirouPol.py [specificaly for polarimetric mode?]
+   |- neoNarval.py [for Artruro's pipeline?]
+   |- UVES.py [maybe?]
+   |- xshooter.py [maybe?]
+   |- harps.py [maybe?]
 
 
 Some convention:

@@ -46,7 +46,7 @@ if __name__ == "__main__":
     
     #Run the line mask generating code
     print('reading line list from', llistName)
-    mask = pol.makeMask.make_mask(llistName, maskName, depthCutoff = depthCutoff,
+    mask = pol.make_mask(llistName, maskName, depthCutoff = depthCutoff,
                                   wlStart = wl1, wlEnd = wl2,
                                   landeStart = lande1, landeEnd = lande2,
                                   elementsUsed = elementsUsed,
