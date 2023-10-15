@@ -36,8 +36,8 @@ class LSD:
     * numParam - The number of Stokes I V & Null profiles used (usually 1, 3, or 4)
     * npix - the number of pixels (points in velocity) in the LSD profile
     """
-    def __init__(self, vel, specI, specSigI, specV=[], specSigV=[],
-                 specN1=[], specSigN1=[], specN2=[], specSigN2=[], header=None):
+    def __init__(self, vel, specI, specSigI, specV=None, specSigV=None,
+                 specN1=None, specSigN1=None, specN2=None, specSigN2=None, header=None):
         """
         Initialize an LSD profile, using data from an existing profile. 
 
@@ -58,7 +58,7 @@ class LSD:
         self.npix = vel.size
         self.numParam = 1
         
-        if(specV != [] and specSigV != []):
+        if(specV is not None and specSigV is not None):
             self.specV = specV
             self.specSigV = specSigV
             self.numParam = 2
@@ -66,7 +66,7 @@ class LSD:
             self.specV = np.zeros(self.npix)
             self.specSigV = np.zeros(self.npix)
             
-        if(specN1 != [] and specSigN1 != []):
+        if(specN1 is not None and specSigN1 is not None):
             self.specN1 = specN1
             self.specSigN1 = specSigN1
             self.numParam = 3
@@ -74,7 +74,7 @@ class LSD:
             self.specN1 = np.zeros(self.npix)
             self.specSigN1 = np.zeros(self.npix)
         
-        if(specN2 != [] and specSigN2 != []):
+        if(specN2 is not None and specSigN2 is not None):
             self.specN2 = specN2
             self.specSigN2 = specSigN2
             self.numParam = 4
@@ -82,7 +82,7 @@ class LSD:
             self.specN2 = np.zeros(self.npix)
             self.specSigN2 = np.zeros(self.npix)
         
-        if(header != None):
+        if(header is not None):
             self.header = header
         else:
             self.header = ""
