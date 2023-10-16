@@ -9,5 +9,5 @@ longitudinal magnetic fields (Bz).
 #from .specpolFlow.iolsd import *
 #from .specpolFlow.LSDprofile import *
 #from .specpolFlow import makeMask
-#import specpolFlow.converters
+import specpolFlow.converters
 from specpolFlow.specpolFlow import *
