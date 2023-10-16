@@ -824,6 +824,7 @@ def run_lsdpy(obs=None, mask=None, outName='prof.dat',
     explicitly specified and if the inlsd.dat file is missing.
     
     Arguments are: 
+    
     :param obs:           name of the input observed spectrum file
     :param mask:          name of the input LSD mask file
     :param outName:       name of the output LSD profile (Default = 'prof.dat')

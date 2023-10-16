@@ -25,18 +25,26 @@ These tutorials are in the form of python notebooks (that can also run on Google
    :maxdepth: 1
    :caption: Contents:
 
+
+
 .. toctree::
-   tutorials/ColabSetup
-   tutorials/LSDtutorial
-   tutorials/CalculateBz
-   tutorials/LSDsonification
+   tutorials/OneObservationFlow_Tutorial
+   tutorials/LoopFlow_Tutorial
+   tutorials/CalculateBz_Tutorial
+   tutorials/ConvertToSFiles_Tutorial
+   tutorials/ExcludeMaskRegionClass_Tutorial
+   tutorials/LSDClass_Tutorial
+   tutorials/MaskClass_Tutorial
+   tutorials/ColabSetup_Tutorial
+   tutorials/LSDsonification_Tutorial
    :maxdepth: 1
    :caption: Tutorials:
 
 
+
 .. toctree::
    API
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: API documentation:
 
 

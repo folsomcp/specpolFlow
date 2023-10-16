@@ -1,35 +1,65 @@
-spFlow Package
-==============
+specpolFlow Package
+====================
 
-iolsd module
-####################
 
-.. automodule:: specpolFlow.iolsd
-    :members:
-    :special-members: __init__
+LSD class and functions
+-----------------------------
 
-Bz module
-####################
-
-.. automodule:: specpolFlow.bz
+.. autoclass:: specpolFlow.LSD
     :members:
 
-makeMask module
-####################
+.. autofunction:: specpolFlow.read_lsd
 
-.. automodule:: specpolFlow.makeMask
+
+.. autofunction:: specpolFlow.run_lsdpy
+
+
+Mask and ExcludeMaskRegion classes and functions
+-------------------------------------------------
+
+.. autoclass:: specpolFlow.Mask
     :members:
 
+.. autofunction:: specpolFlow.read_mask
 
-cleanmask module
-####################
-
-.. automodule:: specpolFlow.cleanmask
+.. autoclass:: specpolFlow.ExcludeMaskRegions
     :members:
 
 
-rvFit module
-####################
+.. autofunction:: specpolFlow.read_exclude_mask_regions
 
-.. automodule:: specpolFlow.rvFit
+.. autofunction:: specpolFlow.get_Balmer_regions_default
+
+.. autofunction:: specpolFlow.get_telluric_regions_default
+
+.. autofunction:: specpolFlow.make_mask
+
+
+Spectrum classes and functions
+-------------------------------------------------
+
+.. autoclass:: specpolFlow.Spectrum
     :members:
+
+.. autofunction:: specpolFlow.read_spectrum
+
+
+LineList classe and functions
+-------------------------------------------------
+
+.. autoclass:: specpolFlow.LineList
+    :members:
+
+.. autofunction:: specpolFlow.line_list_zeros
+
+.. autofunction:: specpolFlow.read_VALD
+
+.. autofunction:: specpolFlow.getEffectiveLande
+
+.. autofunction:: specpolFlow.estimateLande
+
+.. autofunction:: specpolFlow.get_LS_numbers
+
+.. autofunction:: specpolFlow.get_JJ_numbers
+
+.. autofunction:: specpolFlow.get_JK_numbers
