@@ -44,7 +44,7 @@ These tutorials are in the form of python notebooks (that can also run on Google
 
 .. toctree::
    API
-   :maxdepth: 3
+   :maxdepth: 4
    :caption: API documentation:
 
 
