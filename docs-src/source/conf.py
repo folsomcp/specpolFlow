@@ -19,9 +19,11 @@ sys.path.insert(0, os.path.abspath('../../../'))
 # -- Project information -----------------------------------------------------
 
 project = 'SpecPolFlow'
-copyright = '2022, The SpecPolFlow team'
-author = '2022, The SpecPolFlow team'
+copyright = '2023, The SpecPolFlow team'
+author = '2021, The SpecPolFlow team'
 
+# The full version, including alpha/beta/rc tags
+release = '0.1'
 
 # -- General configuration ---------------------------------------------------
 
@@ -60,3 +62,12 @@ html_theme = 'sphinx_rtd_theme'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 html_logo = "images/final_logo.png"
+
+html_css_files = [
+    'css/custom.css',
+    ]
+
+html_theme_options = {
+    'logo_only': False,
+    'display_version': True,
+    }
