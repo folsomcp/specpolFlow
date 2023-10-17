@@ -54,7 +54,7 @@ exclude_patterns = []
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+#html_theme = 'alabaster'
 html_theme = 'sphinx_rtd_theme'
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -63,11 +63,5 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 html_logo = "images/final_logo.png"
 
-html_css_files = [
-    'css/custom.css',
-    ]
+html_css_files = ["custom.css"]
 
-html_theme_options = {
-    'logo_only': False,
-    'display_version': True,
-    }
