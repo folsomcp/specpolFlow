@@ -31,3 +31,5 @@ Past Contributors:
 * Marisol Catalan Olais
 * Dax Moraes
 
+Credits: The SpecpolFlow logo was created by the talented Tali Natan!
+
