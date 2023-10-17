@@ -3,9 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; SpecPolFlow  documentation</title>
+  <title>Index &mdash; SpecPolFlow 0.1 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -31,6 +32,7 @@
           
           <a href="index.html" class="icon icon-home">
             SpecPolFlow
+              <img src="_static/final_logo.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -47,14 +49,19 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorials:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="tutorials/ColabSetup.html">Importing specpolFlow into Colab for tutorial</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorials/LSDtutorial.html">Demonstration of the LSD class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorials/CalculateBz.html">Calculating the longitudinal field and False Alarm Probability (FAP)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorials/LSDsonification.html">Sonifying LSD profiles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/OneObservationFlow_Tutorial.html">Using SpecpolFlow: Example <span class="math notranslate nohighlight">\(\xi^1\)</span> CMa (HD 46328)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/LoopFlow_Tutorial.html">Using SpecpolFlow with Multiple Spectra Files: Example <span class="math notranslate nohighlight">\(\xi^1\)</span> CMa (HD 46328)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/CalculateBz_Tutorial.html">Calculating the longitudinal field (Bz) and False Alarm Probability (FAP)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/ConvertToSFiles_Tutorial.html">Conversion of telescope-provided files to the standardized .s format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/ExcludeMaskRegionClass_Tutorial.html">Tutorial on the ExcludeMaskRegion objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/LSDClass_Tutorial.html">Demonstration of the LSD class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/MaskClass_Tutorial.html">Mask Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/ColabSetup_Tutorial.html">Importing specpolFlow into Colab</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/LSDsonification_Tutorial.html">Sonifying LSD profiles</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API documentation:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="API.html">spFlow Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="API.html">specpolFlow Package</a></li>
 </ul>
 
         </div>
@@ -84,57 +91,38 @@
 <h1 id="index">Index</h1>
 
 <div class="genindex-jumpbox">
- <a href="#_"><strong>_</strong></a>
- | <a href="#C"><strong>C</strong></a>
- | <a href="#D"><strong>D</strong></a>
+ <a href="#C"><strong>C</strong></a>
  | <a href="#E"><strong>E</strong></a>
  | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
- | <a href="#O"><strong>O</strong></a>
  | <a href="#P"><strong>P</strong></a>
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
+ | <a href="#T"><strong>T</strong></a>
  | <a href="#V"><strong>V</strong></a>
- | <a href="#W"><strong>W</strong></a>
  
 </div>
-<h2 id="_">_</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="API.html#specpolFlow.iolsd.line_list.__init__">__init__() (specpolFlow.iolsd.line_list method)</a>
-
-      <ul>
-        <li><a href="API.html#specpolFlow.iolsd.lsd_prof.__init__">(specpolFlow.iolsd.lsd_prof method)</a>
-</li>
-        <li><a href="API.html#specpolFlow.iolsd.mask.__init__">(specpolFlow.iolsd.mask method)</a>
-</li>
-        <li><a href="API.html#specpolFlow.iolsd.observation.__init__">(specpolFlow.iolsd.observation method)</a>
-</li>
-      </ul></li>
-  </ul></td>
-</tr></table>
-
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="API.html#specpolFlow.bz.calcBz">calcBz() (in module specpolFlow.bz)</a>
+      <li><a href="API.html#specpolFlow.LSD.calc_bz">calc_bz() (specpolFlow.LSD method)</a>
+</li>
+      <li><a href="API.html#specpolFlow.LSD.calc_fap">calc_fap() (specpolFlow.LSD method)</a>
+</li>
+      <li><a href="API.html#specpolFlow.Mask.clean">clean() (specpolFlow.Mask method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="API.html#specpolFlow.cleanmask.clean_model_mask">clean_model_mask() (in module specpolFlow.cleanmask)</a>
+      <li><a href="API.html#specpolFlow.LSD.cog_I">cog_I() (specpolFlow.LSD method)</a>
 </li>
-      <li><a href="API.html#specpolFlow.makeMask.convert_list_to_mask">convert_list_to_mask() (in module specpolFlow.makeMask)</a>
+      <li><a href="API.html#specpolFlow.LSD.cog_IV">cog_IV() (specpolFlow.LSD method)</a>
 </li>
-  </ul></td>
-</tr></table>
-
-<h2 id="D">D</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="API.html#specpolFlow.cleanmask.default_exclude_regions">default_exclude_regions() (in module specpolFlow.cleanmask)</a>
+      <li><a href="API.html#specpolFlow.LSD.cog_min">cog_min() (specpolFlow.LSD method)</a>
+</li>
+      <li><a href="API.html#specpolFlow.LSD.cog_V">cog_V() (specpolFlow.LSD method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -142,7 +130,11 @@
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="API.html#specpolFlow.makeMask.estimateLande">estimateLande() (in module specpolFlow.makeMask)</a>
+      <li><a href="API.html#specpolFlow.estimateLande">estimateLande() (in module specpolFlow)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="API.html#specpolFlow.ExcludeMaskRegions">ExcludeMaskRegions (class in specpolFlow)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -150,13 +142,7 @@
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="API.html#specpolFlow.bz.FAP">FAP() (in module specpolFlow.bz)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="API.html#specpolFlow.makeMask.filter_mask">filter_mask() (in module specpolFlow.makeMask)</a>
-</li>
-      <li><a href="API.html#specpolFlow.rvFit.fitGaussianRV">fitGaussianRV() (in module specpolFlow.rvFit)</a>
+      <li><a href="API.html#specpolFlow.LSD.fit_gaussian_rv">fit_gaussian_rv() (specpolFlow.LSD method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -164,15 +150,21 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="API.html#specpolFlow.makeMask.get_JJ_numbers">get_JJ_numbers() (in module specpolFlow.makeMask)</a>
+      <li><a href="API.html#specpolFlow.get_Balmer_regions_default">get_Balmer_regions_default() (in module specpolFlow)</a>
 </li>
-      <li><a href="API.html#specpolFlow.makeMask.get_JK_numbers">get_JK_numbers() (in module specpolFlow.makeMask)</a>
+      <li><a href="API.html#specpolFlow.get_JJ_numbers">get_JJ_numbers() (in module specpolFlow)</a>
+</li>
+      <li><a href="API.html#specpolFlow.get_JK_numbers">get_JK_numbers() (in module specpolFlow)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="API.html#specpolFlow.makeMask.get_LS_numbers">get_LS_numbers() (in module specpolFlow.makeMask)</a>
+      <li><a href="API.html#specpolFlow.get_LS_numbers">get_LS_numbers() (in module specpolFlow)</a>
 </li>
-      <li><a href="API.html#specpolFlow.makeMask.getEffectiveLande">getEffectiveLande() (in module specpolFlow.makeMask)</a>
+      <li><a href="API.html#specpolFlow.get_telluric_regions_default">get_telluric_regions_default() (in module specpolFlow)</a>
+</li>
+      <li><a href="API.html#specpolFlow.Mask.get_weights">get_weights() (specpolFlow.Mask method)</a>
+</li>
+      <li><a href="API.html#specpolFlow.getEffectiveLande">getEffectiveLande() (in module specpolFlow)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -180,11 +172,13 @@
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="API.html#specpolFlow.iolsd.line_list">line_list (class in specpolFlow.iolsd)</a>
+      <li><a href="API.html#specpolFlow.line_list_zeros">line_list_zeros() (in module specpolFlow)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="API.html#specpolFlow.iolsd.lsd_prof">lsd_prof (class in specpolFlow.iolsd)</a>
+      <li><a href="API.html#specpolFlow.LineList">LineList (class in specpolFlow)</a>
+</li>
+      <li><a href="API.html#specpolFlow.LSD">LSD (class in specpolFlow)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -192,40 +186,19 @@
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="API.html#specpolFlow.makeMask.make_mask">make_mask() (in module specpolFlow.makeMask)</a>
+      <li><a href="API.html#specpolFlow.make_mask">make_mask() (in module specpolFlow)</a>
 </li>
-      <li><a href="API.html#specpolFlow.iolsd.mask">mask (class in specpolFlow.iolsd)</a>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="API.html#specpolFlow.Mask">Mask (class in specpolFlow)</a>
 </li>
-      <li>
-    module
-
-      <ul>
-        <li><a href="API.html#module-specpolFlow.bz">specpolFlow.bz</a>
-</li>
-        <li><a href="API.html#module-specpolFlow.cleanmask">specpolFlow.cleanmask</a>
-</li>
-        <li><a href="API.html#module-specpolFlow.iolsd">specpolFlow.iolsd</a>
-</li>
-        <li><a href="API.html#module-specpolFlow.makeMask">specpolFlow.makeMask</a>
-</li>
-        <li><a href="API.html#module-specpolFlow.rvFit">specpolFlow.rvFit</a>
-</li>
-      </ul></li>
   </ul></td>
 </tr></table>
 
 <h2 id="N">N</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="API.html#specpolFlow.iolsd.lsd_prof.norm">norm() (specpolFlow.iolsd.lsd_prof method)</a>
-</li>
-  </ul></td>
-</tr></table>
-
-<h2 id="O">O</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="API.html#specpolFlow.iolsd.observation">observation (class in specpolFlow.iolsd)</a>
+      <li><a href="API.html#specpolFlow.LSD.norm">norm() (specpolFlow.LSD method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -233,15 +206,11 @@
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="API.html#specpolFlow.makeMask.parseFraction">parseFraction() (in module specpolFlow.makeMask)</a>
-</li>
-      <li><a href="API.html#specpolFlow.iolsd.lsd_prof.plot">plot() (specpolFlow.iolsd.lsd_prof method)</a>
+      <li><a href="API.html#specpolFlow.LSD.plot">plot() (specpolFlow.LSD method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="API.html#specpolFlow.bz.plotBzCalc">plotBzCalc() (in module specpolFlow.bz)</a>
-</li>
-      <li><a href="API.html#specpolFlow.iolsd.mask.prune">prune() (specpolFlow.iolsd.mask method)</a>
+      <li><a href="API.html#specpolFlow.Mask.prune">prune() (specpolFlow.Mask method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -249,13 +218,19 @@
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="API.html#specpolFlow.iolsd.read_lsd">read_lsd() (in module specpolFlow.iolsd)</a>
+      <li><a href="API.html#specpolFlow.read_exclude_mask_regions">read_exclude_mask_regions() (in module specpolFlow)</a>
+</li>
+      <li><a href="API.html#specpolFlow.read_lsd">read_lsd() (in module specpolFlow)</a>
+</li>
+      <li><a href="API.html#specpolFlow.read_mask">read_mask() (in module specpolFlow)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="API.html#specpolFlow.iolsd.read_spectrum">read_spectrum() (in module specpolFlow.iolsd)</a>
+      <li><a href="API.html#specpolFlow.read_spectrum">read_spectrum() (in module specpolFlow)</a>
 </li>
-      <li><a href="API.html#specpolFlow.iolsd.read_VALD">read_VALD() (in module specpolFlow.iolsd)</a>
+      <li><a href="API.html#specpolFlow.read_VALD">read_VALD() (in module specpolFlow)</a>
+</li>
+      <li><a href="API.html#specpolFlow.run_lsdpy">run_lsdpy() (in module specpolFlow)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -263,76 +238,41 @@
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="API.html#specpolFlow.iolsd.lsd_prof.save">save() (specpolFlow.iolsd.lsd_prof method)</a>
+      <li><a href="API.html#specpolFlow.ExcludeMaskRegions.save">save() (specpolFlow.ExcludeMaskRegions method)</a>
 
       <ul>
-        <li><a href="API.html#specpolFlow.iolsd.mask.save">(specpolFlow.iolsd.mask method)</a>
+        <li><a href="API.html#specpolFlow.LineList.save">(specpolFlow.LineList method)</a>
 </li>
-      </ul></li>
-      <li><a href="API.html#specpolFlow.iolsd.lsd_prof.scale">scale() (specpolFlow.iolsd.lsd_prof method)</a>
+        <li><a href="API.html#specpolFlow.LSD.save">(specpolFlow.LSD method)</a>
 </li>
-      <li><a href="API.html#specpolFlow.iolsd.lsd_prof.set_weights">set_weights() (specpolFlow.iolsd.lsd_prof method)</a>
-
-      <ul>
-        <li><a href="API.html#specpolFlow.iolsd.mask.set_weights">(specpolFlow.iolsd.mask method)</a>
+        <li><a href="API.html#specpolFlow.Mask.save">(specpolFlow.Mask method)</a>
 </li>
-      </ul></li>
-      <li>
-    specpolFlow.bz
-
-      <ul>
-        <li><a href="API.html#module-specpolFlow.bz">module</a>
+        <li><a href="API.html#specpolFlow.Spectrum.save">(specpolFlow.Spectrum method)</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li>
-    specpolFlow.cleanmask
-
-      <ul>
-        <li><a href="API.html#module-specpolFlow.cleanmask">module</a>
+      <li><a href="API.html#specpolFlow.LSD.scale">scale() (specpolFlow.LSD method)</a>
 </li>
-      </ul></li>
-      <li>
-    specpolFlow.iolsd
-
-      <ul>
-        <li><a href="API.html#module-specpolFlow.iolsd">module</a>
+      <li><a href="API.html#specpolFlow.LSD.set_weights">set_weights() (specpolFlow.LSD method)</a>
 </li>
-      </ul></li>
-      <li>
-    specpolFlow.makeMask
-
-      <ul>
-        <li><a href="API.html#module-specpolFlow.makeMask">module</a>
+      <li><a href="API.html#specpolFlow.Spectrum">Spectrum (class in specpolFlow)</a>
 </li>
-      </ul></li>
-      <li>
-    specpolFlow.rvFit
+  </ul></td>
+</tr></table>
 
-      <ul>
-        <li><a href="API.html#module-specpolFlow.rvFit">module</a>
+<h2 id="T">T</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="API.html#specpolFlow.ExcludeMaskRegions.to_dict">to_dict() (specpolFlow.ExcludeMaskRegions method)</a>
 </li>
-      </ul></li>
   </ul></td>
 </tr></table>
 
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="API.html#specpolFlow.iolsd.lsd_prof.vshift">vshift() (specpolFlow.iolsd.lsd_prof method)</a>
-</li>
-  </ul></td>
-</tr></table>
-
-<h2 id="W">W</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="API.html#specpolFlow.iolsd.observation.write_s">write_s() (specpolFlow.iolsd.observation method)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="API.html#specpolFlow.iolsd.write_VALD">write_VALD() (in module specpolFlow.iolsd)</a>
+      <li><a href="API.html#specpolFlow.LSD.vshift">vshift() (specpolFlow.LSD method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -346,7 +286,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, The SpecPolFlow team.</p>
+    <p>&#169; Copyright 2023, The SpecPolFlow team.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

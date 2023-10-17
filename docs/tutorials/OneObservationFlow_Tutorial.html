@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Using SpecpolFlow: Example \(\xi^1\) CMa (HD 46328) &mdash; SpecPolFlow 0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/nbsphinx-code-cells.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Using SpecpolFlow with Multiple Spectra Files: Example \(\xi^1\) CMa (HD 46328)" href="LoopFlow_Tutorial.html" />
+    <link rel="prev" title="Credits" href="../Credits.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            SpecPolFlow
+              <img src="../_static/final_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Credits.html">Credits</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Using SpecpolFlow: Example <span class="math notranslate nohighlight">\(\xi^1\)</span> CMa (HD 46328)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#1.-Star-Selection">1. Star Selection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#2.-Importing-Necessary-Packages">2. Importing Necessary Packages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#3.-Creating-LSD-Line-Mask">3. Creating LSD Line Mask</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#4.-Cleaning-Line-Mask">4. Cleaning Line Mask</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#5.-Create-LSD-Profile">5. Create LSD Profile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#6.-Calculate-B_z-from-LSD-Profile">6. Calculate <span class="math notranslate nohighlight">\(B_z\)</span> from LSD Profile</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="LoopFlow_Tutorial.html">Using SpecpolFlow with Multiple Spectra Files: Example <span class="math notranslate nohighlight">\(\xi^1\)</span> CMa (HD 46328)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CalculateBz_Tutorial.html">Calculating the longitudinal field (Bz) and False Alarm Probability (FAP)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ConvertToSFiles_Tutorial.html">Conversion of telescope-provided files to the standardized .s format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ExcludeMaskRegionClass_Tutorial.html">Tutorial on the ExcludeMaskRegion objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="LSDClass_Tutorial.html">Demonstration of the LSD class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MaskClass_Tutorial.html">Mask Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ColabSetup_Tutorial.html">Importing specpolFlow into Colab</a></li>
+<li class="toctree-l1"><a class="reference internal" href="LSDsonification_Tutorial.html">Sonifying LSD profiles</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API documentation:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../API.html">specpolFlow Package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SpecPolFlow</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Using SpecpolFlow: Example <span class="math notranslate nohighlight">\(\xi^1\)</span> CMa (HD 46328)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/tutorials/OneObservationFlow_Tutorial.nblink.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="Using-SpecpolFlow:-Example-\xi^1-CMa-(HD-46328)">
+<h1>Using SpecpolFlow: Example <span class="math notranslate nohighlight">\(\xi^1\)</span> CMa (HD 46328)<a class="headerlink" href="#Using-SpecpolFlow:-Example-\xi^1-CMa-(HD-46328)" title="Permalink to this heading"></a></h1>
+<p><img alt="8ecb8c39402e49b7b8a7f6a0165b6c04" class="no-scaled-link" src="tutorials/OneObservationFlow_tutorialfiles/diagram4.png" style="width: 1000px;" /></p>
+<p>In the below code, we will walk through how to use <a class="reference external" href="https://github.com/folsomcp/specpolFlow">SpecpolFlow</a> (with the use of <a class="reference external" href="https://github.com/folsomcp/LSDpy">LSDpy</a>) with the spectra and polarization data of the magnetic B star <span class="math notranslate nohighlight">\(\xi^1\)</span> CMa (HD 46328; <a class="reference external" href="https://doi.org/10.1093/mnras/stab1454">Erba et al. 2021</a>; ESPaDOnS). The code has the following structure: 1. Star Selection 2. Import packages 3. Creating the LSD Line Mask 4. Cleaning Line Mask 5. Creating LSD Profile 6.
+Extracting <span class="math notranslate nohighlight">\(B_{\text{z}}\)</span></p>
+<p>For additional information on the uses and outputs of either code, please consult their respective GitHubs linked above.</p>
+<section id="1.-Star-Selection">
+<h2>1. Star Selection<a class="headerlink" href="#1.-Star-Selection" title="Permalink to this heading"></a></h2>
+<ol class="arabic simple" start="0">
+<li><p>To use this tutorial, you must start with a normalized spectrum (.s file). If you do not have a .s file (you have .fits or .p files), please see the normalization tool <a class="reference external" href="https://github.com/folsomcp/normPlot">normPlot</a>.</p></li>
+<li><p>Collect .s file. For this example, we provide the file (hd46328_test_1.s;ObsId: 2378216p).</p></li>
+<li><p>Collect important stellar parameters (<span class="math notranslate nohighlight">\(T_{\text{eff}}\)</span>, log <span class="math notranslate nohighlight">\(_g\)</span> , <span class="math notranslate nohighlight">\(v\sin i\)</span>, observation specific radial velocities). These are provided below:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(T_{\text{eff}} = 27000\)</span> K</p></li>
+<li><p><span class="math notranslate nohighlight">\(\log g = 3.5\)</span> (cgs)</p></li>
+<li><p><span class="math notranslate nohighlight">\(v\sin i = 15\)</span> km <span class="math notranslate nohighlight">\(\text{s}^{-1}\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(\text{RV} = 12\)</span> km <span class="math notranslate nohighlight">\(\text{s}^{-1}\)</span></p></li>
+</ul>
+</li>
+<li><p>Next we will need to obtain a list of atomic and molecular transition parameters for <span class="math notranslate nohighlight">\(\xi^1\)</span> CMa from the Vienna Atomic Line Database (VALD; <a class="reference external" href="https://ui.adsabs.harvard.edu/abs/2015PhyS...90e4005R/abstract">Ryabchikova et al. 2015</a>). The long list for this star is provided (LongList_T27000G35.dat), however, to retrieve a VALD long list, one can click the “Extract Stellar” button on the <a class="reference external" href="http://vald.astro.uu.se/">VALD website</a>. Note that you need to register an email to access the
+site. The following input was used to obtain the example long list:</p>
+<ul class="simple">
+<li><p>Starting wavelength: 3700 <span class="math notranslate nohighlight">\(\text{\AA}\)</span></p></li>
+<li><p>Ending wavelength: 9000 <span class="math notranslate nohighlight">\(\text{\AA}\)</span></p></li>
+<li><p>Detection threshold: 0.01 (line depths shallower than this threshold are not included)</p></li>
+<li><p>Microturbulence: 2 km <span class="math notranslate nohighlight">\(\text{s}^{-1}\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(T_{\text{eff}} = 27000\)</span> K</p></li>
+<li><p><span class="math notranslate nohighlight">\(\log g = 3.5\)</span> (cgs)</p></li>
+<li><p>Chemical Composition: 0.0 [Fe/H] (Solar)</p></li>
+<li><p>Long format</p></li>
+<li><p>Linelist configuration: Default</p></li>
+</ul>
+</li>
+</ol>
+<p>The long list file is a text file consisting of a header line containing information on the wavelength range of the list, as well as other information about the content of the file. Each spectral line has four rows of information in the file: the first row contains the most relevant information for making the mask, but the format is rather unpleasant to use. The line mask has a much more simplistic format that makes it easier to parse and manipulate. Additionally, the line mask calculates the
+effective Landé factor for each of the lines.</p>
+</section>
+<section id="2.-Importing-Necessary-Packages">
+<h2>2. Importing Necessary Packages<a class="headerlink" href="#2.-Importing-Necessary-Packages" title="Permalink to this heading"></a></h2>
+<p>Now that all the outside data (.s and .dat files) has been obtained, the process of extracting the Bz can begin. The below block of code may output text such as “loading specpolFlow package” or “loading LSDpy package”; this an indication the packages are loading. If these messages do not appear, the packages may already be imported.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">astropy.units</span> <span class="k">as</span> <span class="nn">u</span>
+<span class="kn">import</span> <span class="nn">astropy.constants</span> <span class="k">as</span> <span class="nn">const</span>
+<span class="kn">import</span> <span class="nn">specpolFlow</span> <span class="k">as</span> <span class="nn">pol</span>
+<span class="kn">import</span> <span class="nn">LSDpy</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="3.-Creating-LSD-Line-Mask">
+<h2>3. Creating LSD Line Mask<a class="headerlink" href="#3.-Creating-LSD-Line-Mask" title="Permalink to this heading"></a></h2>
+<p>To convert the VALD long list into a mask, one needs to call the <code class="docutils literal notranslate"><span class="pre">make_mask</span></code> function using the .dat long list. The user will need to specify the location and name of the output file, <code class="docutils literal notranslate"><span class="pre">depthCutoff</span></code>, and <code class="docutils literal notranslate"><span class="pre">atomsOnly</span></code> (<code class="docutils literal notranslate"><span class="pre">atomsOnly</span></code> = True excludes H lines). This will create a .mask file.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">file_name</span> <span class="o">=</span> <span class="s1">&#39;OneObservationFlow_tutorialfiles/LongList_T27000G35.dat&#39;</span>
+<span class="n">file_output</span> <span class="o">=</span> <span class="s1">&#39;OneObservationFlow_tutorialfiles/test_output/T27000G35_depth0.02.mask&#39;</span>
+<span class="n">mask</span> <span class="o">=</span> <span class="n">pol</span><span class="o">.</span><span class="n">make_mask</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="n">file_output</span><span class="p">,</span> <span class="n">depthCutoff</span> <span class="o">=</span> <span class="mf">0.02</span><span class="p">,</span> <span class="n">atomsOnly</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+
+<span class="n">spectrum</span> <span class="o">=</span> <span class="s1">&#39;OneObservationFlow_tutorialfiles/hd46328_test_1.s&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+missing Lande factors for 160 lines (skipped) from:
+[&#39;He 2&#39;, &#39;O 2&#39;]
+skipped all lines for species:
+[&#39;H 1&#39;]
+</pre></div></div>
+</div>
+</section>
+<section id="4.-Cleaning-Line-Mask">
+<h2>4. Cleaning Line Mask<a class="headerlink" href="#4.-Cleaning-Line-Mask" title="Permalink to this heading"></a></h2>
+<p>Next, we remove sections in the mask that we do not want affecting the LSD profile. These include regions 100 km <span class="math notranslate nohighlight">\(\text{s}^{-1}\)</span> (specific to this example) around the Balmer series and Balmer gap, around the H-jump, and in areas of telluric contamination. We remove these sections because the lines are either of the wrong shape or the data is contaminated by the atmosphere; both would negativley effect later processing.</p>
+<p>First the <code class="docutils literal notranslate"><span class="pre">default_exclude_regions</span></code> function takes in the velocity range that you want to exclude and outputs a python dictionary with two elements, WLStart and WLFinish, both of which are arrays. Then the <code class="docutils literal notranslate"><span class="pre">clean_model_mask</span></code> removes the lines within regions specified by the <code class="docutils literal notranslate"><span class="pre">default_exclude_regions</span></code> output. It takes in the path of the input and output line masks, and the dictionary with the excluded regions. It will then output the new line mask as a .mask file at the specified path. The
+user supplies the line mask created in the previous step and the function outputs the cleaned outputs with user-specified parameters. The new line mask will be a .mask file at the specified path.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># inputs</span>
+<span class="c1"># user manual for telleric regions</span>
+<span class="n">velrange</span> <span class="o">=</span> <span class="mi">400</span> <span class="c1"># units are in km/s</span>
+<span class="n">excluded_regions</span> <span class="o">=</span> <span class="n">pol</span><span class="o">.</span><span class="n">get_Balmer_regions_default</span><span class="p">(</span><span class="n">velrange</span><span class="p">)</span> <span class="o">+</span> <span class="n">pol</span><span class="o">.</span><span class="n">get_telluric_regions_default</span><span class="p">()</span>
+<span class="n">excluded_regions</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;specpolFlow.specpolFlow.mask.ExcludeMaskRegions at 0x7f95f2805ca0&gt;
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># visualization of excluded regions</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">excluded_regions</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>start</th>
+      <th>stop</th>
+      <th>type</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>655.405353</td>
+      <td>657.156647</td>
+      <td>Halpha</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>485.491365</td>
+      <td>486.788635</td>
+      <td>Hbeta</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>433.470866</td>
+      <td>434.629134</td>
+      <td>Hgamma</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>409.622728</td>
+      <td>410.717272</td>
+      <td>Hdelta</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>396.480287</td>
+      <td>397.539713</td>
+      <td>Hepsilon</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>360.000000</td>
+      <td>392.000000</td>
+      <td>Hjump</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>587.500000</td>
+      <td>592.000000</td>
+      <td>telluric</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>627.500000</td>
+      <td>632.500000</td>
+      <td>telluric</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>686.000000</td>
+      <td>705.300000</td>
+      <td>telluric</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>717.000000</td>
+      <td>735.000000</td>
+      <td>telluric</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>759.000000</td>
+      <td>771.000000</td>
+      <td>telluric</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>790.000000</td>
+      <td>795.000000</td>
+      <td>telluric</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>809.000000</td>
+      <td>990.000000</td>
+      <td>telluric</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#Location of the output file</span>
+<span class="n">clean_Mask_filename</span> <span class="o">=</span> <span class="s1">&#39;OneObservationFlow_tutorialfiles/test_output/hd46328_test_depth0.02_clean.mask&#39;</span>
+
+<span class="c1"># run cleanMask fuction and save</span>
+<span class="n">mask</span><span class="o">.</span><span class="n">clean</span><span class="p">(</span><span class="n">excluded_regions</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">clean_Mask_filename</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="5.-Create-LSD-Profile">
+<h2>5. Create LSD Profile<a class="headerlink" href="#5.-Create-LSD-Profile" title="Permalink to this heading"></a></h2>
+<p>Least-Squares Deconvolution (LSD) is a cross-correlation technique for computing the weighted average of selected spectral lines (<a class="reference external" href="https://ui.adsabs.harvard.edu/abs/1997MNRAS.291..658D/abstract">Donati et al. 1992</a>). From <a class="reference external" href="https://github.com/folsomcp/LSDpy">LSDpy</a>, we use the default conditions: * normDepth = 0.2 — normalized line depth * normLande = 1.2 — normalized effective Lande factor * normWave = 500.0 — normalized wavelength * removeContPol = 1 — flag for whether the continuum
+polarization is subtracted from the LSD profile (0 = no, 1 = yes) * trimMask = 0 — flag for whether very closely spaced lines should be removed from the line mask (0 = no, 1 = yes) * sigmaClipIter = 0 — number of iterations for sigma clipping, rejecting possible pad pixels based on the fit to Stokes I * sigmaClip = 500 — if sigma cliping, reject pixels where the observation differs from the model by more than this number of sigma * interpMode = 1 — mode for interpolating the model on to the
+observation during LSD (0 = nearest neighbor, 1 = linear interpolation)</p>
+<p>To capture the entire line profile, the range of the LSD profile is set to be 100 km <span class="math notranslate nohighlight">\(s^{-1}\)</span> for this star. Additionally, the pixel size should be set relative to the resolution of the original data; for ESPaDOnS data, one should not go below <span class="math notranslate nohighlight">\(2.6\)</span> km/s per pixel. In a case where the line profile is very broad, it may be advantageous to use larger pixels but make sure the profile has enough data. For our example, we use the ESPaDOnS lower threshold of <span class="math notranslate nohighlight">\(2.6\)</span> km <span class="math notranslate nohighlight">\(s^{-1}\)</span>
+per pixel.</p>
+<p>To calculate the LSD profile, we call the <code class="docutils literal notranslate"><span class="pre">main</span></code> function, specify the file (.s file) and mask (.mask file). In the below code, we also input a name and location of the outfile (.lsd) but you can choose to display this information without an outfile by calling the variable associated with <code class="docutils literal notranslate"><span class="pre">lsdpy.main</span></code>, which is <code class="docutils literal notranslate"><span class="pre">lsdoutput</span></code> in this example. Outputs here include average observed velocity spacing, number of data points, reduced <span class="math notranslate nohighlight">\(\chi^2\)</span> for Stokes V, Stokes I, and N1. For all outputs
+from this function and additional information on the utilities of the LSD class, see <a class="reference external" href="https://github.com/folsomcp/LSDpy">LSDpy</a>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">outfile</span> <span class="o">=</span> <span class="s1">&#39;OneObservationFlow_tutorialfiles/test_output/hd46328_test_1.lsd&#39;</span>
+
+<span class="n">lsd</span><span class="p">,</span> <span class="n">mod</span> <span class="o">=</span> <span class="n">pol</span><span class="o">.</span><span class="n">run_lsdpy</span><span class="p">(</span><span class="n">obs</span> <span class="o">=</span> <span class="n">spectrum</span><span class="p">,</span> <span class="n">mask</span> <span class="o">=</span> <span class="n">clean_Mask_filename</span><span class="p">,</span> <span class="n">outName</span> <span class="o">=</span> <span class="n">outfile</span><span class="p">,</span>
+           <span class="n">velStart</span> <span class="o">=-</span> <span class="mf">100.0</span><span class="p">,</span> <span class="n">velEnd</span> <span class="o">=</span> <span class="mf">100.0</span><span class="p">,</span> <span class="n">velPixel</span> <span class="o">=</span> <span class="mf">2.6</span><span class="p">,</span>
+           <span class="n">normDepth</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span> <span class="n">normLande</span> <span class="o">=</span> <span class="mf">1.2</span><span class="p">,</span> <span class="n">normWave</span> <span class="o">=</span> <span class="mf">500.0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Average observed spec velocity spacing: 1.808983 km/s
+using a 78 point profile with 2.600000 km/s pixels
+mean mask depth 0.097107 wl 493.176 Lande 1.181456 (from 1091 lines)
+mean mask norm weightI 0.485536 weightV 0.462642
+saving model spectrum to  ...
+I reduced chi2 251.8659 (chi2 19360931.36 constraints 76948 dof 78)
+ Rescaling error bars by: 15.870283
+V reduced chi2 1.1309 (chi2 86935.58 constraints 76948 dof 78)
+ Rescaling error bars by: 1.063458
+ removing profile continuum pol: -7.4182e-06 +/- 7.8412e-09 (avg err 8.8233e-05)
+N1 reduced chi2 1.1034 (chi2 84817.45 constraints 76948 dof 78)
+ Rescaling error bars by: 1.050423
+ removing profile continuum pol: 1.1364e-07 +/- 7.6501e-09 (avg err 8.7151e-05)
+(possible Stokes I uncertainty underestimate 2.0900e-03 vs 1.3697e-03)
+line range estimate -14.200000000000188 42.99999999999969 km/s
+V in line reduced chi^2 73.209971 (chi2 1610.619359)
+ detect prob 1.000000 (fap 0.000000e+00)
+ Detection! V (fap 0.000000e+00)
+ V outside line reduced chi^2 1.499632 (chi2  74.981579)
+ detect prob 0.987357 (fap 1.264277e-02)
+N1 in line reduced chi^2 0.987844 (chi2  21.732558)
+ detect prob 0.524055 (fap 4.759455e-01)
+ Non-detection N1 (fap 4.759455e-01)
+ N1 outside line reduced chi^2 0.996528 (chi2  49.826407)
+ detect prob 0.519688 (fap 4.803124e-01)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_OneObservationFlow_Tutorial_12_1.png" src="../_images/tutorials_OneObservationFlow_Tutorial_12_1.png" />
+</div>
+</div>
+</section>
+<section id="6.-Calculate-B_z-from-LSD-Profile">
+<h2>6. Calculate <span class="math notranslate nohighlight">\(B_z\)</span> from LSD Profile<a class="headerlink" href="#6.-Calculate-B_z-from-LSD-Profile" title="Permalink to this heading"></a></h2>
+<p>To calculate Bz we will be using the <code class="docutils literal notranslate"><span class="pre">calc_Bz</span></code> function which takes in the following: * lsd - the LSD profile to be used * cog - the center of gravity; this can either be set manually or calculated from one of the built in functions below * I (from Stokes I) * IV (from Stokes I times V) * V (from Stokes V) * min (minimum of profile) * velrange - the total range over which will be considered in the Bz calculation; this includes the line itself as well as a little extra on either side *
+plot - a flag that determines if an output plot will be automatically generated * bzwidth - the range over which the Bz will be calculated; this should just include the line itself (if given a single number it will center the range on the cog value)</p>
+<p>In the first example we are manually setting the velocity range and Bz width, however it is often useful to set the velocity range slightly larger than the <span class="math notranslate nohighlight">\(v\sin i\)</span> and shifted to be centered on the cog value. By these standards, for this example, velrange <em>would</em> be <code class="docutils literal notranslate"><span class="pre">velrange=[12-1.5*vsini,12+1.5*vsini]</span></code> and bzwidth <em>would</em> be <code class="docutils literal notranslate"><span class="pre">bzwidth=vsini</span></code>.</p>
+<p>In the second example the cog value is being set automatically using the I method.</p>
+<p>The function will then output a dictionary with the following outputs: * Ic: continuum value used for normalization * Cog: the center of gravity value * Bzwidth min (km <span class="math notranslate nohighlight">\(s^{-1}\)</span>): lower bound of the Bz width * Bzwidth max (km <span class="math notranslate nohighlight">\(s^{-1}\)</span>): upper bound of Bz width * V bz (G): Bz calculated from Stokes V profile * V bz sig (G): standard deviation * V FAP: false alarm probability <a class="reference external" href="https://ui.adsabs.harvard.edu/abs/1997MNRAS.291..658D/abstract">FAP (Donati et al. 1997)</a>. Definite
+detection (DD) is defined as having a FAP <span class="math notranslate nohighlight">\(&lt; 10^{-5}\)</span>. A non-detection (ND) is defined as having a FAP <span class="math notranslate nohighlight">\(&gt; 10^{-3}\)</span>. FAPs between <span class="math notranslate nohighlight">\(10^{-5}\)</span> and <span class="math notranslate nohighlight">\(10^{-3}\)</span> are defined as a marginal detection (MD). * Null calculations - N1 and N2 are two different methods for null profile calculations; N1 is most commonly used. * N1 bz (G): Bz calculated from the Null 1 profile * N1 bz sig (G): standard deviation * N1 FAP: false alarm probability of Null 1 Bz measurement * N2 bz (G): Bz
+calculated from the Null 2 profile * N2 bz sig (G): standard deviation * N2 FAP: false alarm probability of Null 2 Bz measurement</p>
+<p>To see additional capabilities of the Bz function, see <a class="reference external" href="https://github.com/folsomcp/specpolFlow">SpecpolFlow</a> or for a more detailed tutorial, see the <a class="reference external" href="https://github.com/folsomcp/specpolFlow/blob/main/tutorials/CalculateBz.ipynb">Bz tutorial</a>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Bz calculation using manual cog selection</span>
+<span class="n">vrad</span> <span class="o">=</span> <span class="mi">12</span>
+<span class="n">velrange</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">18</span><span class="p">,</span><span class="mi">42</span><span class="p">]</span> <span class="c1"># the velocity range over which the center line is found</span>
+<span class="n">bzwidth</span> <span class="o">=</span> <span class="mi">20</span> <span class="c1"># this is the width about the center line used to calculate Bz</span>
+
+<span class="n">lsd</span> <span class="o">=</span> <span class="n">pol</span><span class="o">.</span><span class="n">read_lsd</span><span class="p">(</span><span class="n">outfile</span><span class="p">)</span>
+<span class="n">Bz</span><span class="p">,</span> <span class="n">fig</span> <span class="o">=</span> <span class="n">lsd</span><span class="o">.</span><span class="n">calc_bz</span><span class="p">(</span><span class="n">cog</span> <span class="o">=</span> <span class="n">vrad</span><span class="p">,</span> <span class="n">velrange</span> <span class="o">=</span> <span class="n">velrange</span><span class="p">,</span> <span class="n">plot</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">bzwidth</span> <span class="o">=</span> <span class="n">bzwidth</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+using AUTO method for the normalization
+  using the median of the continuum outside of the line
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_OneObservationFlow_Tutorial_14_1.png" src="../_images/tutorials_OneObservationFlow_Tutorial_14_1.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># The below dataframe contains the defaults outputs</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">[</span><span class="n">Bz</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Ic</th>
+      <th>cog</th>
+      <th>Bzwidth min</th>
+      <th>Bzwidth max</th>
+      <th>V bz (G)</th>
+      <th>V bz sig (G)</th>
+      <th>V FAP</th>
+      <th>N1 bz (G)</th>
+      <th>N1 bz sig (G)</th>
+      <th>N1 FAP</th>
+      <th>N2 bz (G)</th>
+      <th>N2 bz sig (G)</th>
+      <th>N2 FAP</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0.993659</td>
+      <td>12</td>
+      <td>-8</td>
+      <td>32</td>
+      <td>-112.769454</td>
+      <td>5.41078</td>
+      <td>0.0</td>
+      <td>-3.826854</td>
+      <td>5.302269</td>
+      <td>0.264093</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#Bz calculation using automatic cog selection (I)</span>
+<span class="n">vsini</span> <span class="o">=</span> <span class="mi">15</span>
+<span class="n">vrad</span> <span class="o">=</span> <span class="mi">12</span>
+
+<span class="n">lsd</span> <span class="o">=</span> <span class="n">pol</span><span class="o">.</span><span class="n">iolsd</span><span class="o">.</span><span class="n">read_lsd</span><span class="p">(</span><span class="n">outfile</span><span class="p">)</span>
+<span class="n">Bz</span><span class="p">,</span> <span class="n">fig</span> <span class="o">=</span> <span class="n">pol</span><span class="o">.</span><span class="n">bz</span><span class="o">.</span><span class="n">calcBz</span><span class="p">(</span><span class="n">lsd</span> <span class="o">=</span> <span class="n">lsd</span><span class="p">,</span> <span class="n">cog</span> <span class="o">=</span> <span class="s1">&#39;I&#39;</span><span class="p">,</span> <span class="n">velrange</span> <span class="o">=</span> <span class="p">[(</span><span class="n">vrad</span><span class="o">-</span><span class="mf">1.5</span><span class="o">*</span><span class="n">vsini</span><span class="p">),(</span><span class="n">vrad</span><span class="o">+</span><span class="mf">1.5</span><span class="o">*</span><span class="n">vsini</span><span class="p">)],</span> <span class="n">plot</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">bzwidth</span> <span class="o">=</span> <span class="n">vsini</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">[</span><span class="n">Bz</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Ic</th>
+      <th>cog</th>
+      <th>Bzwidth min</th>
+      <th>Bzwidth max</th>
+      <th>V bz (G)</th>
+      <th>V bz sig (G)</th>
+      <th>V FAP</th>
+      <th>N1 bz (G)</th>
+      <th>N1 bz sig (G)</th>
+      <th>N1 FAP</th>
+      <th>N2 bz (G)</th>
+      <th>N2 bz sig (G)</th>
+      <th>N2 FAP</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0.993659</td>
+      <td>12</td>
+      <td>-8</td>
+      <td>32</td>
+      <td>-112.769454</td>
+      <td>5.41078</td>
+      <td>0.0</td>
+      <td>-3.826854</td>
+      <td>5.302269</td>
+      <td>0.264093</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../Credits.html" class="btn btn-neutral float-left" title="Credits" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="LoopFlow_Tutorial.html" class="btn btn-neutral float-right" title="Using SpecpolFlow with Multiple Spectra Files: Example \(\xi^1\) CMa (HD 46328)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, The SpecPolFlow team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

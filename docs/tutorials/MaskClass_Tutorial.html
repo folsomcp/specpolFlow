@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mask Tutorial &mdash; SpecPolFlow 0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/nbsphinx-code-cells.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Importing specpolFlow into Colab" href="ColabSetup_Tutorial.html" />
+    <link rel="prev" title="Demonstration of the LSD class" href="LSDClass_Tutorial.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            SpecPolFlow
+              <img src="../_static/final_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Credits.html">Credits</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="OneObservationFlow_Tutorial.html">Using SpecpolFlow: Example <span class="math notranslate nohighlight">\(\xi^1\)</span> CMa (HD 46328)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="LoopFlow_Tutorial.html">Using SpecpolFlow with Multiple Spectra Files: Example <span class="math notranslate nohighlight">\(\xi^1\)</span> CMa (HD 46328)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CalculateBz_Tutorial.html">Calculating the longitudinal field (Bz) and False Alarm Probability (FAP)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ConvertToSFiles_Tutorial.html">Conversion of telescope-provided files to the standardized .s format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ExcludeMaskRegionClass_Tutorial.html">Tutorial on the ExcludeMaskRegion objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="LSDClass_Tutorial.html">Demonstration of the LSD class</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Mask Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#0.-What-is-a-Mask?">0. What is a Mask?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#1.-Why-do-we-care?">1. Why do we care?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#2.-Mask-Creation">2. Mask Creation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#3.-Mask-Cleaning">3. Mask Cleaning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#4.-Other-useful-tools">4. Other useful tools</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ColabSetup_Tutorial.html">Importing specpolFlow into Colab</a></li>
+<li class="toctree-l1"><a class="reference internal" href="LSDsonification_Tutorial.html">Sonifying LSD profiles</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API documentation:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../API.html">specpolFlow Package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SpecPolFlow</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Mask Tutorial</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/tutorials/MaskClass_Tutorial.nblink.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="Mask-Tutorial">
+<h1>Mask Tutorial<a class="headerlink" href="#Mask-Tutorial" title="Permalink to this heading"></a></h1>
+<p>In this tutorial, we go over the importance of masks, as well as how they are made and used.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">specpolFlow</span> <span class="k">as</span> <span class="nn">pol</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+</pre></div>
+</div>
+</div>
+<section id="0.-What-is-a-Mask?">
+<h2>0. What is a Mask?<a class="headerlink" href="#0.-What-is-a-Mask?" title="Permalink to this heading"></a></h2>
+<p>Analytically, a mask is a function with dirac deltas at wavelengths corresponding to specific spectral line. The amplitude of the dirac delta function corresponds to the line depth. Numerically, a mask is an array of zeros with a depth at the center of each line. Thus, the mask tells us the location and depth of all lines in a spectrum but does not tell us about the shape of the lines of the spectrum as a whole.</p>
+</section>
+<section id="1.-Why-do-we-care?">
+<h2>1. Why do we care?<a class="headerlink" href="#1.-Why-do-we-care?" title="Permalink to this heading"></a></h2>
+<p>Given an LSD profile and a mask, we can convolve the LSD profile with the mask to get the spectrum. Typically though, we have the spectrum and a mask but want the LSD profile. This process of going from a spectrum and a line mask to a LSD profile can be done by doing the reverse operation called a deconvolution. We need a mask to help us weigh each spectral line in the spectrum so that they can be averaged together in an LSD.</p>
+<p>Note that the hydrogen lines are automatically exluded when <code class="docutils literal notranslate"><span class="pre">atomsOnly</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>. This is done since the hydrogen lines have different shape than all the other lines in the spectrum due to their broad wings.</p>
+</section>
+<section id="2.-Mask-Creation">
+<h2>2. Mask Creation<a class="headerlink" href="#2.-Mask-Creation" title="Permalink to this heading"></a></h2>
+<p>To create a mask we will use the <code class="docutils literal notranslate"><span class="pre">make_mask</span></code> function. The function has the following inputs: * lineListFile - name of the file containing the line list * maskFile - name of the file to write the output mask to * depthCutoff - only include lines in the mask that are deeper than this value * wlStart - optional, use only lines with wavelengths above this * wlEnd - optional, use only lines with wavelengths below this * landeStart - optional, use only lines with effective Lande factors above
+this * landeEnd - optional, use only lines with effective Lande factors below this * elementsUsed - optional, list of elements to include in the mask creation * elementsExclude - optional, list of elements to exlude from the mask creation * atomsOnly - only include atomic lines (no molecular lines and no H-lines) * includeNoLande - include lines in the mask even if they don’t have an effective Lande factor given * DefaultLande - the value for the effective Lande factor to use in the case
+that a line has no listed effective Lande factor</p>
+<p>For most cases you will only use the top three inputs and <code class="docutils literal notranslate"><span class="pre">atomsOnly</span></code>. The input line list is a VALD line list file and is obtained from the VALD website. More details about VALD is given in <code class="docutils literal notranslate"><span class="pre">SpecpolTutorial.ipynb</span></code>. The <code class="docutils literal notranslate"><span class="pre">make_mask</span></code> function will automatically attempt to calculate the effective Lande factor for lines where it is not given, however if one is unable to be calculated it will be excluded if <code class="docutils literal notranslate"><span class="pre">includeNoLande</span></code> is <code class="docutils literal notranslate"><span class="pre">False</span></code> or it will equal <code class="docutils literal notranslate"><span class="pre">DefaultLande</span></code> if <code class="docutils literal notranslate"><span class="pre">includeNoLande</span></code>
+is <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+<p>In the example case used below, we are using all atomic lines in the line list except ones without effective Lande factors and the H-lines.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">LineList_file_name</span> <span class="o">=</span> <span class="s1">&#39;OneObservationFlow_tutorialfiles/LongList_T27000G35.dat&#39;</span>
+<span class="n">Mask_file_name</span> <span class="o">=</span> <span class="s1">&#39;OneObservationFlow_tutorialfiles/test_output/T27000G35_depth0.02.mask&#39;</span>
+
+<span class="n">mask_clean</span> <span class="o">=</span> <span class="n">pol</span><span class="o">.</span><span class="n">make_mask</span><span class="p">(</span><span class="n">LineList_file_name</span><span class="p">,</span> <span class="n">Mask_file_name</span><span class="p">,</span> <span class="n">depthCutoff</span> <span class="o">=</span> <span class="mf">0.02</span><span class="p">,</span> <span class="n">atomsOnly</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+missing Lande factors for 160 lines (skipped) from:
+[&#39;He 2&#39;, &#39;O 2&#39;]
+skipped all lines for species:
+[&#39;H 1&#39;]
+</pre></div></div>
+</div>
+</section>
+<section id="3.-Mask-Cleaning">
+<h2>3. Mask Cleaning<a class="headerlink" href="#3.-Mask-Cleaning" title="Permalink to this heading"></a></h2>
+<p>Once we have our mask, we need to clean it. Mask cleaning is the removal of lines that we don’t want to be used in the LSD profile. Typically, excluded lines include all lines within the Telluric regions as well as lines within the H wings. Lines within the Telluric regions are contaminated by Earth’s atmosphere and thus are not useable. Lines in the H wings are blended with Hydrogen lines thus they are contaminated and unusable since they have a different shape (will effect averaging).
+Additionally, when dealing with stars with emission, care should be taken to exclude the emission lines if they have different shapes.</p>
+<p>In this tutorial, we will use some already defined regions to clean the mask (see the ExcludeMaskRegion_Tutorial for more details).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># inputs</span>
+<span class="n">velrange</span> <span class="o">=</span> <span class="mi">600</span> <span class="c1"># units are in km/s</span>
+<span class="n">excluded_regions</span> <span class="o">=</span> <span class="n">pol</span><span class="o">.</span><span class="n">get_Balmer_regions_default</span><span class="p">(</span><span class="n">velrange</span><span class="p">)</span> <span class="o">+</span> <span class="n">pol</span><span class="o">.</span><span class="n">get_telluric_regions_default</span><span class="p">()</span>
+
+<span class="c1"># Display the excluded regions using Pandas</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">excluded_regions</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>start</th>
+      <th>stop</th>
+      <th>type</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>654.967529</td>
+      <td>657.594471</td>
+      <td>Halpha</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>485.167047</td>
+      <td>487.112953</td>
+      <td>Hbeta</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>433.181299</td>
+      <td>434.918701</td>
+      <td>Hgamma</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>409.349092</td>
+      <td>410.990908</td>
+      <td>Hdelta</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>396.215430</td>
+      <td>397.804570</td>
+      <td>Hepsilon</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>360.000000</td>
+      <td>392.000000</td>
+      <td>Hjump</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>587.500000</td>
+      <td>592.000000</td>
+      <td>telluric</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>627.500000</td>
+      <td>632.500000</td>
+      <td>telluric</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>686.000000</td>
+      <td>705.300000</td>
+      <td>telluric</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>717.000000</td>
+      <td>735.000000</td>
+      <td>telluric</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>759.000000</td>
+      <td>771.000000</td>
+      <td>telluric</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>790.000000</td>
+      <td>795.000000</td>
+      <td>telluric</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>809.000000</td>
+      <td>990.000000</td>
+      <td>telluric</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>Once we have our excluded regions, we can clean the mask using the <code class="docutils literal notranslate"><span class="pre">clean_model_mask</span></code> function. This function takes in the name of the uncleaned mask, the name of the output mask file, and the dictionary containing the excluded regions. The ouput is a cleaned line mask; lines lying within the <code class="docutils literal notranslate"><span class="pre">excluded_regions</span></code> have been removed.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Reading in the mask that we created earlier</span>
+<span class="n">mask</span> <span class="o">=</span> <span class="n">pol</span><span class="o">.</span><span class="n">read_mask</span><span class="p">(</span><span class="s1">&#39;OneObservationFlow_tutorialfiles/test_output/T27000G35_depth0.02.mask&#39;</span><span class="p">)</span>
+
+<span class="c1"># Applying the ExcludeMaskRegions that we created</span>
+<span class="n">mask_clean</span> <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">clean</span><span class="p">(</span><span class="n">excluded_regions</span><span class="p">)</span>
+
+<span class="c1"># Saving the new mask to a file</span>
+<span class="n">mask_clean</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s1">&#39;OneObservationFlow_tutorialfiles/test_output/hd46328_test_depth0.02_clean.mask&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="4.-Other-useful-tools">
+<h2>4. Other useful tools<a class="headerlink" href="#4.-Other-useful-tools" title="Permalink to this heading"></a></h2>
+<p>SpecpolFlow also includes an interactive tool to visually inspect a spectrum and select/deselect lines, and compare with the model spectrum from an LSD profile calculated on-the-fly</p>
+<p>Additionally, the Mask class has functions to <code class="docutils literal notranslate"><span class="pre">prune</span></code> the mask object (remove from the list all lines that have iuse=0)</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="LSDClass_Tutorial.html" class="btn btn-neutral float-left" title="Demonstration of the LSD class" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ColabSetup_Tutorial.html" class="btn btn-neutral float-right" title="Importing specpolFlow into Colab" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, The SpecPolFlow team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

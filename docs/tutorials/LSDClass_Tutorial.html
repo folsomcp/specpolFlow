@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Demonstration of the LSD class &mdash; SpecPolFlow 0.1 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/nbsphinx-code-cells.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Mask Tutorial" href="MaskClass_Tutorial.html" />
+    <link rel="prev" title="Tutorial on the ExcludeMaskRegion objects" href="ExcludeMaskRegionClass_Tutorial.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            SpecPolFlow
+              <img src="../_static/final_logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Credits.html">Credits</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="OneObservationFlow_Tutorial.html">Using SpecpolFlow: Example <span class="math notranslate nohighlight">\(\xi^1\)</span> CMa (HD 46328)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="LoopFlow_Tutorial.html">Using SpecpolFlow with Multiple Spectra Files: Example <span class="math notranslate nohighlight">\(\xi^1\)</span> CMa (HD 46328)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CalculateBz_Tutorial.html">Calculating the longitudinal field (Bz) and False Alarm Probability (FAP)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ConvertToSFiles_Tutorial.html">Conversion of telescope-provided files to the standardized .s format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ExcludeMaskRegionClass_Tutorial.html">Tutorial on the ExcludeMaskRegion objects</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Demonstration of the LSD class</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#0.-Importing-Necessary-Packages">0. Importing Necessary Packages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#1.-Loading-and-displaying-LSD-profiles">1. Loading and displaying LSD profiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#2.-Slicing-LSD-profiles">2. Slicing LSD profiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#3.-Normalization,-weights,-and-velocity-shifts">3. Normalization, weights, and velocity shifts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#4.-Saving-LSD-profiles">4. Saving LSD profiles</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="MaskClass_Tutorial.html">Mask Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ColabSetup_Tutorial.html">Importing specpolFlow into Colab</a></li>
+<li class="toctree-l1"><a class="reference internal" href="LSDsonification_Tutorial.html">Sonifying LSD profiles</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API documentation:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../API.html">specpolFlow Package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SpecPolFlow</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Demonstration of the LSD class</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/tutorials/LSDClass_Tutorial.nblink.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="Demonstration-of-the-LSD-class">
+<h1>Demonstration of the LSD class<a class="headerlink" href="#Demonstration-of-the-LSD-class" title="Permalink to this heading"></a></h1>
+<p>In this tutorial, we highlight the basic functionality of the LSD class. This includes loading in LSD profiles, making quick graphs, slicing the data, and slightly more advanced capabilities such as normalizing the profiles and changing the LSD weights (wpol and wint).</p>
+<p>The class functions to calculate Bz is demonstrated in the CalculateBz_Tutorial.</p>
+<section id="0.-Importing-Necessary-Packages">
+<h2>0. Importing Necessary Packages<a class="headerlink" href="#0.-Importing-Necessary-Packages" title="Permalink to this heading"></a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">specpolFlow</span> <span class="k">as</span> <span class="nn">pol</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="1.-Loading-and-displaying-LSD-profiles">
+<h2>1. Loading and displaying LSD profiles<a class="headerlink" href="#1.-Loading-and-displaying-LSD-profiles" title="Permalink to this heading"></a></h2>
+<p>Below, we use the built-in <code class="docutils literal notranslate"><span class="pre">read_lsd</span></code> function to read the LSD data in as an object. Inside the LSD profile, the variables are arrays of values which include:</p>
+<ul class="simple">
+<li><p>vel - the velocity grid</p></li>
+<li><p>specI &amp; specSigI - the Stokes I profile and its uncertainties</p></li>
+<li><p>specV &amp; specSigV - the Stokes V polarization profile and its uncertainties</p></li>
+<li><p>specN1 &amp; specSigN1 - the Null1 profile and its uncertainties</p></li>
+<li><p>specN2 &amp; specSigN2 - the (optional) Null2 profile and its uncertainties</p></li>
+<li><p>header - the header of the file that was read to create the lsd_prof</p></li>
+</ul>
+<p>One can plot the results with <code class="docutils literal notranslate"><span class="pre">plot</span></code> directly with SpecpolFlow. This fucntion contains an optional argument <code class="docutils literal notranslate"><span class="pre">figsize</span></code> that determines the size of the image created; the defaul is (10,10).</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># iolsd.read_lsd is used to read lsd data into an object</span>
+<span class="n">lsd1</span> <span class="o">=</span> <span class="n">pol</span><span class="o">.</span><span class="n">read_lsd</span><span class="p">(</span><span class="s1">&#39;CalculateBz_tutorialfiles/SampleLSD.s&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># setting the figsize argument in iolsd.plot</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">lsd1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_LSDClass_Tutorial_6_0.png" src="../_images/tutorials_LSDClass_Tutorial_6_0.png" />
+</div>
+</div>
+</section>
+<section id="2.-Slicing-LSD-profiles">
+<h2>2. Slicing LSD profiles<a class="headerlink" href="#2.-Slicing-LSD-profiles" title="Permalink to this heading"></a></h2>
+<p>You are able to select subsections of LSD data in the same way you do with arrays (I.e. [start:stop]). Below, we have shown how to slice <code class="docutils literal notranslate"><span class="pre">lsd1</span></code> from indices 10 to 50; this is renamed as <code class="docutils literal notranslate"><span class="pre">lsdslice</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># slicing lsd data takes the same form as slicing typical numpy arrays</span>
+<span class="n">lsdslice</span> <span class="o">=</span> <span class="n">lsd1</span><span class="p">[</span><span class="mi">10</span><span class="p">:</span><span class="mi">50</span><span class="p">]</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">lsdslice</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">))</span>
+
+<span class="c1"># this will create an lsd profile with all data points where vel&gt;0 and vel&lt;100</span>
+<span class="n">lsdpos</span> <span class="o">=</span> <span class="n">lsd1</span><span class="p">[</span><span class="n">lsd1</span><span class="o">.</span><span class="n">vel</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">lsdpos</span> <span class="o">=</span> <span class="n">lsdpos</span><span class="p">[</span><span class="n">lsdpos</span><span class="o">.</span><span class="n">vel</span><span class="o">&lt;</span><span class="mi">100</span><span class="p">]</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">lsdpos</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">))</span>
+
+<span class="c1"># you can also return the length of the LSD profile using</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">lsdpos</span><span class="o">.</span><span class="n">npix</span><span class="p">)</span>
+<span class="c1"># or</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lsdpos</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+55
+55
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_LSDClass_Tutorial_8_1.png" src="../_images/tutorials_LSDClass_Tutorial_8_1.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_LSDClass_Tutorial_8_2.png" src="../_images/tutorials_LSDClass_Tutorial_8_2.png" />
+</div>
+</div>
+</section>
+<section id="3.-Normalization,-weights,-and-velocity-shifts">
+<h2>3. Normalization, weights, and velocity shifts<a class="headerlink" href="#3.-Normalization,-weights,-and-velocity-shifts" title="Permalink to this heading"></a></h2>
+<p>We can normalize a LSD profile to a different continuum. From this, the Stokes parameters and the error bars are recomputed accordingly. Two methods for adjusting the LSD weights are shown below; one uses old and new wint (intensity weight) and wpol (polarization weight) values (this uses the <code class="docutils literal notranslate"><span class="pre">set_weights</span></code> function) and the other uses a scale facor, <code class="docutils literal notranslate"><span class="pre">scale</span></code>. Finally, to apply a radial velocity shift to the LSD profile, you will use <code class="docutils literal notranslate"><span class="pre">vshift</span></code> and the value in km/s you want to shift the
+profile by.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># renormalizing the lsd profile and plotting the new results</span>
+<span class="n">lsdnorm</span> <span class="o">=</span> <span class="n">lsd1</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="mf">0.95</span><span class="p">)</span>
+
+<span class="n">lsdnorm</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(&lt;Figure size 500x500 with 3 Axes&gt;,
+ array([&lt;AxesSubplot:ylabel=&#39;V&#39;&gt;, &lt;AxesSubplot:ylabel=&#39;N1&#39;&gt;,
+        &lt;AxesSubplot:xlabel=&#39;Velocity (km/s)&#39;, ylabel=&#39;I&#39;&gt;], dtype=object))
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_LSDClass_Tutorial_10_1.png" src="../_images/tutorials_LSDClass_Tutorial_10_1.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># We can also adjust the LSD weights two ways.</span>
+
+<span class="c1"># 1. if you want to adjust to a new wint and wpol from old ones:</span>
+<span class="n">wint_old</span> <span class="o">=</span> <span class="mf">0.1</span>
+<span class="n">wpol_old</span> <span class="o">=</span> <span class="mi">60</span>
+<span class="n">wint_new</span> <span class="o">=</span> <span class="mf">0.2</span>
+<span class="n">wpol_new</span> <span class="o">=</span> <span class="mi">120</span>
+
+<span class="n">newlsd</span> <span class="o">=</span> <span class="n">lsd1</span><span class="o">.</span><span class="n">set_weights</span><span class="p">(</span><span class="n">wint_old</span><span class="p">,</span> <span class="n">wpol_old</span><span class="p">,</span> <span class="n">wint_new</span><span class="p">,</span> <span class="n">wpol_new</span><span class="p">)</span>
+<span class="n">newlsd</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">))</span>
+
+<span class="c1"># 2. If you have already calculated the scale factors to go from old to new, you can simply do:</span>
+<span class="n">scale_int</span> <span class="o">=</span> <span class="mf">2.0</span>
+<span class="n">scale_pol</span> <span class="o">=</span> <span class="mf">2.0</span>
+
+<span class="n">newlsd</span> <span class="o">=</span> <span class="n">lsd1</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">scale_int</span><span class="p">,</span> <span class="n">scale_pol</span><span class="p">)</span>
+<span class="n">newlsd</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">))</span>
+
+<span class="c1"># (In fact, the set_weigths function just calls the scale function with new/old.)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(&lt;Figure size 500x500 with 3 Axes&gt;,
+ array([&lt;AxesSubplot:ylabel=&#39;V&#39;&gt;, &lt;AxesSubplot:ylabel=&#39;N1&#39;&gt;,
+        &lt;AxesSubplot:xlabel=&#39;Velocity (km/s)&#39;, ylabel=&#39;I&#39;&gt;], dtype=object))
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_LSDClass_Tutorial_11_1.png" src="../_images/tutorials_LSDClass_Tutorial_11_1.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_LSDClass_Tutorial_11_2.png" src="../_images/tutorials_LSDClass_Tutorial_11_2.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Finally, you can apply a radial velocity shift to the LSD profile.</span>
+
+<span class="n">lsd1</span><span class="o">.</span><span class="n">vshift</span><span class="p">(</span><span class="mf">50.0</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">))</span>
+
+<span class="c1"># Note that in the above line, I did not save the shifted profile to a new variable</span>
+<span class="c1"># lsd1.vshift() returns a LSD object, on which I called the plot function</span>
+<span class="c1"># This whole command returns a figure that I could further manipulate with:</span>
+<span class="c1"># ax, fig = lsd1.vshift(50.0).plot(figsize=(5,5))</span>
+<span class="c1"># To save the shifted LSD profile, one could set it equal to a new variable such as:</span>
+<span class="c1"># newlsd = lsd1.vshift(50.0)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(&lt;Figure size 500x500 with 3 Axes&gt;,
+ array([&lt;AxesSubplot:ylabel=&#39;V&#39;&gt;, &lt;AxesSubplot:ylabel=&#39;N1&#39;&gt;,
+        &lt;AxesSubplot:xlabel=&#39;Velocity (km/s)&#39;, ylabel=&#39;I&#39;&gt;], dtype=object))
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/tutorials_LSDClass_Tutorial_12_1.png" src="../_images/tutorials_LSDClass_Tutorial_12_1.png" />
+</div>
+</div>
+</section>
+<section id="4.-Saving-LSD-profiles">
+<h2>4. Saving LSD profiles<a class="headerlink" href="#4.-Saving-LSD-profiles" title="Permalink to this heading"></a></h2>
+<p>We can save the LSD profiles by using the <code class="docutils literal notranslate"><span class="pre">save</span></code> class function</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># lsd1.save(&#39;MyNewLSD.lsd&#39;)</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ExcludeMaskRegionClass_Tutorial.html" class="btn btn-neutral float-left" title="Tutorial on the ExcludeMaskRegion objects" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="MaskClass_Tutorial.html" class="btn btn-neutral float-right" title="Mask Tutorial" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, The SpecPolFlow team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

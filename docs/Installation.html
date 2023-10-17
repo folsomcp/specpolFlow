@@ -4,9 +4,10 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Installation &mdash; SpecPolFlow  documentation</title>
+  <title>Installation &mdash; SpecPolFlow 0.1 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -34,6 +35,7 @@
           
           <a href="index.html" class="icon icon-home">
             SpecPolFlow
+              <img src="_static/final_logo.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -47,21 +49,31 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#pre-requisite">Pre-requisite</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#installation-instructions">Installation instructions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installation-instructions">Installation instructions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#macosx">macOSx</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#windows">Windows</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#linux">Linux</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Credits.html">Credits</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tutorials:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="tutorials/ColabSetup.html">Importing specpolFlow into Colab for tutorial</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorials/LSDtutorial.html">Demonstration of the LSD class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorials/CalculateBz.html">Calculating the longitudinal field and False Alarm Probability (FAP)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorials/LSDsonification.html">Sonifying LSD profiles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/OneObservationFlow_Tutorial.html">Using SpecpolFlow: Example <span class="math notranslate nohighlight">\(\xi^1\)</span> CMa (HD 46328)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/LoopFlow_Tutorial.html">Using SpecpolFlow with Multiple Spectra Files: Example <span class="math notranslate nohighlight">\(\xi^1\)</span> CMa (HD 46328)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/CalculateBz_Tutorial.html">Calculating the longitudinal field (Bz) and False Alarm Probability (FAP)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/ConvertToSFiles_Tutorial.html">Conversion of telescope-provided files to the standardized .s format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/ExcludeMaskRegionClass_Tutorial.html">Tutorial on the ExcludeMaskRegion objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/LSDClass_Tutorial.html">Demonstration of the LSD class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/MaskClass_Tutorial.html">Mask Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/ColabSetup_Tutorial.html">Importing specpolFlow into Colab</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/LSDsonification_Tutorial.html">Sonifying LSD profiles</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API documentation:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="API.html">spFlow Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="API.html">specpolFlow Package</a></li>
 </ul>
 
         </div>
@@ -90,22 +102,32 @@
              
   <section id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this heading"></a></h1>
+<p>SpecpolFlow is not available on pip yet (coming very soon!).</p>
+<p>We therefore recommend to clone the specpolFlow repository in a location that is available in your $PYTHONPATH. You will need to do the same for LSDpy package https://github.com/folsomcp/LSDpy</p>
 <section id="pre-requisite">
 <h2>Pre-requisite<a class="headerlink" href="#pre-requisite" title="Permalink to this heading"></a></h2>
-<p>Some prerequisite list here</p>
+<p>The SpecpolFlow tutorials make use of the following packages. We recommend installing these before using SpecpolFlow.</p>
 <ul class="simple">
-<li><p>numpy</p></li>
-<li><p>matplotlib for plotting</p></li>
-<li><p>LSDpy (not required but useful for calculating LSD profiles)</p></li>
-<li><p>requirement 3</p></li>
+<li><p><a class="reference external" href="https://numpy.org/doc/stable/#">NumPy</a></p></li>
+<li><p><a class="reference external" href="https://matplotlib.org/">Matplotlib</a></p></li>
+<li><p><a class="reference external" href="https://pandas.pydata.org/">pandas</a></p></li>
 </ul>
 </section>
 <section id="installation-instructions">
 <h2>Installation instructions<a class="headerlink" href="#installation-instructions" title="Permalink to this heading"></a></h2>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>block of code
-to show the terminal commands
+<section id="macosx">
+<h3>macOSx<a class="headerlink" href="#macosx" title="Permalink to this heading"></a></h3>
+<p>To install the latest version of SpecpolFlow, enter the following command into terminal:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>block of code to show the terminal commands
 </pre></div>
 </div>
+</section>
+<section id="windows">
+<h3>Windows<a class="headerlink" href="#windows" title="Permalink to this heading"></a></h3>
+</section>
+<section id="linux">
+<h3>Linux<a class="headerlink" href="#linux" title="Permalink to this heading"></a></h3>
+</section>
 </section>
 </section>
 
@@ -120,7 +142,7 @@ to show the terminal commands
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, The SpecPolFlow team.</p>
+    <p>&#169; Copyright 2023, The SpecPolFlow team.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
