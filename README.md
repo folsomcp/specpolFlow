@@ -14,22 +14,26 @@ These tutorials are in the form of Python notebooks, which can also be run using
 
 The full documentation can be found here: [folsomcp.github.io/specpolFlow/](folsomcp.github.io/specpolFlow/)
 
-Current Contributors:
+Development Team:
 * Christi Erba
 * Colin Folsom
 * Veronique Petit
 * Shaquann Seadrow
 * Patrick Stanley
 * Tali Natan
-* Gregg Wade
 * Mary Oksala
-* DJ Meleney
+
+Current Contributors:
+* Gregg Wade
+* Bonnie Zaire
 
 Past Contributors:
 * Federico Villadiego Forero
+* DJ Meleney
 * Robin Moore
-* Marisol Catalan Olais
 * Dax Moraes
+* Marisol Catalan Olais
 
-Credits: The SpecpolFlow logo was created by the talented Tali Natan!
+Logo:
+The SpecpolFlow logo was created by the talented Tali Natan!
 
