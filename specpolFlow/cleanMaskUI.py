@@ -10,7 +10,7 @@ import numpy as np
 from matplotlib.figure import Figure
 
 from . import cleanMaskUISubroutines as cleanSub
-from . import LSDprofile
+from . import profileLSD
 from . import mask as maskTools
 from . import obsSpec
 
@@ -70,7 +70,7 @@ def cleanMaskUI(maskName, obsName, outMaskName=None,
         #first save the current updated mask, so we can run LSDpy on it
         mask.save(outMaskName)
         #then run LSDpy, with specific 'default' parameters
-        lsdProf, modelSpec = LSDprofile.run_lsdpy(obs=lsdp.obs, mask=lsdp.mask,
+        lsdProf, modelSpec = profileLSD.run_lsdpy(obs=lsdp.obs, mask=lsdp.mask,
             outName=lsdp.outName, velStart=lsdp.velStart, velEnd=lsdp.velEnd,
             velPixel=lsdp.velPixel, normDepth=lsdp.normDepth,
             normLande=lsdp.normLande, normWave=lsdp.normWave,

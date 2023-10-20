@@ -5,9 +5,8 @@ utilities for calculating and handling LSD profiles, line masks, and
 longitudinal magnetic fields (Bz).
 """
 
-#from specpolFlow.specpolFlow.iolsd import *
-#from .specpolFlow.iolsd import *
-#from .specpolFlow.LSDprofile import *
-#from .specpolFlow import makeMask
 import specpolFlow.converters
 from specpolFlow.specpolFlow import *
+#Relative import alternatives
+#from .specpolFlow import *
+#from . import converters

@@ -17,7 +17,7 @@ except ImportError:  #If that fails this probably isn't matplotlib 3.x
     except ImportError: #if that fails, just don't use this extra toolbar
         _mplToolbar=0
 
-from . import LSDprofile
+from . import profileLSD
 from . import mask as maskTools
 from . import obsSpec
 
@@ -781,7 +781,7 @@ class fitDepths:
         useMask1 = self.mask[indUse1]
         if len(useMask1) > 0:
             #Get the reference LSD profile
-            prof = LSDprofile.read_lsd(self.lsdp.outName) 
+            prof = profileLSD.read_lsd(self.lsdp.outName) 
             #Remove degenerate (or nearly) lines
             pixVel = prof.vel[1]-prof.vel[0]
             removePoorLines(useMask1, pixVel, fracPix = 3.0, sumDepths=False)
@@ -1158,7 +1158,7 @@ class updateLSD:
         #Run LSD
         lsdp = self.lsdp
         self.mask.save(lsdp.mask)
-        lsdProf, modelSpec = LSDprofile.run_lsdpy(obs=lsdp.obs, mask=lsdp.mask,
+        lsdProf, modelSpec = profileLSD.run_lsdpy(obs=lsdp.obs, mask=lsdp.mask,
             outName=lsdp.outName, velStart=lsdp.velStart, velEnd=lsdp.velEnd,
             velPixel=lsdp.velPixel, normDepth=lsdp.normDepth,
             normLande=lsdp.normLande, normWave=lsdp.normWave,

@@ -1,4 +1,4 @@
-from .LSDprofile import *
+from .profileLSD import *
 from .obsSpec import *
 from .mask import *
 from .lineList import *
