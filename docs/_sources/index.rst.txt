@@ -6,8 +6,6 @@
 Welcome to SpecPolFlow
 ========================================
 
-NOTE: This documentation has been build for the RefactoringProject development branch. 
-
 The goal of SpecpolFlow is to provide a completely pythonic workflow for the analysis of 
 spectropolarimetric observations (for example, ESPaDOnS at CFHT, Narval at TBL, etc). 
 
