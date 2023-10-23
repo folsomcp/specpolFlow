@@ -1,1 +1,1 @@
-import specpolFlow.converters.espadons
+from .espadons import *
