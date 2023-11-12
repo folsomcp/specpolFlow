@@ -833,10 +833,10 @@ def read_lsd(fname):
 
 def run_lsdpy(obs=None, mask=None, outName='prof.dat',
               velStart=None, velEnd=None, velPixel=None, 
-              normDepth=None, normLande=None, normWave=None,
-              removeContPol=None, trimMask=None, sigmaClipIter=None, 
-              sigmaClip=None, interpMode=None, outModelName='',
-              fLSDPlotImg=None, fSavePlotImg=None, outPlotImgName=None):
+              normDepth=0.2, normLande=1.2, normWave=500.0,
+              removeContPol=1, trimMask=1, sigmaClipIter=0, 
+              sigmaClip=500, interpMode=1, outModelName='',
+              fLSDPlotImg=1, fSavePlotImg=0, outPlotImgName='figProf.pdf'):
     """
     Run the LSDpy code and return an LSD object  
     (a convenience wrapper around the lsdpy.main() function)
@@ -866,7 +866,7 @@ def run_lsdpy(obs=None, mask=None, outName='prof.dat',
                           (Default = 1)
     :param trimMask:      int, flag for whether very closely spaced lines 
                           should be removed from the line mask (0=no, 1=yes)
-                          (Default = 0)
+                          (Default = 1)
     :param sigmaClipIter: int, number of iterations for sigma clipping, 
                           rejecting possible bad pixels based on the fit to
                           Stokes I. Set to 0 for no sigma clipping.
