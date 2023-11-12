@@ -19,9 +19,11 @@ class LineList:
     * ion - list of species identifiers (element or molecule and ionization)
     * wl - array of wavelengths
     * loggf - array of oscillator strengths (log gf)
-    * Elo - array of excitation potentials for the lower level in the transition (in eV)
+    * Elo - array of excitation potentials for the lower level in
+      the transition (in eV)
     * Jlo - array of J quantum numbers for the lower level
-    * Eu - array of excitation potentials for the upper level in the transition (in eV)
+    * Eu - array of excitation potentials for the upper level in
+      the transition (in eV)
     * Jup - array of J quantum numbers for the upper level
     * landeLo - array of Lande factors for the lower level
     * landeUp - array of Lande factors for the upper level
@@ -30,8 +32,10 @@ class LineList:
     * stark - array of quadratic Stark damping coefficients
     * waals - array of van der Waals damping coefficients
     * depth - depth at the centre of the spectral line, as estimated by VALD
-    * configLo - list of strings with the electron configuration and term symbols for the lower level
-    * configUp - list of strings with the electron configuration and term symbols for the upper level
+    * configLo - list of strings with the electron configuration and
+      term symbols for the lower level
+    * configUp - list of strings with the electron configuration and
+      term symbols for the upper level
     * refs - list of references for the sources of the line data (optional)
     """
     def __init__(self, ion, wl, loggf, Elo, Jlo, Eup, Jup, landeLo, landeUp,
@@ -86,7 +90,8 @@ class LineList:
 
     def __setitem__(self, key, newval):
         """
-        Sets all values of the LineList at the specified location equal to the input LineList values.
+        Sets all values of the LineList at the specified location
+        equal to the input LineList values.
 
         :param key: the index or slice being overwritten
         :param newval: LineList used to replace the values given by key
@@ -140,8 +145,8 @@ class LineList:
         Write a line list to a text file.
         This outputs using the VALD version 3 'extract stellar' 'long' format.
         
-        A few details (e.g. references) are omitted since they are not saved
-        in the LineList class.
+        A few details (e.g. references at the end of the file)
+        are omitted since they are not saved in the LineList class.
         
         :param fname: the file name to save the output to
         """
@@ -164,7 +169,8 @@ def line_list_zeros(nLines):
     """
     Generate a line list of zeros and blank text.
     
-    Used by read_VALD (It can be a bit faster to allocate all the array space at once)
+    Used by read_VALD
+    (It can be a bit faster to allocate all the array space at once)
     
     :param nLines: the number of lines in the LineList of zeros
     :rtype: LineList
@@ -195,10 +201,11 @@ def read_VALD(fname):
     """
     Read a list of spectral line data from VALD and return a LineList
 
-    This expects VALD version 3 line list, in an 'extract stellar' 'long' format.
+    This expects VALD version 3 line list, in an 'extract stellar'
+    'long' format.
 
     :param fname: the file name for the VALD line list.
-    :rtype: LineList object, containing arrays of line data
+    :rtype: LineList
     """
     fVald = open(fname, 'r')
     i = 0
@@ -259,7 +266,7 @@ def getEffectiveLande(landeLo, landeUp, Jlo, Jup):
     :param landeUp: Upper level Lande factor
     :param Jlo: Lower level J quantum number
     :param Jup: Upper level J quantum number
-    :rtype: Effective Lande factor for the transition
+    :return: Effective Lande factor for the transition
     """
 
     #From, e.g., Degl'Innocenti & Landolfi 2004, eq. 3.44 
@@ -279,9 +286,11 @@ def estimateLande(J, config, verbose=False):
     
     :param J: The J quantum number for this level
     :param config: The text string from VALD with the electron configuration
-     and term symbol for the level
-    :param verbose: Report warnings for levels in unsupported coupling schemes if True
-    :rtype: The Lande factor estimated for this level.  If the Lande factor can't be estimated this will be 99.0.
+                   and term symbol for the level
+    :param verbose: Report warnings for levels in unsupported coupling schemes
+                    if True
+    :return: The Lande factor estimated for this level.  If the Lande factor
+             can't be estimated this will be 99.0.
     """
     
     #Letters for L quantum numbers (note J is omitted in this notation)
@@ -393,7 +402,8 @@ def get_LS_numbers(config):
     for a level in LS coupling.
     
     :param config: the electron configuration and term symbol text string
-    :rtype: The L and S quantum numbers (if a parsing error occurs, negative values are returned)
+    :return: The L and S quantum numbers (if a parsing error occurs,
+             negative values are returned)
     """
     #Letters for L quantum numbers (note J is omitted in this notation)
     Lval = ('S','P','D','F','G','H','I','K','L','M','N','O','Q','R','T','U','V')
@@ -436,7 +446,8 @@ def get_JJ_numbers(config):
     equivalent electrons with their own j, which combine to make J).
     
     :param config: the electron configuration and term symbol text string
-    :rtype: The L1, S1, J1, L2, S2, and J2 quantum numbers (if a parsing error occurs, negative values are returned)
+    :return: The L1, S1, J1, L2, S2, and J2 quantum numbers
+             (if a parsing error occurs, negative values are returned)
     """
     #Letters for L quantum numbers (note J is omitted in this notation)
     Lval = ('S','P','D','F','G','H','I','K','L','M','N','O','Q','R','T','U','V')
@@ -520,7 +531,8 @@ def get_JK_numbers(config):
     This is sometimes called J1-l or J1-L2 coupling.
 
     :param config: the electron configuration and term symbol text string
-    :rtype: The L1, S1, J1, L2, S2, and K quantum numbers (if a parsing error occurs, negative values are returned)
+    :return: The L1, S1, J1, L2, S2, and K quantum numbers
+             (if a parsing error occurs, negative values are returned)
     """
     #Letters for L quantum numbers (note J is omitted in this notation)
     Lval = ('S','P','D','F','G','H','I','K','L','M','N','O','Q','R','T','U','V')
@@ -620,7 +632,7 @@ def _parseFraction(string, errMsg='failed to parse as a fraction:'):
     
     :param string: Text string to convert
     :param errMsg: Error message if this operation fails
-    :rtype: The converted value, will be NaN if the conversion fails.
+    :return: The converted value, will be NaN if the conversion fails.
     """
     val = float('NaN')
     if '/' in string:

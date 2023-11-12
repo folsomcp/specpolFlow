@@ -33,10 +33,9 @@ class Spectrum:
         
     def __getitem__(self, key):
         """
-        Returns an Spectrum object with only the values at the specified index(s).
+        Returns a Spectrum object with only the values at the specified index(s)
 
         :param key: the index or slice being checked
-
         :rtype: Spectrum
         """
         wl_s = self.wl[key]
@@ -52,7 +51,8 @@ class Spectrum:
 
     def __setitem__(self, key, newval):
         """
-        Sets all values of the Spectrum at the specified location equal to the input Spectrum's values.
+        Sets all values of the Spectrum at the specified location equal
+        to the input Spectrum's values.
 
         :param key: the index or slice being overwritten
         :param newval: Spectrum whose values are to replace the overwritten ones
@@ -72,10 +72,10 @@ class Spectrum:
 
     def save(self, fname, saveHeader=True):
         '''
-        Write the Spectrum into a .s LibreESPRIT style format
-        Optionally skip writing the two lines of header
+        Write the Spectrum into a text .s file in a LibreESPRIT style format.
+        Optionally skip writing the two lines of header.
 
-        :param saveHeader: optional flag to skip writing the header if False
+        :param saveHeader: optional flag, skip writing the header if False
         '''
 
         #Note, the LibreESPRIT .s format header counts the number of columns
@@ -125,13 +125,13 @@ def read_spectrum(fname, trimBadPix=False, sortByWavelength=False):
     and also 3 column spectra (wavelength, I, errors).
 
     :param fname: the name of the file to read.
-    :param sortByWavelength: reorder the points in the spectrum to always
-                             increase in wavelength, if set to True.
     :param trimBadPix: optionally remove the more obviously bad pixels if True.
                        Removes pixels with negative flux or error bars of zero,
-                       pixels within 3sigma of zero (large error bars),
+                       pixels with flux within 3sigma of zero (large errors),
                        and pixels with extremely large values.
-    :return: a Spectrum object containing the observation.
+    :param sortByWavelength: reorder the points in the spectrum to always
+                             increase in wavelength, if set to True.
+    :rtype: Spectrum
     """
     # Reading manually is often faster than np.loadtxt for a large files
     fObs = open(fname, 'r')

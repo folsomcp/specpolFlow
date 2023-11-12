@@ -22,17 +22,18 @@ Mask and ExcludeMaskRegions classes and functions
 
 .. autofunction:: specpolFlow.read_mask
 
+.. autofunction:: specpolFlow.make_mask
+
+.. autofunction:: specpolFlow.cleanMaskUI
+
 .. autoclass:: specpolFlow.ExcludeMaskRegions
     :members:
-
 
 .. autofunction:: specpolFlow.read_exclude_mask_regions
 
 .. autofunction:: specpolFlow.get_Balmer_regions_default
 
 .. autofunction:: specpolFlow.get_telluric_regions_default
-
-.. autofunction:: specpolFlow.make_mask
 
 
 Spectrum classes and functions
