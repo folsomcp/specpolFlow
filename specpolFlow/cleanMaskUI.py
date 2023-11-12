@@ -27,18 +27,28 @@ def cleanMaskUI(maskName, obsName, outMaskName=None,
     The parameters for the LSD calculation are taken from the defaults in
     the cleanMaskUISubroutines lsdParams() function.
 
-    :param maskName: File name for the input line mask to clean.
+    :param maskName: File name, or a Mask object, for the input line mask
+                     to clean.
     :param obsName: File name for the reference observation to compare with.
-    :param outMaskName: File name for the output cleaned mask, defaults to [maskName].clean
-    :param excludeFileName: File name for a set of regions to be excluded from the line mask (read from and write to). If the file doesn't exist a set of default values will be used.
-    :rtype: mask
+    :param outMaskName: File name for the output cleaned mask,
+                        defaults to [maskName].clean
+    :param excludeFileName: File name for a set of regions to be excluded from
+                            the line mask (read from and write to). If the file
+                            doesn't exist a set of default values will be used.
+    :rtype: Mask
     """
     
     if outMaskName is None:
-        outMaskName = maskName+'.clean'
+        if isinstance(maskName, maskTools.Mask):
+            outMaskName = 'mask.clean'
+        else:
+            outMaskName = maskName+'.clean'
     
     #Read the input mask
-    mask = maskTools.read_mask(maskName)
+    if isinstance(maskName, maskTools.Mask):
+        mask = maskName
+    else:
+        mask = maskTools.read_mask(maskName)
     
     #Read a list of wavelength regions to exclude from the mask 
     #(if the file exists), or generate one from default values.
