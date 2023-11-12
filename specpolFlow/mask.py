@@ -347,7 +347,7 @@ def get_telluric_regions_default():
 ###################################
 
 def make_mask(lineListFile, maskFile, depthCutoff=0.0, 
-              wlStart=0.0, wlEnd=1e10, landeStart=-1e10, landeEnd=1e10,
+              wlStart=None, wlEnd=None, landeStart=None, landeEnd=None,
               elementsUsed=[], elementsExclude=[],
               atomsOnly=True, includeNoLande=False, defaultLande=1.0):
     """
@@ -517,8 +517,8 @@ def convert_list_to_mask(lineList, depthCutoff=0.0, atomsOnly = True,
     return mask
 
 
-def filter_mask(mask, depthCutoff = 0.0, wlStart = 0.0, wlEnd = 1e10,
-               landeStart = -1e10, landeEnd = 1e10,
+def filter_mask(mask, depthCutoff = 0.0, wlStart = None, wlEnd = None,
+               landeStart = None, landeEnd = None,
                elementsUsed = [], elementsExclude = []):
     """
     Remove lines from an LSD line mask, based on their depth, wavelength,
@@ -560,6 +560,11 @@ def filter_mask(mask, depthCutoff = 0.0, wlStart = 0.0, wlEnd = 1e10,
               'Pm','Sm','Eu','Gd','Tb','Dy','Ho','Er','Tm','Yb','Lu','Hf',
               'Ta','W' ,'Re','Os','Ir','Pt','Au','Hg','Tl','Pb','Bi','Po',
               'At','Rn','Fr','Ra','Ac','Th','Pa','U' )
+
+    if wlStart is None: wlStart = 0.0
+    if wlEnd is None: wlEnd = 1e10
+    if landeStart is None: landeStart = -1e10
+    if landeEnd is None: landeEnd = 1e10,
     
     #Remove lines that are outside the requested range in wavelength, Lande factor, or depth.
     indRemove = ((mask.depth < depthCutoff)
