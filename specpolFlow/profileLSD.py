@@ -127,7 +127,7 @@ class LSD:
         input profile's values.
 
         :param key: the index or slice being overwritten
-        :param newval: LSD whose values are to replace the overwritten ones
+        :param newval: LSD object used to replace the overwritten values
         """
         if not(isinstance(newval, LSD)):
             raise TypeError()
@@ -433,6 +433,7 @@ class LSD:
         '''
         Helper function to return the center of gravity of this Stokes V
         LSD profile
+        
         :return: the velocity of the center of gravity
         '''
         nominator = np.trapz(self.vel * np.abs(self.specV), x=self.vel )
@@ -443,6 +444,7 @@ class LSD:
         '''
         Helper function to return the velocity of the minimum of this
         Stokes I LSD profile
+        
         :return: the velocity of the Stokes I minumum
         '''
         
@@ -834,7 +836,7 @@ def read_lsd(fname):
 def run_lsdpy(obs=None, mask=None, outName='prof.dat',
               velStart=None, velEnd=None, velPixel=None, 
               normDepth=0.2, normLande=1.2, normWave=500.0,
-              removeContPol=1, trimMask=1, sigmaClipIter=0, 
+              removeContPol=1, trimMask=1, sigmaClipIter=0,
               sigmaClip=500, interpMode=1, outModelName='',
               fLSDPlotImg=1, fSavePlotImg=0, outPlotImgName='figProf.pdf'):
     """

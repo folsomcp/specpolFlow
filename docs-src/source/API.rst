@@ -14,7 +14,7 @@ LSD class and functions
 .. autofunction:: specpolFlow.run_lsdpy
 
 
-Mask and ExcludeMaskRegion classes and functions
+Mask and ExcludeMaskRegions classes and functions
 -------------------------------------------------
 
 .. autoclass:: specpolFlow.Mask
@@ -44,7 +44,7 @@ Spectrum classes and functions
 .. autofunction:: specpolFlow.read_spectrum
 
 
-LineList classe and functions
+LineList class and functions
 -------------------------------------------------
 
 .. autoclass:: specpolFlow.LineList
