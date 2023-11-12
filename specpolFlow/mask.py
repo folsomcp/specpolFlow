@@ -52,10 +52,11 @@ class Mask:
 
     def __setitem__(self, key, newval):
         """
-        Sets all values of the mask at the specified location equal to the input mask's values.
+        Sets all values of the mask at the specified location
+        equal to the input mask's values.
 
         :param key: the index or slice being overwritten
-        :param newval: Mask whose values are to replace the overwritten ones
+        :param newval: Mask object used to replace the overwritten values
         """
         if not(isinstance(newval, Mask)):
             raise TypeError()
@@ -79,6 +80,8 @@ class Mask:
         
         Remove lines if iuse index is set to 0,
         restricting the Mask to only lines used in LSD.
+        
+        :rtype: Mask
         """
         trimmedMask = self[self.iuse != 0]
         return trimmedMask
@@ -86,15 +89,17 @@ class Mask:
     def get_weights(self, normDepth, normWave, normLande):
         """
         Returns the calculated the LSD weights of all the lines in the mask
-        (no matter if iuse is 0 or 1).
+        (includes lines with both the iuse flag 0 and 1).
         
         This assumes the Stokes I lines are weighted as depth,
         and Stokes V is weighted as depth*wavelength*Lande factor
         
         :param normDepth: the normalizing line depth for the mask/LSD profile
-        :param normWave: the normalizing wavelength (nm) for the mask/LSD profile
-        :param normLande: the normalizing effective Lande factor for the mask/LSD profile
-        :return: weightI, weightV
+        :param normWave: the normalizing wavelength (nm) for
+                         the mask/LSD profile
+        :param normLande: the normalizing effective Lande factor for
+                          the mask/LSD profile
+        :return: weightI, weightV (as arrays)
         """
         weightI = self.depth / normDepth
         weightV = self.depth*self.wl*self.lande / (normDepth*normWave*normLande)
@@ -119,17 +124,19 @@ class Mask:
     
     def clean(self, regions):
         '''
-        Use a ExcludeMaskRegions object and returns a Mask Object in which
-        set the iuse column is set to zero for
-        for spectral lines with wavelengths in these regions. 
+        Remove lines inside a set of exclude regions from a mask.
+        
+        Takes an ExcludeMaskRegions object, and returns a Mask object with
+        the iuse values set to zero for spectral lines with wavelengths
+        inside these regions. 
         
         :param regions: An ExcludeMaskRegions object
+        :rtype: Mask
         '''
-        # Making a copy of the 
-        #mask_clean = copy.deepcopy(self)
+        # Making a copy of the mask (or use copy.deepcopy(self) )
         mask_clean = Mask(self.wl.copy(), self.element.copy(),
                           self.depth.copy(), self.excite.copy(),
-                          self.lande.copy(), self.iuse.copy()) #deep copy
+                          self.lande.copy(), self.iuse.copy())
         nregions = len(regions)
         for i in range(0,nregions):
             is_in = np.logical_and( (self.wl>=regions[i].start),
@@ -143,6 +150,7 @@ def read_mask(fname):
     Read in an LSD line mask file and returns a Mask object.
 
     The mask file should one line of header and columns of:
+    
     * Wavelength (nm)
     * Atomic number + (ionization state)*0.01
     * Line depth
@@ -173,6 +181,13 @@ def read_mask(fname):
 class ExcludeMaskRegions:
     """
     Class for a region object that records spectral regions to exclude from a Mask.
+
+    Usualy contrains arrays of:
+
+    * start - starting wavelengths for the regions
+    * stop - ending wavelengths for the regions
+    * type - optionally, text comments for the type of region \
+             (inside a numpy array with dtype=object)
     """
 
     def __init__(self, start, stop, type):
@@ -192,7 +207,8 @@ class ExcludeMaskRegions:
 
     def __setitem__(self, key, newval):
         """
-        Sets all values of the Mask at the specified location equal to the input mask's values.
+        Sets all values of the Mask at the specified location
+        equal to the input mask's values.
 
         :param key: the index or slice being overwritten
         :param newval: Mask whose values are to replace the overwritten ones
@@ -205,12 +221,17 @@ class ExcludeMaskRegions:
             self.type[key] = newval.type
 
     def __len__(self):
-        '''Overloaded len function that returns the number of lines in the mask'''
+        """
+        Returns the number of lines in the mask
+        """
         return len(self.start)
 
     def __add__(self, other):
         """
-        Overloaded addition function to concatenate two ExcludeMaskRegions objects
+        Concatenate two ExcludeMaskRegions objects
+        
+        :param other: an ExcludeMaskRegions object to combine with this one
+        :rtype: ExcludeMaskRegions
         """
         start = np.concatenate([self.start, other.start])
         stop = np.concatenate([self.stop, other.stop])
@@ -220,6 +241,9 @@ class ExcludeMaskRegions:
     def save(self, fname):
         """
         Save the ExcludeMaskRegions object to a text file.
+
+        The file contains one line for each region, with the start wavelength,
+        end wavelength, and a type comment.
         
         :param fname: the file path/name
         """
@@ -231,17 +255,21 @@ class ExcludeMaskRegions:
 
     def to_dict(self):
         """
-        Function to return the ExcludeMaskRegion as a dictionary. 
-        This is useful to transform ExcludeMaskRegions objects to Panda dataframes
+        Return the ExcludeMaskRegions as a dictionary. 
+        This is useful to transform ExcludeMaskRegions objects
+        to Panda dataframes.
         """
         return {'start':self.start, 'stop':self.stop,'type':self.type}
 
 def read_exclude_mask_regions(fname):
     """
-    Read in a ExcludeMaskRegion file into an ExcludeMaskRegion object. 
+    Read in a ExcludeMaskRegions file into an ExcludeMaskRegions object. 
 
+    The file should be a text file with one line for each region,
+    containing the start wavelength, end wavelength, and the type comment.
+    
     :param fname: the path/name of the file
-    :rtype ExcludeMaskRegion: 
+    :rtype: ExcludeMaskRegions
     """
     start = []
     stop = []
@@ -262,11 +290,13 @@ def read_exclude_mask_regions(fname):
 
 def get_Balmer_regions_default(velrange=500):
     '''
-    Returns a ExcludeMaskRegion object with regions around Balmer H-lines (alpha to epsilon) 
-    up to a given radial velocity, and a region that exclude the Balmer jump (from 360-392 nm)
+    Generate an ExcludeMaskRegions object with regions around Balmer H-lines
+    (alpha to epsilon) up to a given radial velocity,
+    and a region that excludes the Balmer jump (from 360-392 nm)
     
-    :param velrange: (default 500 km/s) velocity range around the H-line to be excluded.
-    :rtype: ExcludeMaskRegion
+    :param velrange: velocity range around the H-line to be excluded
+                     (default 500 km/s)
+    :rtype: ExcludeMaskRegions
     '''
 
     c = 299792.458 # Speed of light in km/s
@@ -301,7 +331,10 @@ def get_Balmer_regions_default(velrange=500):
 
 def get_telluric_regions_default():
     '''
-    Returns a ExcludeMaskRegions object with regions with heavy telluric regions in the optical
+    Generate an ExcludeMaskRegions object with regions containing
+    heavy telluric line contamination in the optical
+    
+    :rtype: ExcludeMaskRegions
     '''
     start = np.array([587.5,627.5,686.0,717.0,759.0,790.0,809.0])  # nm
     stop   = np.array([592.0,632.5,705.3,735.0,771.0,795.0,990.0])  # nm
@@ -327,18 +360,34 @@ def make_mask(lineListFile, maskFile, depthCutoff=0.0,
     This assumes input line list wavelengths in A, and returns a mask in nm.
     
     :param lineListFile: The name of the file containing the line list
+                         (in the VALD3 'extract stellar' 'long' format)
     :param maskFile: The name of the to write the mask to
-    :param depthCutoff: Only include lines in the mask deeper than this value (defaults to 0, all lines included)
-    :param wlStart: Optionally, only use lines with wavelengths above this (note: value in nm!)
-    :param wlEnd: Optionally, only use lines with wavelengths below this (note: value in nm!)
-    :param landeStart:  Optionally, only use lines with effective Lande factors above this
-    :param landeEnd: Optionally, only use lines with effective Lande factors below this
-    :param elementsUsed: Optionally, provide a list of elements to include in the line mask. This should be a list of strings with the element symbols, e.g. ['C', 'O', 'Si', 'Fe'] (an empty list or a list starting with 'all' will include all elements)
-    :param elementsExclude: Optionally, provide a list of elements to exclude from the line mask. Also a list of strings with the element symbols.
-    :param atomsOnly: Only include atomic lines (no molecular lines) and exclude H lines (defaults to True)
-    :param includeNoLande: Include lines in the mask even if no Lande factor can be estimated for them (defaults to False)
-    :param defaultLande: The value of the effective Lande factor to use if no value can be estimated (only used if includeNoLande = True)
-    :rtype: The mask object, in case further processing is desired
+    :param depthCutoff: Only include lines in the mask deeper than this value
+                        (defaults to 0, all lines included)
+    :param wlStart: Optionally, only use lines with wavelengths above this
+                    (note: value in nm!)
+    :param wlEnd: Optionally, only use lines with wavelengths below this
+                  (note: value in nm!)
+    :param landeStart: Optionally, only use lines with effective Lande factors
+                       above this
+    :param landeEnd: Optionally, only use lines with effective Lande factors
+                     below this
+    :param elementsUsed: Optionally, provide a list of elements to include
+                         in the line mask. This should be a list of strings
+                         with the element symbols, e.g. ['C', 'O', 'Si', 'Fe']
+                         (an empty list or a list starting with 'all' will
+                         include all elements)
+    :param elementsExclude: Optionally, provide a list of elements to exclude
+                            from the line mask. Also a list of strings with
+                            the element symbols.
+    :param atomsOnly: Only include atomic lines (no molecular lines) and
+                      exclude H lines (defaults to True)
+    :param includeNoLande: Include lines in the mask even if no Lande factor
+                           can be estimated for them (defaults to False)
+    :param defaultLande: The value of the effective Lande factor to use if
+                         no value can be estimated (only used if
+                         includeNoLande = True)
+    :rtype: Mask
     """
     lineList = lineListLib.read_VALD(lineListFile)
     
@@ -368,11 +417,16 @@ def convert_list_to_mask(lineList, depthCutoff=0.0, atomsOnly = True,
     See also the make_mask() function.
     
     :param lineList: The line list object to be converted to a mask
-    :param depthCutoff: Only include lines deeper than this depth cutoff (defaults to 0, all lines included)
-    :param atomsOnly: Flag to use only atomic lines (no molecular lines) and exclude H lines (defaults to True)
-    :param includeNoLande: Flag to include lines in the mask even if no Lande factor can be estimated for them (defaults to False)
-    :param defaultLande: The value of the effective Lande factor to use for lines where no value can be estimated (only used if includeNoLande = True)
-    :rtype: The line mask object created from this data
+    :param depthCutoff: Only include lines deeper than this depth cutoff
+                        (defaults to 0, all lines included)
+    :param atomsOnly: Flag to use only atomic lines (no molecular lines)
+                      and exclude H lines (defaults to True)
+    :param includeNoLande: Flag to include lines in the mask even if no Lande
+                           factor can be estimated for them (defaults to False)
+    :param defaultLande: The value of the effective Lande factor to use for
+                         lines where no value can be estimated
+                         (only used if includeNoLande = True)
+    :rtype: Mask
     """
     
     elements=('H' ,'He','Li','Be','B' ,'C' ,'N' ,'O' ,'F' ,'Ne','Na','Mg',
@@ -477,14 +531,25 @@ def filter_mask(mask, depthCutoff = 0.0, wlStart = 0.0, wlEnd = 1e10,
     not molecular lines)
 
     :param mask: The line mask object to filter lines out of.
-    :param depthCutoff: Only include lines in the mask deeper than this value (defaults to 0, all lines included)
-    :param wlStart: Optionally, only use lines with wavelengths above this (note: value in nm!)
-    :param wlEnd: Optionally, only use lines with wavelengths below this (note: value in nm!)
-    :param landeStart:  Optionally, only use lines with effective Lande factors above this
-    :param landeEnd: Optionally, only use lines with effective Lande factors below this
-    :param elementsUsed: Optionally, provide a list of elements to include in the line mask. This should be a list of strings with the element symbols, e.g. ['C', 'O', 'Si', 'Fe'] (an empty list or a list starting with 'all' will include all elements)
-    :param elementsExclude: Optionally, provide a list of elements to exclude from the line mask. Also a list of strings with the element symbols.
-    :rtype: The line mask object, with the requested lines removed.
+    :param depthCutoff: Only include lines in the mask deeper than this value
+                        (defaults to 0, all lines included)
+    :param wlStart: Optionally, only use lines with wavelengths above this
+                    (note: value in nm!)
+    :param wlEnd: Optionally, only use lines with wavelengths below this
+                  (note: value in nm!)
+    :param landeStart: Optionally, only use lines with effective Lande factors
+                       above this
+    :param landeEnd: Optionally, only use lines with effective Lande factors
+                     below this
+    :param elementsUsed: Optionally, provide a list of elements to include
+                         in the line mask. This should be a list of strings
+                         with the element symbols, e.g. ['C', 'O', 'Si', 'Fe']
+                         (an empty list or a list starting with 'all' will
+                         include all elements)
+    :param elementsExclude: Optionally, provide a list of elements to exclude
+                            from the line mask. Also a list of strings with
+                            the element symbols.
+    :rtype: Mask
     """
     
     elements=('H' ,'He','Li','Be','B' ,'C' ,'N' ,'O' ,'F' ,'Ne','Na','Mg',
