@@ -4,6 +4,8 @@ Tools for manipulating spectra, typically spectropolarimetric observations.
 """
 
 import numpy as np
+import copy
+import matplotlib.pyplot as plt
 
 ###################################
 
@@ -113,6 +115,169 @@ class Spectrum:
                     f.write('{:10.4f} {:11.4e}\n'.format(
                         self.wl[i], self.specI[i]))
         return
+
+    def calc_CaIRTindex(self, doppler_vel=None, plotFit=False):
+        '''
+        Calculates the Ca IRT index.
+        Follows the definition in Petit et al. (2013, doi:10.1007/978-3-642-30648-8_9).
+
+        :param doppler_vel: velocity used to correct for Doppler shifts in the spectrum (Float)
+        :param plotFit: If True, Plot the windows of integration used to compute the fluxes
+        :rtype: CaIRT-index (Float)
+        '''
+
+        spectrum = copy.copy(self)
+        
+        # Emission in the Ca IRT and flux in V and R continuum
+        label = ['F8498', 'F8542', 'F8662', 'V8475', 'R8704']
+        w0    = [849.802, 854.209, 866.214, 847.58 , 870.49 ] # central wavelength in nm 
+        dw    = [0.200  , 0.200  , 0.200  , 0.500  , 0.500  ] # integration window width in nm
+          
+        # speed of ligth in km/s
+        cvel = 2.99792458e5 
+
+        # doppler shift the spectrum
+        wl_doppler = spectrum.wl*(1 - doppler_vel/cvel) 
+
+        # Calculate integrated flux with a trapezoidal numerical integral
+        int_flux = []
+        for count, (iw0, idw) in enumerate(zip(w0, dw)):
+            # set the integration window
+            indWaveUse = (wl_doppler > iw0 - idw/2) & (wl_doppler < iw0 + idw/2)
+            # rectangular low pass filter
+            rect_filter = np.zeros_like(spectrum.specI)
+            rect_filter[indWaveUse] = 1
+            # compute flux
+            int_flux.append(np.trapz(spectrum.specI*rect_filter, x=wl_doppler)/idw)
+
+            if plotFit:
+                    plt.figure()
+                    plt.plot(wl_doppler,spectrum.specI)
+                    plt.plot(wl_doppler,rect_filter, label='Retangular filter')
+                    plt.axvline(x=iw0,color='r', label=r'$\lambda_0$')
+                    plt.xlim(iw0 - 2*idw, iw0 + 2*idw)
+                    plt.ylim(0,5)
+                    plt.legend()
+                    plt.show()
+
+        # Get the CaIRT-index
+        CaIRTindex = (int_flux[0] + int_flux[1] + int_flux[2])/(int_flux[3] + int_flux[4])
+        
+        return(CaIRTindex)
+
+    def calc_Haindex(self, doppler_vel=None, method='Gizis', plotFit=False):
+        '''
+        Calculates the Halpha index.
+        
+        :param doppler_vel: velocity used to correct for Doppler shifts in the spectrum (Float)
+        :param method: flag to decide which prescription to use when computing the Ha flux.
+                       Implemented options are 'Gizis' and 'Gomes', which stand for the definitions
+                       in Gizis, Reid & Hawley (2002) and Gomes da Silva et al. (2011), respectively.
+                       (Default: 'Gizis')
+        :param plotFit: If True, Plot the window of integration used to compute the flux
+        :rtype: Ha-index (Float)
+        '''
+
+        spectrum = copy.copy(self)
+        
+        # Emission in the Ha line and flux in V and R continuum.
+        label = ['Ha'   , 'V'    , 'R']
+
+        # Prescription used to compute the fluxes:
+        if method.lower() == 'gizis':
+            # Gizis, Reid & Hawley (2002):
+            w0    = [656.285, 655.885, 656.730] # central wavelength in nm
+            dw    = [0.360  , 0.220  , 0.220  ] # integration window width in nm
+        elif method.lower() == 'gomes':
+            # Gomes da Silva et al. (2011)
+            w0    = [656.2808, 655.087, 658.031] # central wavelength in nm
+            dw    = [0.160   , 1.075  , 0.875  ] # integration window width in nm
+        else: 
+            raise ValueError(('Method {:} unknown. Select among the coded methods i.e. "gizis" or "gomes".' 
+                 'Available methods are implemented as described in Gizis, Reid & Hawley (2002)'
+                 'and Gomes da Silva et al. (2011)').format(method))
+
+          
+        # speed of ligth in km/s
+        cvel = 2.99792458e5 
+
+        # doppler shift the spectrum
+        wl_doppler = spectrum.wl*(1 - doppler_vel/cvel) 
+
+        # Calculate integrated flux with a trapezoidal numerical integral
+        int_flux = []
+        for count, (iw0, idw) in enumerate(zip(w0, dw)):
+            # set the integration window
+            indWaveUse = (wl_doppler > iw0 - idw/2) & (wl_doppler < iw0 + idw/2)
+            # rectangular low pass filter
+            rect_filter = np.zeros_like(spectrum.specI)
+            rect_filter[indWaveUse] = 1
+            # compute flux
+            int_flux.append(np.trapz(spectrum.specI*rect_filter, x=wl_doppler)/idw)
+
+            if plotFit:
+                    plt.figure()
+                    plt.plot(wl_doppler,spectrum.specI)
+                    plt.plot(wl_doppler,rect_filter, label='Retangular filter')
+                    plt.axvline(x=iw0,color='r', label=r'$\lambda_0$')
+                    plt.xlim(iw0 - 2*idw, iw0 + 2*idw)
+                    plt.ylim(0,5)
+                    plt.legend()
+                    plt.show()
+                
+
+        # Get the Ha-index
+        Haindex = int_flux[0]/(int_flux[1] + int_flux[2])
+        return(Haindex)
+    
+    def calc_Naindex(self, doppler_vel=None, plotFit=False):
+        '''
+        Calculates the Na I dublet index.
+
+        :param doppler_vel: velocity used to correct for Doppler shifts in the spectrum (Float)
+        :param plotFit: If True, Plot the window of integration used to compute the flux
+        :rtype: Na-index (Float)
+        '''
+
+        spectrum = copy.copy(self)
+        
+        # Emission in the Na I doublet, and flux in R & V
+        label = ['F5895', 'F5889', 'V'   , 'R'   ]  
+        w0    = [589.592, 588.995, 580.50, 609.70] # central wavelength in nm 
+        dw    = [0.05000, 0.05000, 1.0000, 2.0000] # integration window width in nm
+
+          
+        # speed of ligth in km/s
+        cvel = 2.99792458e5 
+
+        # doppler shift the spectrum
+        wl_doppler = spectrum.wl*(1 - doppler_vel/cvel) 
+
+        # Calculate integrated flux with a trapezoidal numerical integral
+        int_flux = []
+        for count, (iw0, idw) in enumerate(zip(w0, dw)):
+            # set the integration window
+            indWaveUse = (wl_doppler > iw0 - idw/2) & (wl_doppler < iw0 + idw/2)
+            # rectangular low pass filter
+            rect_filter = np.zeros_like(spectrum.specI)
+            rect_filter[indWaveUse] = 1
+            # compute flux
+            int_flux.append(np.trapz(spectrum.specI*rect_filter, x=wl_doppler)/idw)
+
+            if plotFit:
+                    plt.figure()
+                    plt.plot(wl_doppler,spectrum.specI)
+                    plt.plot(wl_doppler,rect_filter, label='Retangular filter')
+                    plt.axvline(x=iw0,color='r', label=r'$\lambda_0$')
+                    plt.xlim(iw0 - 2*idw, iw0 + 2*idw)
+                    plt.ylim(0,1.1)
+                    plt.legend()
+                    plt.show()
+
+        # Get the NaI-index
+        NaIindex = (int_flux[0] + int_flux[1])/(int_flux[2] + int_flux[3]) 
+        
+        return(NaIindex)
 
 def read_spectrum(fname, trimBadPix=False, sortByWavelength=False):
     """
