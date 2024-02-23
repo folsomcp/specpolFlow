@@ -637,6 +637,136 @@ class LSD:
         else:
             return result
 
+    def calc_bis(self, Ic=1.,  cog='I', biswidth=None, plotFit=False, fullOutput=False):
+        """
+        Calculateis the bisector velocity span to this LSD profile, for a given continuum
+        level. Follows the bisector definition in Gray (1982) and Queloz et al. (2001). 
+        
+        :param Ic: the continnum level to use the the BIS calculation
+                   (float, default=1.0)
+        :param cog: The value, or calculation method for the center of gravity.
+                    The choices are:
+                    'I': center of gravity of I,
+                    'V': center of gravity of V,
+                    'IV': center of gravity of I*V,
+                    or a float: a user defined value in km/s.
+        :param biswidth: distance from the line center for the BIS calculation.
+                    One element = same on each side of line center.
+                    Two elements, left and right of line center.
+                    Not defined: using the entire profile.
+        :param plotFit: If True, Plot the bisector curve in the LSD profile with matplotlib
+        :param fullOutput: If True, Return all the variables used to compute the line bisector 
+                           rather than just the velocity span 
+        :return: the velocity span (Float)
+                 If fullOutput is True then also include average velocity at the 
+                 top & bottom part of the bisector (Float) and numpy arrays with the
+                 line bisector & associated intensity levels.
+        """
+
+        lsd=copy.deepcopy(self)
+
+        # Check if cog is a string.
+        if isinstance(cog, str):
+            # calculate the cog for the chosen method
+            if cog == 'I':
+                cog_val = lsd.cog_I(Ic)
+            elif cog == 'min':
+                cog_val = lsd.cog_min()
+            elif cog == 'IV':
+                cog_val = lsd.cog_IV(Ic)
+            elif cog == 'V':
+                cog_val = lsd.cog_V()
+            else:
+                raise ValueError('bis got unrecognized value for cog: {:}'.format(cog))
+        else:
+            cog_val=copy.copy(cog)
+
+        # Get the velocity range
+        if biswidth == None:
+            print('no biswidth, using full velocity range to calculate BIS')
+            velrange = (lsd.vel[1], lsd.vel[-2])
+        else:
+            # Check whether it is a numpy array
+            if isinstance(biswidth, list) or isinstance(biswidth, tuple):
+                if len(biswidth) == 1:
+                    # keeping the actual bis calculation range for plotting later.
+                    velrange = (cog_val-biswidth[0], cog_val+biswidth[0])
+                elif len(bzwidth) == 2:
+                    velrange = (cog_val-biswidth[0], cog_val+biswidth[1])
+                else:
+                    print('biswidth has too many elements (need one or two)')
+                    raise ValueError('biswidth has too many elements {:} (need 1 or 2)'.format(len(biswidth)))
+            else:
+                velrange = (cog_val-biswidth, cog_val+biswidth)
+
+        # Set the velocity window
+        indVelUse = (lsd.vel >= velrange[0]) & (lsd.vel <= velrange[1])
+
+        # Set the intensity levels for the line bisector calculation
+        # split red and blue shifted regimes
+        remove_zero = 0.01 
+        _rshift = ((lsd.vel[indVelUse] - cog_val) >  remove_zero) & (lsd.specI[indVelUse] < (Ic - 0.001))
+        _bshift = ((lsd.vel[indVelUse] - cog_val) < -remove_zero) & (lsd.specI[indVelUse] < (Ic - 0.001))
+
+        # Define the line intensity limits 
+        specImax =  min([max(lsd.specI[indVelUse][_rshift]), max(lsd.specI[indVelUse][_bshift])])
+        specImin =  max([min(lsd.specI[indVelUse][_rshift]), min(lsd.specI[indVelUse][_bshift])])
+
+        # Gets the maximum intensity variation in the LSD profile 
+        deltaI = specImax - specImin
+
+        # Get the number of levels for the line bisector based on the resolution 
+        nlev = int(min([np.size(lsd.specI[indVelUse][_rshift][(lsd.specI[indVelUse][_rshift]>specImin) \
+                                & (lsd.specI[indVelUse][_rshift]<specImax)]), 
+                        np.size([(lsd.specI[indVelUse][_bshift]>specImin) \
+                                & (lsd.specI[indVelUse][_bshift]<specImax)])]))  
+        specI_levels = np.linspace(specImin, specImax, nlev, endpoint=True)
+
+
+        # Re-bin the velocity vector to match the selected Stokes I levels
+        # Warning: here the velocity is written as a function of Stokes I 
+        # to easily interpolate the velocity array. Because of that, it is 
+        # necessary to reverse (vel - cog_val)[_bshift] and specI[_bshift] 
+        # to have an increasing function vel(specI)
+        rvel_rebin =  np.interp(specI_levels, lsd.specI[indVelUse][_rshift], (lsd.vel - cog_val)[indVelUse][_rshift])
+        bvel_rebin =  np.interp(specI_levels, lsd.specI[indVelUse][_bshift][::-1], (lsd.vel - cog_val)[indVelUse][_bshift][::-1]) 
+
+        # Bisector: half of the difference in velocity for a given intensity level
+        bisector = (rvel_rebin + bvel_rebin)/2
+
+        # Define indexes out of range for BIS calculation
+        _ior =  (specI_levels > (Ic-0.10*deltaI)) | (specI_levels < (Ic-0.90*deltaI))
+        specI_levels[_ior] = np.nan
+        specI_levels[_ior] = np.nan
+
+        # Get average velocity at the top and bottom part of the bisector
+        # the top part includes all points within 10–40 per cent of the full 
+        # line depth and the bottom one those within 60–90 per cent.
+        _itop = (specI_levels <= (Ic-0.10*deltaI)) & (specI_levels >= (Ic-0.40*deltaI)) 
+        _ibot = (specI_levels <= (Ic-0.55*deltaI)) & (specI_levels >= (Ic-0.90*deltaI)) 
+        vt = np.nanmean(bisector[_itop])
+        vb = np.nanmean(bisector[_ibot])
+
+        # Get the bisector velocity span as defined in Queloz et al. 2001
+        vs = vt - vb
+
+        # Optionally plot the BIS to the observed LSD profile
+        if plotFit == True:
+            plt.errorbar(lsd.vel[indVelUse] - cog_val, lsd.specI[indVelUse],
+                          yerr=lsd.specSigI[indVelUse], c='grey')
+            plt.plot(bisector*10, specI_levels, 'b.', label='BIS x10')
+            plt.xlabel('Velocity (km/s)')
+            plt.ylabel('I')
+            plt.legend(loc='best')
+            plt.show()
+
+
+        #Optionally return all fit parameters
+        if fullOutput == True:
+            return (vs, vt, vb, bisector, specI_levels)
+        else:
+            return vs
+
 ##################
 ##################
 
