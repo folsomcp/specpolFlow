@@ -336,7 +336,7 @@ def get_telluric_regions_default():
     
     :rtype: ExcludeMaskRegions
     '''
-    start = np.array([587.5,627.5,686.0,717.0,759.0,790.0,809.0])  # nm
+    start = np.array([587.5,627.5,684.0,717.0,757.0,790.0,809.0])  # nm
     stop   = np.array([592.0,632.5,705.3,735.0,771.0,795.0,990.0])  # nm
 
     return ExcludeMaskRegions(start, stop,
