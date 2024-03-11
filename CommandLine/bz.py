@@ -2,6 +2,7 @@
 #
 # Calculate a longitudinal magnetic field (Bz) from an LSD profile.
 
+import argparse
 import matplotlib.pyplot as plt
 try:
     import specpolFlow as pol
@@ -16,12 +17,13 @@ except ModuleNotFoundError:
     sys.path.insert(0, os.path.join(loc0, '..', '..'))
     import specpolFlow as pol
 
+def bz_cli():
+    """Main function for running LSD.calc_bz() as a terminal program
 
-#For running LSD.calc_bz() as a terminal program
-if __name__ == "__main__":
+    Takes no arguments, but uses command line parameters instead.
+    """
     #Take input file names and velocity ranges as command line arguments,
     #with some additional optional control parameters.
-    import argparse
     parser = argparse.ArgumentParser(description="""
     Calculate the longitudinal magnetic field Bz from LSD profiles.
     Prints Bz from Stokes V and null profiles.
@@ -102,3 +104,9 @@ if __name__ == "__main__":
                 res['N2 bz (G)'], res['N2 bz sig (G)'],
                 res['N2 bz (G)']/res['N2 bz sig (G)'], res['N2 FAP'])
         print(txtline)
+        
+    return
+
+#For running this Python script as a terminal program
+if __name__ == "__main__":
+    bz_cli()

@@ -2,6 +2,7 @@
 #
 #A wrapper for quickly plotting a set of LSD profiles from the command line
 
+import argparse
 import matplotlib.pyplot as plt
 try:
     import specpolFlow as pol
@@ -16,12 +17,12 @@ except ModuleNotFoundError:
     sys.path.insert(0, os.path.join(loc0, '..', '..'))
     import specpolFlow as pol
 
-
-#For running as a terminal program
-if __name__ == "__main__":
+def plot_lsd_cli():
+    """
+    Function for quickly reading and plotting LSD profiles from a terminal
+    """
     #Take input file names as command line arguments,
     #with some additional optional control parameters.
-    import argparse
     parser = argparse.ArgumentParser(description='Plot a set of LSD profiles.')
     parser.add_argument("fileList", nargs='*',
                         help="LSD profile files to plot, can be more than one file.")
@@ -50,3 +51,8 @@ if __name__ == "__main__":
         fig.savefig(saveName)
     
     plt.show()
+    return
+
+#For running this Python script as a terminal program
+if __name__ == "__main__":
+    plot_lsd_cli()

@@ -2,6 +2,7 @@
 #
 # Generate an LSD line mask from a VALD line list.
 
+import argparse
 import matplotlib.pyplot as plt
 try:
     import specpolFlow as pol
@@ -16,12 +17,14 @@ except ModuleNotFoundError:
     sys.path.insert(0, os.path.join(loc0, '..', '..'))
     import specpolFlow as pol
 
+def make_mask_cli():
+    """
+    Main function for running make_mask as a terminal program
 
-#For running makeMask as a terminal program
-if __name__ == "__main__":
+    Takes no arguments, but uses command line parameters instead.
+    """
     #Take input and output file names as command line arguments,
     #with some additional optional control parameters.
-    import argparse
     parser = argparse.ArgumentParser(description='Generate an LSD line mask from a VALD line list. When Lande factors are not in the line list they will be estimated if possible.')
     parser.add_argument("lineList", help="Line list from VALD. This file should be an 'extract stellar' line list in the 'long' format.")
     parser.add_argument("mask", nargs='?', default='mask.dat', help='Save the line mask to this file.')
@@ -53,3 +56,8 @@ if __name__ == "__main__":
                                   elementsExclude = elementsExclude,
                                   includeNoLande = False)
     print('mask saved to', maskName)
+    return
+
+#For running this script as a terminal program
+if __name__ == "__main__":
+    make_mask_cli()

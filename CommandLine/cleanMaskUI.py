@@ -3,6 +3,7 @@
 #
 #Interactive tool for cleaning poor lines from an LSD line mask
 
+import argparse
 import numpy as np
 from matplotlib.figure import Figure
 
@@ -19,10 +20,9 @@ except ModuleNotFoundError:
     sys.path.insert(0, os.path.join(loc0, '..', '..'))
     import specpolFlow as pol
 
-
-#For running cleanMaskUI as a terminal program
-if __name__ == "__main__":
-    import argparse
+def clean_mask_cli():
+    """Main function for running cleanMaskUI as a terminal program
+    """
     parser = argparse.ArgumentParser(description='Interactively remove poor lines from an LSD line mask, and optionally modify line depths. This plots the mask, a comparison observation, and the model LSD spectrum (the convolution of the mask and LSD profile). For the model LSD spectrum calculation, some more useful parameters can be set within the graphical UI, and there is an option for displaying the resulting profile.')
     parser.add_argument('mask', help='The line mask to clean')
     parser.add_argument('observation', help='An observed spectrum for comparison')
@@ -40,4 +40,8 @@ if __name__ == "__main__":
     cleanMask = pol.cleanMaskUI(maskName, obsName, outMaskName=outMaskName,
                                 excludeFileName=excludeFileName,
                                 batchMode=batchMode)
-    
+    return
+
+#For running this Python script as a terminal program
+if __name__ == "__main__":
+    clean_mask_cli()
