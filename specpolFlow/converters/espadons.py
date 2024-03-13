@@ -25,7 +25,9 @@ def espadons(flist, flistout=None):
     and 'n.s' and 'u.s' appended to the filename root
 
     :param flist: (list of strings) a list of ESPaDOnS filenames
+    :param flistout: (list of strings) optional, list of output file rootnames
     """
+    if isinstance(flist, str): flist = [flist,]
     for i, fname in enumerate(flist):
         print('converting ', fname.strip())
         if flistout is None:
@@ -106,11 +108,10 @@ def espadons(flist, flistout=None):
         outHeader = open(fnameOut+'.out','w')
         outHeader.write(repr(header))
         outHeader.close()
+    return
 
-
-#For running as a terminal program
-if __name__ == "__main__":
-    
+#Interface function for running as a command line script
+def espadons_cli():
     import argparse
     parser = argparse.ArgumentParser(description='Convert FITS file spectra from the ESPaDOnS CADC archive format to text .s files. Output files as [filename]n.s for the pipeline normalized spectra, [filename]u.s for unnormalized spectra, and [filename].out for header information.')
     parser.add_argument("observation", nargs='*', help='a list of FITS files to process.')
@@ -123,4 +124,8 @@ if __name__ == "__main__":
     else:
         #Run the conversion funciton
         espadons(flist)
+    return
 
+#For running this scirpt as a terminal program
+if __name__ == "__main__":
+    espadons_cli()
