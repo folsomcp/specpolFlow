@@ -1,0 +1,52 @@
+#specpolFlow
+#Settings for packaging the project with setuptools, for distribution with PyPI.
+#For just using a local version of the code this can be safely ignored
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+#Include only specific folders or modules
+[tool.setuptools.packages.find]
+# All the following settings are optional:
+#where = ["src"]  # ["."] by default
+include = ["specpolFlow*"]  # ["*"] by default
+
+[project]
+name = "specpolFlow"
+version = "0.3.4a1"
+authors = [ { name="Colin Fosom"},
+            { name="Christi Erba"},
+            { name="Veronique Petit"},
+            { name="Shaquann Seadrow"},
+            { name="Patrick Stanley"},
+            { name="Tali Natan"},
+            { name="Mary Oksala"},
+]
+description = "Tools for the analysis of stellar spectropolarimetric data"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Astronomy",
+    "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    "numpy",
+    "scipy",
+    "matplotlib",
+    "LSDpy",
+]
+
+[project.urls]
+Homepage = "https://github.com/folsomcp/specpolFlow"
+Documentation = "https://folsomcp.github.io/specpolFlow/"
+
+[project.scripts]
+spf-Bz = "specpolFlow.CommandLine.bz:bz_cli"
+spf-rvFit = "specpolFlow.CommandLine.rvFit:rv_fit_cli"
+spf-makeMask = "specpolFlow.CommandLine.makeMask:make_mask_cli"
+spf-cleanMask = "specpolFlow.CommandLine.cleanMaskUI:clean_mask_cli"
+spf-plotLSD = "specpolFlow.CommandLine.plotLSD:plot_lsd_cli"

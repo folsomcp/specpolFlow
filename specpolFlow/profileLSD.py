@@ -900,7 +900,7 @@ def run_lsdpy(obs=None, mask=None, outName='prof.dat',
     """
     import LSDpy
 
-    vel, sI, sIerr, sV, sVerr, sN1, sN1err, headerTxt, specList = LSDpy.lsdpy.main(
+    vel, sI, sIerr, sV, sVerr, sN1, sN1err, headerTxt, specList = LSDpy.lsd(
         obs, mask, outName, velStart, velEnd, velPixel, 
         normDepth, normLande, normWave, removeContPol, trimMask, 
         sigmaClipIter, sigmaClip, interpMode, 1, outModelName, 
