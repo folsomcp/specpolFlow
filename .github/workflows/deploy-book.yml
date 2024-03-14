@@ -39,13 +39,13 @@ jobs:
     - name: Install dependencies
       run: |
         pip install -r docs-jb-env.yml
+        pip install "git+https://github.com/folsomcp/LSDpy"
+        pip install "git+https://github.com/folsomcp/SpecpolFlow"
 
     # Build the book
     - name: Build the book
       shell: bash -l {0}
       run: |
-        pip install "git+https://github.com/folsomcp/LSDpy"
-        pip install "git+https://github.com/folsomcp/SpecpolFlow"
         jupyter-book build docs-jb
 
     # Push the book's HTML to github-pages
