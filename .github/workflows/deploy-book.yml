@@ -1,1 +1,61 @@
+name: deploy-book
 
+# Only run this when the main branch changes
+on:
+  push:
+    branches:
+    - main
+
+# This job installs dependencies, build the book, and pushes it to `gh-pages`
+jobs:
+  deploy-book:
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+    - uses: actions/checkout@v3
+
+    # Install dependencies
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.9
+
+    # VP not using conda for now
+    # using the pip install of the dependencies to build the book
+    # at the moment, the notebooks are not auto-running
+    # so I only need to load LSDpy and specpolFlow to run the auto API
+    #- name: Setup Miniconda
+    #  uses: conda-incubator/setup-miniconda@v2.1.1
+    #  with:
+    #    environment-file: environment.yml
+    #    activate-environment: my-env
+    #    python-version: 3.9
+    #    auto-activate-base: false
+
+    # VP: I could just hardcode the package, but it might be useful for later
+    # to have the requirements in a file
+    - name: Install dependencies
+      run: |
+        pip install -r docs-jb-env.yml
+
+    # Build the book
+    - name: Build the book
+      shell: bash -l {0}
+      run: |
+        pip install "git+https://github.com/folsomcp/LSDpy"
+        pip install "git+https://github.com/folsomcp/SpecpolFlow"
+        jupyter-book build Book
+
+    # Push the book's HTML to github-pages
+    # Upload the book's HTML as an artifact
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v2
+      with:
+        path: "Book/_build/html"
+
+    # Deploy the book's HTML to GitHub Pages
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v2
