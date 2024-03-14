@@ -46,7 +46,7 @@ jobs:
       run: |
         pip install "git+https://github.com/folsomcp/LSDpy"
         pip install "git+https://github.com/folsomcp/SpecpolFlow"
-        jupyter-book build Book
+        jupyter-book build docs-jb
 
     # Push the book's HTML to github-pages
     # Upload the book's HTML as an artifact
