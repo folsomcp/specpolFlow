@@ -15,14 +15,16 @@ include = ["specpolFlow*"]  # ["*"] by default
 [project]
 name = "specpolFlow"
 version = "0.3.4a1"
-authors = [ { name="Colin Fosom"},
-            { name="Christi Erba"},
-            { name="Veronique Petit"},
-            { name="Shaquann Seadrow"},
-            { name="Patrick Stanley"},
-            { name="Tali Natan"},
-            { name="Mary Oksala"},
+authors = [ {name="SpecpolFlow Team"},
 ]
+#authors = [ { name="Colin Folsom"},
+#            { name="Christi Erba"},
+#            { name="Veronique Petit"},
+#            { name="Shaquann Seadrow"},
+#            { name="Patrick Stanley"},
+#            { name="Tali Natan"},
+#            { name="Mary Oksala"},
+#]
 description = "Tools for the analysis of stellar spectropolarimetric data"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -37,6 +39,7 @@ dependencies = [
     "numpy",
     "scipy",
     "matplotlib",
+    "astropy",
     "LSDpy",
 ]
 
