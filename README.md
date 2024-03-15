@@ -1,6 +1,13 @@
 # SpecpolFlow
 
-## NOTICE TO ALL USERS: SpecpolFlow is still under active development. Please clone the repository and update often for the latest version. The first stable release of SpecpolFlow is coming soon -- stay tuned!
+## NOTICE TO ALL USERS: 
+SpecpolFlow's beta release is live at 
+  pip install -i https://test.pypi.org/simple/ specpolFlow
+
+LSDpy is live at
+  pip install LSDpy
+
+## About SpecpolFLow
 
 SpecpolFlow is a software package that provides a completely pythonic workflow for the analysis of spectropolarimetric observations of astronomical sources (for example, data aquired using ground-based instruments such as ESPaDOnS at CFHT, Narval at TBL, etc). It is designed to provide a single, user-friendly pipeline from telescope to science product.
 
@@ -14,18 +21,18 @@ These tutorials are in the form of Python notebooks, which can also be run using
 
 The full documentation can be found here: [folsomcp.github.io/specpolFlow/](folsomcp.github.io/specpolFlow/)
 
-Development Team:
-* Christi Erba
-* Colin Folsom
+## SpF Development Team:
+* Christi Erba (co-PI)
+* Colin Folsom (co-PI)
 * Veronique Petit
 * Shaquann Seadrow
 * Patrick Stanley
 * Tali Natan
-* Mary Oksala
+* Bonnie Zaire
 
 Current Contributors:
 * Gregg Wade
-* Bonnie Zaire
+* Mary Oksala
 
 Past Contributors:
 * Federico Villadiego Forero
@@ -34,6 +41,6 @@ Past Contributors:
 * Dax Moraes
 * Marisol Catalan Olais
 
-Logo:
-The SpecpolFlow logo was created by the talented Tali Natan!
+## Logo:
+The SpecpolFlow logo was created by the talented Tali Natan! Please contact the SpF team if you would like to use this graphic in a publication. 
 
