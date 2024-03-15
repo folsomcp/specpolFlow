@@ -1,14 +1,14 @@
 # SpecpolFlow
 
 ## NOTICE TO ALL USERS: 
-SpecpolFlow's beta release is live at
+SpecpolFlow's beta release is live at:
 ```
-pip install -i https://test.pypi.org/simple/ specpolFlow
+  pip install -i https://test.pypi.org/simple/ specpolFlow
 ```
 
-LSDpy is live at
+LSDpy is live at:
 ```
-pip install LSDpy
+  pip install LSDpy
 ```
 
 ## About SpecpolFLow
@@ -24,6 +24,9 @@ with examples of how to construct a flexible workflow from these tools for your 
 These tutorials are in the form of Python notebooks, which can also be run using collaborative platforms such as Google Colab. 
 
 The full documentation can be found here: [folsomcp.github.io/specpolFlow/](folsomcp.github.io/specpolFlow/)
+
+## Contact us!
+You can reach the SpF Development Team at: specpolflow@gmail.com
 
 ## SpF Development Team:
 * Christi Erba (co-PI)
