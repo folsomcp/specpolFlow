@@ -28,5 +28,9 @@ parts:
     - file: Tutorials/7-CalculateBisector_Tutorial.ipynb
   - caption: API
     chapters:
-    #- file: API/API.rst
-    - file: API/API_full.rst
+    - file: API/Converters_API.rst
+    - file: API/Spectrum_API.rst
+    - file: API/Mask_API.rst
+    - file: API/LSD_API.rst
+    - file: API/LineList_API.rst
+    #- file: API/API_full.rst
