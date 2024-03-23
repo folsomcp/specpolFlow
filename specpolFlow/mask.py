@@ -7,7 +7,7 @@ and interacively cleaning and tweaking.
 """
 
 import numpy as np
-from . import lineList as lineListLib
+#from . import lineList as lineListLib #(moved inside some functions)
 
 ###################################
 ###################################
@@ -390,6 +390,7 @@ def make_mask(lineListFile, maskFile, depthCutoff=0.0,
                          includeNoLande = True)
     :rtype: Mask
     """
+    from . import lineList as lineListLib
     lineList = lineListLib.read_VALD(lineListFile)
     
     mask = convert_list_to_mask(lineList, depthCutoff=depthCutoff,
@@ -430,7 +431,7 @@ def convert_list_to_mask(lineList, depthCutoff=0.0, atomsOnly = True,
                          (only used if includeNoLande = True)
     :rtype: Mask
     """
-    
+    from . import lineList as lineListLib
     elements=('H' ,'He','Li','Be','B' ,'C' ,'N' ,'O' ,'F' ,'Ne','Na','Mg',
               'Al','Si','P' ,'S' ,'Cl','Ar','K' ,'Ca','Sc','Ti','V' ,'Cr',
               'Mn','Fe','Co','Ni','Cu','Zn','Ga','Ge','As','Se','Br','Kr',

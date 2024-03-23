@@ -3,16 +3,12 @@
 # Generate an LSD line mask from a VALD line list.
 
 import argparse
-import matplotlib.pyplot as plt
 try:
     import specpolFlow as pol
 except ModuleNotFoundError:
     #If specpolFlow is not installed or in the python path
     #try guessing the location and adding it temporarily
-    import sys
-    import os
-    #loc0 = sys.path[0] #try this module's directory from the Python path list
-    #try getting this module's directory from a predefined attribute
+    import sys, os
     loc0 = os.path.dirname(__file__) 
     sys.path.insert(0, os.path.join(loc0, '..', '..'))
     import specpolFlow as pol
