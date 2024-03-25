@@ -1,30 +1,40 @@
-# Welcome to SpecpolFlow
+# Welcome to SpecpolFlow!
 
 :::{warning}
 The SpecpolFlow documentation is currently undergoing a major restructuration. 
 Stay tuned!
 :::
 
-The goal of SpecpolFlow is to provide a completely pythonic workflow for the analysis of 
-spectropolarimetric observations (for example, ESPaDOnS at CFHT, Narval at TBL, etc). 
+## About SpecpolFLow
 
-The SpecpolFlow package is built around two other packages developed by Colin Folsom for 
-the two most computationally challenging tasks: spectra normalization (Github: folsomcp/NormPlot) 
-and LSD profile calculations (Github:folsomcp/LSDpy). 
+`SpecpolFlow` is a software package that provides a completely pythonic workflow for the analysis of spectropolarimetric observations of astronomical sources (for example, data aquired using instruments such as ESPaDOnS at CFHT, Narval at TBL, etc). It is designed to provide a single, user-friendly pipeline from telescope to science product.
 
-SpecPolFlow provides intermediate calculation tools (for example line mask calculations and 
-longitudinal field calculations), as well as object classes and manipulation tools that are useful 
-to build a spectropolarimetric workflow (for example a LSD object class, with built-in read, write, 
-slice, plot, etc methods). 
+`SpecpolFlow`'s routines handle two computationally challenging tasks in spectropolarimetry: spectral normalization (normPlot) and least-squares deconvolution (LSD) profile calculation (LSDpy). `SpecpolFlow` also provides several intermediate calculation and visualization options, including tools for developing and cleaning line masks, calculating the longitudinal magnetic field, and visualizing the LSD profile. All of these tools are fully documented in the API documentation.
 
-These tools are fully documented (see API documentation)
+`SpecpolFLow` also maintains a series of detailed tutorials, with examples of how to construct a flexible workflow from `SpecpolFLow`'s tools for your specific needs (e.g., to handle automation for very large datasets using tools like `pandas`, the Python Data Analysis Library). These tutorials are in the form of Python notebooks, which can also be run using collaborative platforms such as Google Colab. 
 
-We also provide tutorials that can be used to teach the workflow, 
-and examples on how to construct a workflow from these tools to e.g. handle automation 
-for very large datasets (using tools like the Panda package that is becoming very popular in data science). 
+## Contact us!
+You can reach the SpF Development Team at: specpolflow@gmail.com
 
-These tutorials are in the form of python notebooks (that can also run on Google Colab). 
+## SpF Development Team:
+* Christi Erba (co-PI)
+* Colin Folsom (co-PI)
+* Veronique Petit
+* Shaquann Seadrow
+* Patrick Stanley
+* Tali Natan
+* Bonnie Zaire
 
-:::{Warning}
-NOTICE TO ALL USERS: SpecpolFlow is still under active development. Please clone the repository and update often for the latest version. The first stable release of SpecpolFlow is coming soon -- stay tuned!
-:::
+Current Contributors:
+* Gregg Wade
+* Mary Oksala
+
+Past Contributors:
+* Federico Villadiego Forero
+* DJ Meleney
+* Robin Moore
+* Dax Moraes
+* Marisol Catalan Olais
+
+## Logo:
+The SpecpolFlow logo was created by the talented Tali Natan! Please contact the SpF team if you would like to use this graphic in a publication. 
