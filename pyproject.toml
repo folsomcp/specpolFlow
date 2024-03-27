@@ -14,7 +14,7 @@ include = ["specpolFlow*"]  # ["*"] by default
 
 [project]
 name = "specpolFlow"
-version = "0.3.4a1"
+version = "0.3.4a2"
 authors = [ {name="SpecpolFlow Team", email="specpolflow@gmail.com"},
 ]
 description = "Tools for the analysis of stellar spectropolarimetric data"
@@ -34,6 +34,9 @@ dependencies = [
     "astropy",
     "LSDpy",
 ]
+
+[project.optional-dependencies]
+norm = ["normPlot"]
 
 [project.urls]
 Homepage = "https://github.com/folsomcp/specpolFlow"
