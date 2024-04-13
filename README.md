@@ -3,27 +3,35 @@
 ## NOTICE TO ALL USERS: 
 SpecpolFlow's beta release is live at:
 ```
-  pip install -i https://test.pypi.org/simple/ specpolFlow
+pip install specpolFlow
+```
+The code is still in active development, while the current modules are well tested, some details may change.
+
+Installing SpecpolFlow will install [LSDpy](https://pypi.org/project/LSDpy/). Or you can install LSDpy separately:
+```
+pip install LSDpy
 ```
 
-LSDpy is live at:
+The spectrum normalization tool [NormPlot](https://pypi.org/project/normPlot/) is an optional extra.  It can be installed at the same time as SpecpolFlow using:
 ```
-  pip install LSDpy
+pip install specpolFlow[norm]
+```
+or NormPlot can be installed seperately using:
+```
+pip install normPlot
 ```
 
-## About SpecpolFLow
 
-SpecpolFlow is a software package that provides a completely pythonic workflow for the analysis of spectropolarimetric observations of astronomical sources (for example, data aquired using ground-based instruments such as ESPaDOnS at CFHT, Narval at TBL, etc). It is designed to provide a single, user-friendly pipeline from telescope to science product.
+## About SpecpolFlow
 
-SpecpolFlow incorporates earlier pieces of software developed by Dr. Colin Folsom for the two most computationally challenging tasks: 
-spectra normalization (Github: [folsomcp/NormPlot](https://github.com/folsomcp/normPlot)) and LSD profile calculation (Github: [folsomcp/LSDpy](https://github.com/folsomcp/LSDpy)). It also provides several intermediate calculation and visualization options, including tools for developing and cleaning line masks, calculating the longitudinal magnetic field, and visualizing the LSD profile. All of these tools are fully documented in our API documentation.
+SpecpolFlow is a software package that provides a completely pythonic workflow for the analysis of spectropolarimetric observations of astronomical sources (for example, data acquired using ground-based instruments such as ESPaDOnS at CFHT, Narval at TBL, etc). It is designed to provide a single, user-friendly pipeline from telescope to science product.
 
-We also provide and maintain a series of tutorials that can be used to teach the workflow, 
-with examples of how to construct a flexible workflow from these tools for your specific needs 
-(e.g., to handle automation for very large datasets using tools like pandas = Python for Data Analysis). 
+SpecpolFlow incorporates tools for spectra normalization (Github: [folsomcp/NormPlot](https://github.com/folsomcp/normPlot)) and LSD profile calculation (Github: [folsomcp/LSDpy](https://github.com/folsomcp/LSDpy)). It also provides several supporting tools, including tools for developing and cleaning line masks, calculating the longitudinal magnetic field, and visualizing the LSD profile. These tools can be used through a fully documented Python API, or through a command line interface.
+
+We also maintain a series of detailed tutorials, with examples of how to construct a flexible workflow from SpecpolFlow's tools for your specific needs (e.g., automation for very large datasets using tools like pandas = Python for Data Analysis). 
 These tutorials are in the form of Python notebooks, which can also be run using collaborative platforms such as Google Colab. 
 
-The full documentation can be found here: [folsomcp.github.io/specpolFlow/](folsomcp.github.io/specpolFlow/)
+The full documentation can be found here: [folsomcp.github.io/specpolFlow/](https://folsomcp.github.io/specpolFlow/)
 
 ## Contact us!
 You can reach the SpF Development Team at: specpolflow@gmail.com
