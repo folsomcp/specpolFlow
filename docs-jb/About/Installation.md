@@ -23,7 +23,7 @@ pip install "git+https://github.com/folsomcp/SpecpolFlow/INSERT_RELEASE_TAG"
 
 ## Accessing the classes and function
 
-In interactive python (e.g. Jupyter Notebooks), importing SpecpolFlow will give access to all of the classes and function (like e.g. numpy). From these, you can build your own workflow (see the tutorials for examples).
+In interactive python (e.g. Jupyter Notebooks), importing SpecpolFlow will give access to all of the classes and function (similar to numpy). From these, you can build your own workflow (see the tutorials for examples).
 
 There are two interactive tools (NormPlot and CleanMaskUI) that will not work within a notebook. These tools can be launched from 
 
