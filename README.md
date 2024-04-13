@@ -13,7 +13,7 @@ The spectrum normalization tool [NormPlot](https://github.com/folsomcp/normPlot/
 ```
 pip install specpolFlow[norm]
 ```
-or NormPlot can be installed seperately using:
+or NormPlot can be installed separately using:
 ```
 pip install normPlot
 ```
@@ -21,7 +21,7 @@ pip install normPlot
 
 ## About SpecpolFlow
 
-SpecpolFlow is a software package that provides a completely pythonic workflow for the analysis of spectropolarimetric observations of astronomical sources (for example, data acquired using ground-based instruments such as ESPaDOnS at CFHT, Narval at TBL, etc). It is designed to provide a single, user-friendly pipeline from telescope to science product.
+SpecpolFlow is a software package that provides a completely pythonic workflow for the analysis of spectropolarimetric observations of stellar sources (for example, data acquired from ESPaDOnS at CFHT, Narval at TBL, etc). It is designed to provide a single, user-friendly pipeline from telescope to science product.
 
 SpecpolFlow incorporates tools for spectra normalization (Github: [folsomcp/NormPlot](https://github.com/folsomcp/normPlot)) and LSD profile calculation (Github: [folsomcp/LSDpy](https://github.com/folsomcp/LSDpy)). It also provides several supporting tools, including tools for developing and cleaning line masks, calculating the longitudinal magnetic field, and visualizing the LSD profile. These tools can be used through a fully documented Python API, or through a command line interface.
 
