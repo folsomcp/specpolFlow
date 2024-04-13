@@ -44,7 +44,7 @@ python> pol.cleanMaskUI('maskfile.dat', 'obsFile.s', outMaskName=None, excludeFi
 
 ## Using the command line scripts
 
-SpecpolFlow provides a several command line tools for analysis. After installing with pip, these tools (all starting with `spf-toolname`) should be available in your shell's path. Some more importaint termial commands are:
+SpecpolFlow provides a several command line tools for analysis. After installing with pip, these tools (all starting with `spf-toolname`) should be available in your shell's path. Some more important terminal commands are:
 * `spf-makemask` generate a line mask from a line list
 * `spf-cleanmask` clean problem lines from a line mask
 * `spf-bz` calculate longitudinal magnetic fields
