@@ -7,12 +7,9 @@ pip install specpolFlow
 ```
 The code is still in active development, while the current modules are well tested, some details may change.
 
-Installing SpecpolFlow will install [LSDpy](https://pypi.org/project/LSDpy/). Or you can install LSDpy separately:
-```
-pip install LSDpy
-```
+Installing SpecpolFlow will automatically install [LSDpy](https://github.com/folsomcp/LSDpy/).
 
-The spectrum normalization tool [NormPlot](https://pypi.org/project/normPlot/) is an optional extra.  It can be installed at the same time as SpecpolFlow using:
+The spectrum normalization tool [NormPlot](https://github.com/folsomcp/normPlot/) is an optional extra.  It can be installed at the same time as SpecpolFlow using:
 ```
 pip install specpolFlow[norm]
 ```
