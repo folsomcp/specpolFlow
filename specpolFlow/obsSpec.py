@@ -4,6 +4,7 @@ Tools for manipulating spectra, typically spectropolarimetric observations.
 """
 
 import numpy as np
+import specpolFlow as pol
 
 ###################################
 
@@ -69,6 +70,40 @@ class Spectrum:
 
     def __len__(self):
         return len(self.wl)
+
+    def EmissionLine(self, lambda0, lwidth):
+        '''Select an emission line in the spectrum
+
+        :param lambda0: wavelength of the transition in nanometers
+        :param lwidth: distance from the line center for the determination
+                       of the wavelegnth window considered in line profile.
+                       One element = same on each side of line center.
+                       Two elements, left and right of line center.
+        '''
+
+        # Select emission line
+        if isinstance(lwidth, list) or isinstance(lwidth, tuple):
+            if len(lwidth) == 1:
+                # keeping the actual bz calculation range for plotting later.
+                p_lwidth = [lambda0-lwidth, lambda0+lwidth]
+                emission_line = self[np.logical_and(self.wl >= p_lwidth[0], self.wl <= p_lwidth[1])]
+            elif len(lwidth) == 2:
+                p_lwidth = [cog_val-bzwidth[0], cog_val+bzwidth[1]]
+                emission_line = self[np.logical_and(self.wl >= p_lwidth[0], self.wl <= p_lwidth[1])]
+            else:
+                print('lwidth has too many elements (need one or two)')
+                raise ValueError('lwidth has too many elements {:} (need 1 or 2)'.format(len(lwidth)))
+        else:
+            p_lwidth = [lambda0-lwidth, lambda0+lwidth]
+            emission_line = self[np.logical_and(self.wl >= p_lwidth[0], self.wl <= p_lwidth[1])]
+
+        # Now we convert wavelenths to velocity space
+        c = 299792.458  #speed of light in km/s
+        vel = c*(emission_line.wl-lambda0)/lambda0
+
+        prof = pol.LSD(vel, emission_line.specI, emission_line.specSig, emission_line.specV, np.zeros_like(vel), 
+                   emission_line.specN1, np.zeros_like(vel), header=None)
+        return prof 
 
     def save(self, fname, saveHeader=True):
         '''
