@@ -401,18 +401,32 @@ class LSD:
                     fitAmplErr, fitWidth, fitWidthErr)
         return fitVel, fitVelErr
 
-    def cog_I(self, Ic=1.0):
+    def cog_I(self, Ic=1.0, fullOutput=False):
         '''
         Helper function to return the center of gravity of Stokes I for
         this LSD profile, for a given continuum level
 
         :param Ic: the continnum level to use the the COG calculation
                    (float, default=1.0)
+        :param fullOutput: If True, Return also the error of the velocity
+                            of the center of gravity
         :return: the velocity of the center of gravity
         '''
+        # Computes the velocity of the center of gravity
         nominator = np.trapz(self.vel * (Ic-self.specI), x=self.vel)
         denominator = np.trapz( Ic-self.specI, x=self.vel )
-        return nominator/denominator
+        rv = nominator/denominator
+
+        # Estimate the associated error
+        deltav = self.vel[1] - self.vel[0]
+        nominatorSig = np.sqrt(np.sum(self.vel**2 * self.specSigI**2) * deltav**2)
+        denominatorSig = np.sqrt(np.sum(self.specSigI**2) * deltav**2)
+        rvSig = np.abs(rv *np.sqrt((nominatorSig/nominator)**2 + (denominatorSig/denominator)**2))
+
+        #Optionally return the rv and its error 
+        if fullOutput == True:
+            return rv, rvSig
+        return rv
 
     def cog_IV(self, Ic=1.0):
         '''
