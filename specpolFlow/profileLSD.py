@@ -515,6 +515,7 @@ class LSD:
                     'I': center of gravity of I,
                     'V': center of gravity of V,
                     'IV': center of gravity of I*V,
+                    'min': velocity of the minimum of I,
                     or a float: a user defined value in km/s.
         :param norm: calculation method for the continuum. The choices are:
                     'auto': the median of I outside of velrange (if defined)
