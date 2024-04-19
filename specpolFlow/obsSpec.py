@@ -71,8 +71,8 @@ class Spectrum:
     def __len__(self):
         return len(self.wl)
 
-    def EmissionLine(self, lambda0, lwidth):
-        '''Select an emission line in the spectrum
+    def IndividualLine(self, lambda0, lwidth):
+        '''Select an individual line in the spectrum
 
         :param lambda0: wavelength of the transition in nanometers
         :param lwidth: distance from the line center for the determination
@@ -101,8 +101,8 @@ class Spectrum:
         c = 299792.458  #speed of light in km/s
         vel = c*(emission_line.wl-lambda0)/lambda0
 
-        prof = pol.LSD(vel, emission_line.specI, emission_line.specSig, emission_line.specV, np.zeros_like(vel), 
-                   emission_line.specN1, np.zeros_like(vel), header=None)
+        prof = pol.LSD(vel, emission_line.specI, emission_line.specSig, emission_line.specV, emission_line.specSig,
+                   emission_line.specN1, emission_line.specSig, header=None)
         return prof 
 
     def save(self, fname, saveHeader=True):
