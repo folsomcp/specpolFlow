@@ -76,7 +76,9 @@ class Spectrum:
         """
         Combine this Spectrum with other Spectrum objects, passed as arguments,
         concatenating them in order, into a new Spectrum object.
-        
+
+        :param args: other Spectrum objects (or a list or tuple of them)
+                     to concatenate with this one
         :rtype: Spectrum
         """
         cat_header = self.header
@@ -86,7 +88,13 @@ class Spectrum:
         cat_specN1 = self.specN1
         cat_specN2 = self.specN2
         cat_specSig = self.specSig
-        for arg in args:
+        args2 = args
+        #Check if the user passed a list or tuple of spectra (unwrap it)
+        if len(args) > 0:
+            if isinstance(args[0], list) or isinstance(args[0], tuple):
+                if isinstance(args[0][0], Spectrum):
+                    args2 = args[0]
+        for arg in args2:
             if not isinstance(arg, Spectrum):
                 raise ValueError('concatenate can only use Spectrum objects!')
             cat_wl = np.concatenate((cat_wl, arg.wl))
@@ -113,6 +121,8 @@ class Spectrum:
         will produce incorrect results with this routine.  We strongly
         recommend using the merge_orders function before using this routine.
         
+        :param args: other Spectrum objects (or a list or tuple of them)
+                     to coadd with this one
         :rtype: Spectrum
         """
         #Set up the weighted average using self as the first entry
@@ -124,8 +134,14 @@ class Spectrum:
         spec.specN1 = self.specN1*weight
         spec.specN2 = self.specN2*weight
         totalWeight = weight.copy()
-        
-        for arg in args:
+
+        args2 = args
+        #Check if the user passed a list or tuple of spectra (unwrap it)
+        if len(args) > 0:
+            if isinstance(args[0], list) or isinstance(args[0], tuple):
+                if isinstance(args[0][0], Spectrum):
+                    args2 = args[0]
+        for arg in args2:
             if not isinstance(arg, Spectrum):
                 raise ValueError('coadd can only use Spectrum objects!')
             if np.any(arg.specSig <= 0.0):
