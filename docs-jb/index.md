@@ -16,25 +16,6 @@ Stay tuned!
 ## Contact us!
 You can reach the SpF Development Team at: specpolflow@gmail.com
 
-## SpF Development Team:
-* Christi Erba (co-PI)
-* Colin Folsom (co-PI)
-* Veronique Petit
-* Shaquann Seadrow
-* Patrick Stanley
-* Tali Natan
-* Bonnie Zaire
-
-Current Contributors:
-* Gregg Wade
-* Mary Oksala
-
-Past Contributors:
-* Federico Villadiego Forero
-* DJ Meleney
-* Robin Moore
-* Dax Moraes
-* Marisol Catalan Olais
-
 ## Logo:
-The SpecpolFlow logo was created by the talented Tali Natan! Please contact the SpF team if you would like to use this graphic in a publication. 
+The SpecpolFlow logo was created by the talented Tali Natan! 
+Please contact the SpF team if you would like to use this graphic in a publication. 
