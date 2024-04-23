@@ -1,23 +1,23 @@
 # Credits
 
-SpecpolFlow is developed and maintained by a dedicated team of scientists who volunteer their time and expertise to make this project possible.
-The current and past members of the SpecpolFlow team are listed below.
+SpecpolFlow is developed and maintained by a dedicated team of astronomers who volunteer their time and expertise to make this project possible. The current and past members of the SpecpolFlow team are listed below.
 
 ## Current SpecpolFlow Team Developers
 
-* Christi Erba (co-PI)
 * Colin Folsom (co-PI)
+* Christi Erba (co-PI)
 * Veronique Petit
 * Shaquann Seadrow
 * Patrick Stanley
 * Tali Natan
-* Federico Villadiego Forero
-* Dax Moraes
-* Gregg Wade
+* Bonnie Zaire
 * Mary Oksala
+* Gregg Wade
+
+## Past SpecpolFlow Contributors
+
+* Federico Villadiego Forero
 * DJ Meleney
-
-## Past SpecpolFlow Team Developers
-
 * Robin Moore
+* Dax Moraes
 * Marisol Catalan Olais
