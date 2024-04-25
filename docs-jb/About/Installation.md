@@ -8,6 +8,11 @@ To also install the optional spectrum normalization tool NormPlot use:
 ```
 pip install specpolFlow[norm]
 ```
+In some terminals, like zsh, you may need to put the command in quotes
+```
+pip install "specpolFlow[norm]"
+```
+
 
 For a developer, it is also possible to install the development version from the current Github repository:
 ```
