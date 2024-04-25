@@ -15,5 +15,3 @@ You can reach the SpF Development Team with questions or comments at: specpolflo
 If you use `SpecpolFLow` in the preparation of any publications, please use the following acknowledgement:
     The `SpecpolFlow` code (https://github.com/folsomcp/specpolFlow).
 
-## Logo:
-The SpecpolFlow logo was created by the talented Tali Natan, a member of the SpF Development Team. Please contact the SpF team if you would like to use this graphic in a publication. 
