@@ -856,7 +856,7 @@ def run_lsdpy(obs=None, mask=None, outName='prof.dat',
               fLSDPlotImg=1, fSavePlotImg=0, outPlotImgName='figProf.pdf'):
     """
     Run the LSDpy code and return an LSD object  
-    (a convenience wrapper around the lsdpy.main() function)
+    (a convenience wrapper around the lsdpy.lsd() function)
 
     This requires LSDpy to be installed and in your Python path.
     (see https://github.com/folsomcp/LSDpy )
