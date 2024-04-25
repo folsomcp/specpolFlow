@@ -1,3 +1,0 @@
-{
-    "path": "../../../tutorials/ConvertToSFiles_Tutorial.ipynb"
-}
