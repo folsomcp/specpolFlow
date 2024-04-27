@@ -346,7 +346,7 @@ def get_telluric_regions_default():
 ###################################
 ###################################
 
-def make_mask(lineListFile, maskFile, depthCutoff=0.0, 
+def make_mask(lineListFile, maskFile=None, depthCutoff=0.0, 
               wlStart=None, wlEnd=None, landeStart=None, landeEnd=None,
               elementsUsed=[], elementsExclude=[],
               atomsOnly=True, includeNoLande=False, defaultLande=1.0):
@@ -362,7 +362,7 @@ def make_mask(lineListFile, maskFile, depthCutoff=0.0,
     :param lineListFile: The name of the file containing the line list
                          (in the VALD3 'extract stellar' 'long' format)
     :param maskFile: The name of the to write the mask to
-                     (set this to None to avoid saving a files)
+                     (set this to None to avoid saving a file)
     :param depthCutoff: Only include lines in the mask deeper than this value
                         (defaults to 0, all lines included)
     :param wlStart: Optionally, only use lines with wavelengths above this
@@ -412,7 +412,7 @@ def make_mask(lineListFile, maskFile, depthCutoff=0.0,
 def convert_list_to_mask(lineList, depthCutoff=0.0, atomsOnly = True,
                          includeNoLande = False, defaultLande=1.0):
     """
-    Convert a VALD line list to an LSD line mask.
+    Convert a lineList to an LSD line mask.
     
     This estimates Lande factors when VALD doesn't have a known value
     This also can automatically reject any H lines and any molecular lines.
