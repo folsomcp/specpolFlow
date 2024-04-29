@@ -29,6 +29,18 @@ def espadons(flist, flistout=None):
     """
 
     if isinstance(flist, str): flist = [flist,]
+    #Some basic error checking
+    if not isinstance(flist, list):
+        raise ValueError('in espadons(), the flist argument must be a Python '
+                         'list of input file names (or a single file name)')
+    if not (flistout is None):
+        if not isinstance(flistout, list):
+            raise ValueError('in espadons(), the flistout argument must be a '
+                             'Python list of output file names')
+        if len(flist) != len(flistout):
+            raise ValueError('in espadons(), the list of input file names and '
+                             'list of output file names must have the same length')
+    
     for i, fname in enumerate(flist):
         print('converting ', fname.strip())
         if flistout is None:
