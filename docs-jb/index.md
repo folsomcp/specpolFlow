@@ -13,5 +13,5 @@ You can reach the SpF Development Team with questions or comments at: specpolflo
 
 ## Using `SpecpolFlow` in publications
 If you use `SpecpolFLow` in the preparation of any publications, please use the following acknowledgement:
-    The `SpecpolFlow` code (https://github.com/folsomcp/specpolFlow).
+    The `SpecpolFlow` package (https://github.com/folsomcp/specpolFlow).
 
