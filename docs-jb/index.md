@@ -12,10 +12,10 @@
 You can reach the SpF Development Team with questions or comments at: specpolflow@gmail.com
 
 ## Using `SpecpolFlow` in publications
-If you use the `SpecpolFLow` package in the preparation of any publications, please use the following acknowledgement:
+If you use the `SpecpolFLow` package in the preparation of any publications, please use the following acknowledgement:  
 &nbsp;&nbsp;&nbsp;The `SpecpolFlow` package is available at https://github.com/folsomcp/specpolFlow.
 
-Individual components of `SpecpolFLow` can be referenced as follows:
-&nbsp;&nbsp;&nbsp;LSDpy: The GitHub repository for LSDpy is available at https://github.com/folsomcp/LSDpy.
-&nbsp;&nbsp;&nbsp;normPlot: The GitHub repository for normPlot is available at https://github.com/folsomcp/normPlot.
+Individual components of `SpecpolFLow` can be referenced as follows:  
+&nbsp;&nbsp;&nbsp;LSDpy: The GitHub repository for LSDpy is available at https://github.com/folsomcp/LSDpy.  
+&nbsp;&nbsp;&nbsp;normPlot: The GitHub repository for normPlot is available at https://github.com/folsomcp/normPlot.  
 
