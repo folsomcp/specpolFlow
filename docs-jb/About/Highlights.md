@@ -4,11 +4,11 @@ Find out more about `SpecpolFlow` and how it's being used below!
 ## Related Projects
 Think `SpecpolFlow` is awesome? Check out some of these other projects, too!
 
-  >[`ZDIpy`](https://github.com/folsomcp/ZDIpy): Doppler Imaging and Zeeman Doppler Imaging
+  > [`ZDIpy`](https://github.com/folsomcp/ZDIpy): Doppler Imaging and Zeeman Doppler Imaging
 
-  >['pyRaven'](https://github.com/veropetit/pyRaven): Pythonic Bayesian method for determining upper limits on a dipolar B-field
+  > [`pyRaven`](https://github.com/veropetit/pyRaven): Pythonic Bayesian method for determining upper limits on a dipolar B-field
   
-  >[BeStarsMiMeS](https://github.com/veropetit/BeStarsMiMeS): Home of the BeStarsMiMeS Project
+  > [`BeStarsMiMeS`](https://github.com/veropetit/BeStarsMiMeS): Home of the BeStarsMiMeS Project
 
 
 ## SpecpolFlow News
