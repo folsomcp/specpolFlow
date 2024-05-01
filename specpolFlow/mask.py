@@ -1,4 +1,3 @@
-## @module mask.py
 """
 Tools for generating and manipulating line masks for LSD.
 Includes creating a line mask from a VALD line list, cleaning problem 

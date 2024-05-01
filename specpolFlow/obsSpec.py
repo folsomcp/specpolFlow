@@ -1,11 +1,11 @@
-## @module obsSpec.py
 """
 Tools for manipulating spectra, typically spectropolarimetric observations.
 """
 
 import numpy as np
 import copy
-import specpolFlow as pol
+
+from .profileLSD import LSD
 
 ###################################
 
@@ -204,7 +204,7 @@ class Spectrum:
         c = 299792.458  #speed of light in km/s
         vel = c*(emission_line.wl-lambda0)/lambda0
 
-        prof = pol.LSD(vel, emission_line.specI, emission_line.specSig, emission_line.specV, emission_line.specSig,
+        prof = LSD(vel, emission_line.specI, emission_line.specSig, emission_line.specV, emission_line.specSig,
                    emission_line.specN1, emission_line.specSig, header=None)
         return prof 
 

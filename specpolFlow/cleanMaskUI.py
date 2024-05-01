@@ -1,4 +1,3 @@
-## @module cleanMaskUI.py
 """
 An interactive program for cleaning problem lines from a LSD line mask
 and tweaking (fitting) depths of some lines.  This opens its main

@@ -1,4 +1,3 @@
-## @module profileLSD.py
 """
 Tools for generating and manipulating LSD profiles.  Includes calculating
 longitudinal magnetic fields and radial velocities.  Also includes a wrapper

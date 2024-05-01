@@ -1,7 +1,7 @@
 #!/usr/bin/python3
-## @module cleanMaskUI.py
 #
-#Interactive tool for cleaning poor lines from an LSD line mask
+# Interactive tool for cleaning poor lines from an LSD line mask
+# also can fit line depths in the mask.
 
 import argparse
 
