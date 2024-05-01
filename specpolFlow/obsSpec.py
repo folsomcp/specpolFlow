@@ -180,8 +180,10 @@ class Spectrum:
         :param lambda0: wavelength of the line (same units as self.wl)
         :param lwidth: distance from the line center, in wavelength,
                        for the wavelength window used for the line profile.
-                       One element: same on each side of line center.
-                       Two elements: left and right of line center.
+                       One element: same distance on each side of line center.
+                       Two elements: distance to the left and right of
+                       line center.
+        :rtype: LSD
         '''
         #This is nearly a circular import, since profileLSD imports obsSpec
         #Maybe move this to a stand alone function in profileLSD?
