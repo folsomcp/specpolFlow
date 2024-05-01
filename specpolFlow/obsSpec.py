@@ -5,8 +5,6 @@ Tools for manipulating spectra, typically spectropolarimetric observations.
 import numpy as np
 import copy
 
-from .profileLSD import LSD
-
 ###################################
 
 class Spectrum:
@@ -174,38 +172,43 @@ class Spectrum:
         spec.specSig = np.sqrt(1/totalWeight)
         return spec
             
-    def IndividualLine(self, lambda0, lwidth):
-        '''Select an individual line in the spectrum
-
-        :param lambda0: wavelength of the transition in nanometers
-        :param lwidth: distance from the line center for the determination
-                       of the wavelength window considered in line profile.
-                       One element = same on each side of line center.
-                       Two elements, left and right of line center.
+    def individual_line(self, lambda0, lwidth):
         '''
+        Select an individual line in the spectrum and return it
+        as an LSD profile object
 
-        # Select emission line
+        :param lambda0: wavelength of the line (same units as self.wl)
+        :param lwidth: distance from the line center, in wavelength,
+                       for the wavelength window used for the line profile.
+                       One element: same on each side of line center.
+                       Two elements: left and right of line center.
+        '''
+        #This is nearly a circular import, since profileLSD imports obsSpec
+        #Maybe move this to a stand alone function in profileLSD?
+        from .profileLSD import LSD
+        
+        # Select observed line
         if isinstance(lwidth, list) or isinstance(lwidth, tuple):
             if len(lwidth) == 1:
-                # keeping the actual bz calculation range for plotting later.
-                p_lwidth = [lambda0-lwidth, lambda0+lwidth]
-                emission_line = self[np.logical_and(self.wl >= p_lwidth[0], self.wl <= p_lwidth[1])]
+                p_lwidth = [lambda0 - lwidth[0], lambda0 + lwidth[0]]
             elif len(lwidth) == 2:
-                p_lwidth = [cog_val-bzwidth[0], cog_val+bzwidth[1]]
-                emission_line = self[np.logical_and(self.wl >= p_lwidth[0], self.wl <= p_lwidth[1])]
+                p_lwidth = [lambda0 - lwidth[0], lambda0 + lwidth[1]]
             else:
                 print('lwidth has too many elements (need one or two)')
-                raise ValueError('lwidth has too many elements {:} (need 1 or 2)'.format(len(lwidth)))
+                raise ValueError('lwidth has too many elements: '
+                                 '{:} (need 1 or 2)'.format(len(lwidth)))
         else:
-            p_lwidth = [lambda0-lwidth, lambda0+lwidth]
-            emission_line = self[np.logical_and(self.wl >= p_lwidth[0], self.wl <= p_lwidth[1])]
+            p_lwidth = [lambda0 - lwidth, lambda0 + lwidth]
+        
+        obs_line = self[(self.wl >= p_lwidth[0]) & (self.wl <= p_lwidth[1])]
 
         # Now we convert wavelengths to velocity space
         c = 299792.458  #speed of light in km/s
-        vel = c*(emission_line.wl-lambda0)/lambda0
+        vel = c*(obs_line.wl-lambda0)/lambda0
 
-        prof = LSD(vel, emission_line.specI, emission_line.specSig, emission_line.specV, emission_line.specSig,
-                   emission_line.specN1, emission_line.specSig, header=None)
+        prof = LSD(vel, obs_line.specI, obs_line.specSig, obs_line.specV, 
+                   obs_line.specSig, obs_line.specN1, obs_line.specSig,
+                   header=obs_line.header)
         return prof 
 
     def save(self, fname, saveHeader=True):
