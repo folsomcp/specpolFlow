@@ -836,7 +836,7 @@ class modifyLSDpar:
         self.win = None
 
         self.varSaveMod = tk.IntVar()
-        if self.lsdp.outModelName == '':
+        if self.lsdp.outModelName is None:
             self.varSaveMod.set(0)
         else:
             self.varSaveMod.set(1)
@@ -936,7 +936,7 @@ class modifyLSDpar:
 
         #remove closely spaced lines in the LSD calculation?
         self.varRemoveClose = tk.IntVar()
-        self.varRemoveClose.set(self.lsdp.trimMask)
+        self.varRemoveClose.set(int(self.lsdp.trimMask))
         checkRemoveClose = ttk.Checkbutton(wframe,
                                            text='remove closely\nspaced lines',
                                            variable=self.varRemoveClose,
@@ -952,7 +952,10 @@ class modifyLSDpar:
         labModName = ttk.Label(wframe, text='model\nfile name',
                                justify='right')
         self.txtModName = tk.StringVar()
-        self.txtModName.set('{:}'.format(self.lsdp.outModelName))
+        if self.lsdp.outModelName is None:
+            self.txtModName.set('')
+        else:
+            self.txtModName.set('{:}'.format(self.lsdp.outModelName))
         entModName = ttk.Entry(master=wframe,
                                textvariable=self.txtModName, width=25,
                                validate='focusout',
@@ -973,7 +976,7 @@ class modifyLSDpar:
         ToolTip(entProfName, 'File name for the output LSD profile')
 
         self.varPltProf = tk.IntVar()
-        self.varPltProf.set(self.lsdp.fLSDPlotImg)
+        self.varPltProf.set(int(self.lsdp.plotLSD))
         checkPltProf = ttk.Checkbutton(wframe, text='plot\nprofile',
                                        variable=self.varPltProf,
                                        command=self.setPlotProf)
@@ -1111,13 +1114,13 @@ class modifyLSDpar:
 
     def setRemoveClose(self, *event):
         val = self.varRemoveClose.get()
-        self.lsdp.trimMask = int(val)
+        self.lsdp.trimMask = bool(val)
         return
     
     def setSaveMod(self, *event):
         val = self.varSaveMod.get()
         if val == 0:
-            self.lsdp.outModelName = ''
+            self.lsdp.outModelName = None
         else:
             self.lsdp.outModelName = self.txtModName.get()
         return
@@ -1126,7 +1129,7 @@ class modifyLSDpar:
         if flag != 0:
             self.lsdp.outModelName = self.txtModName.get()
         else:
-            self.lsdp.outModelName = ''
+            self.lsdp.outModelName = None
         return
     def setProfName(self, *event):
         val = self.txtProfName.get()
@@ -1136,9 +1139,9 @@ class modifyLSDpar:
     def setPlotProf(self, *event):
         val = self.varPltProf.get()
         if val == 0:
-            self.lsdp.fLSDPlotImg = 0
+            self.lsdp.plotLSD = False
         else:
-            self.lsdp.fLSDPlotImg = 1
+            self.lsdp.plotLSD = True
         return
 
 
@@ -1164,9 +1167,17 @@ class updateLSD:
             normLande=lsdp.normLande, normWave=lsdp.normWave,
             removeContPol=lsdp.removeContPol, trimMask=lsdp.trimMask,
             sigmaClipIter=lsdp.sigmaClipIter, sigmaClip=lsdp.sigmaClip,
-            interpMode=lsdp.interpMode, outModelName=lsdp.outModelName,
-            fLSDPlotImg=lsdp.fLSDPlotImg, fSavePlotImg=lsdp.fSavePlotImg,
-            outPlotImgName=lsdp.outPlotImgName)
+            outModelName=lsdp.outModelName,
+            plotLSD=lsdp.plotLSD, outPlotLSDName=lsdp.outPlotLSDName)
+        #lsdProf, modelSpec = profileLSD.run_lsdpy(obs=lsdp.obs, mask=lsdp.mask,
+        #    outName=lsdp.outName, velStart=lsdp.velStart, velEnd=lsdp.velEnd,
+        #    velPixel=lsdp.velPixel, normDepth=lsdp.normDepth,
+        #    normLande=lsdp.normLande, normWave=lsdp.normWave,
+        #    removeContPol=lsdp.removeContPol, trimMask=lsdp.trimMask,
+        #    sigmaClipIter=lsdp.sigmaClipIter, sigmaClip=lsdp.sigmaClip,
+        #    interpMode=lsdp.interpMode, outModelName=lsdp.outModelName,
+        #    fLSDPlotImg=lsdp.fLSDPlotImg, fSavePlotImg=lsdp.fSavePlotImg,
+        #    outPlotImgName=lsdp.outPlotImgName)
         #Return the cursor to normal
         self.root.config(cursor=oldCursor)
         
@@ -1291,10 +1302,10 @@ class lsdParams:
     def __init__(self, obs, mask, outName='prof.dat',
                  velStart=-200., velEnd=200., velPixel=None,
                  normDepth=0.2, normLande=1.2, normWave=500.,
-                 removeContPol=1, trimMask=0, 
-                 sigmaClipIter=0, sigmaClip=500., interpMode=1, 
-                 outModelName='',
-                 fLSDPlotImg=0, fSavePlotImg=0, outPlotImgName=''):
+                 removeContPol=True, trimMask=False, 
+                 sigmaClipIter=0, sigmaClip=500.,
+                 outModelName=None,
+                 plotLSD=False, outPlotLSDName=None):
         """
         A simple data structure to hold input parameters for LSD calculations,
         and to set some sensible defaults.
@@ -1311,19 +1322,25 @@ class lsdParams:
         self.trimMask = trimMask
         self.sigmaClipIter = sigmaClipIter
         self.sigmaClip = sigmaClip
-        self.interpMode = interpMode
+        #self.interpMode = interpMode
         self.outModelName = outModelName
-        self.fLSDPlotImg = fLSDPlotImg
-        self.fSavePlotImg = fSavePlotImg
-        self.outPlotImgName = outPlotImgName
+        #self.fLSDPlotImg = fLSDPlotImg
+        #self.fSavePlotImg = fSavePlotImg
+        #self.outPlotImgName = outPlotImgName
+        # removeContPol
+        # trimMask
+        # outModelName
+        self.plotLSD = plotLSD
+        self.outPlotLSDName = outPlotLSDName
         
         cvel = 2.99792458e5 #c in km/s
         if velPixel == None:
             #Get average observed wavelength spacing
             obsSp = obsSpec.read_spectrum(self.obs)
             wlStep = obsSp.wl[1:] - obsSp.wl[:-1]
-            indWlSteps = ((wlStep > 0.) & (wlStep < 0.1))
-            meanVelPix = np.average(wlStep[indWlSteps]/obsSp.wl[:-1][indWlSteps]*cvel)
-            self.velPixel = round(meanVelPix, ndigits=2)
+            ##indWlSteps = ((wlStep > 0.) & (wlStep < 0.1))
+            ##meanVelPix = np.average(wlStep[indWlSteps]/obsSp.wl[:-1][indWlSteps]*cvel)
+            medianVelPix = np.median(wlStep/obsSp.wl[:-1]*cvel)
+            self.velPixel = round(medianVelPix, ndigits=2)
         else:
             self.velPixel = velPixel

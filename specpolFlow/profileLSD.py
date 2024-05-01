@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import scipy.special as specialf
 from scipy.optimize import curve_fit
 
-from .obsSpec import Spectrum
+from .obsSpec import Spectrum, read_spectrum
 
 ###################################
 ###################################
@@ -848,24 +848,22 @@ def read_lsd(fname):
 
 ###################################
 
-def run_lsdpy(obs=None, mask=None, outName='prof.dat',
-              velStart=None, velEnd=None, velPixel=None, 
+def run_lsdpy(obs, mask, outName='prof.dat',
+              velStart=-200.0, velEnd=+200.0, velPixel=None, 
               normDepth=0.2, normLande=1.2, normWave=500.0,
-              removeContPol=1, trimMask=1, sigmaClipIter=0,
-              sigmaClip=500, interpMode=1, outModelName='',
-              fLSDPlotImg=1, fSavePlotImg=0, outPlotImgName='figProf.pdf'):
+              removeContPol=True, trimMask=True, sigmaClipIter=0,
+              sigmaClip=500, outModelName=None,
+              plotLSD=True,  outPlotLSDName=None):
     """
     Run the LSDpy code and return an LSD object  
-    (a convenience wrapper around the lsdpy.lsd() function)
+    (a convenience wrapper around the lsdpy.main() function)
 
-    This requires LSDpy to be installed and in your Python path.
+    This requires LSDpy to be installed and in your Python path,
+    which should be installed if you installed specpolFlow with pip.
     (see https://github.com/folsomcp/LSDpy )
     
-    Any arguments not specified will be read from the file inlsd.dat.
-    The file inlsd.dat is optional, but if the file does not exist and 
-    any arguments are 'None', the program will error and halt.
-    Some arguments have default values, which will be used if they are not
-    explicitly specified and if the inlsd.dat file is missing.
+    While some reasonable default values are included, pay attention to
+    the parameters: velPixel, normDepth, normLande, normWave, and outName.
     
     Arguments are: 
     
@@ -874,16 +872,18 @@ def run_lsdpy(obs=None, mask=None, outName='prof.dat',
     :param outName:       name of the output LSD profile (Default = 'prof.dat')
     :param velStart:      float, starting velocity for the LSD profile (km/s)
     :param velEnd:        float, ending  velocity (km/s)
-    :param velPixel:      float, velocity pixel size (km/s)
+    :param velPixel:      float, velocity pixel size (km/s). If not provided,
+                          this will be the median pixel size in the observation,
+                          however it is recommended to set this explicitly.
     :param normDepth:     float, normalizing line depth
     :param normLande:     float, normalizing effective Lande factor
     :param normWave:      float, normalizing wavelength
-    :param removeContPol: int, flag for whether continuum polarization is 
-                          subtracted from the LSD profile (0=no, 1=yes)
-                          (Default = 1)
-    :param trimMask:      int, flag for whether very closely spaced lines 
-                          should be removed from the line mask (0=no, 1=yes)
-                          (Default = 1)
+    :param removeContPol: flag for whether continuum polarization is 
+                          subtracted from the LSD profile
+                          (Default = True)
+    :param trimMask:      flag for whether very closely spaced lines 
+                          should be removed from the line mask
+                          (Default = True)
     :param sigmaClipIter: int, number of iterations for sigma clipping, 
                           rejecting possible bad pixels based on the fit to
                           Stokes I. Set to 0 for no sigma clipping.
@@ -893,32 +893,58 @@ def run_lsdpy(obs=None, mask=None, outName='prof.dat',
                           number of sigma.  Should be a large value so only very
                           bad pixels are rejected.
                           (Default = 500.)
-    :param interpMode:    int, mode for interpolating the model on to the
-                          observation during LSD 0 = nearest neighbour,
-                          1 = linear interpolation.
-                          (Default = 1)
-    :param outModelName:  name of the file for the output model spectrum 
-                          (if saved). If this is '' a model 
-                          will be generated but not saved to file.
-                          (Default = '')
-    :param fLSDPlotImg:   int, flag for whether to plot the LSD profile
-                          (using matplotlib) (0=no, 1=yes)
-                          (Default = 1)
-    :param fSavePlotImg:  int, flag for whether to save the plot of the 
-                          LSD profile (0=no, 1=yes)
-                          (Default = 0)
-    :param outPlotImgName: name of the plotted figure of the LSD profile 
-                          (if saved) (Default = 'figProf.pdf')
+    :param outModelName:  if provided, save the output model spectrum to this
+                          file.  (Default = None, not saved)
+    :param LSDPlotImg:    flag for whether to plot the LSD profile
+                          (using matplotlib) (Default = True)
+    :param outPlotImgName: if provided, save the the plotted figure of the LSD 
+                           profile  to this file (e.g. 'figProf.pdf'). Supports
+                           the output file formats using the matplotlib savefig
+                           function.
     :return: an LSD profile object, and a 'Spectrum' object containing the model
                           spectrum (the fit to the observation,
                           i.e. the convolution of the line mask and LSD profile)
     """
     import LSDpy
 
+    interpMode = 1
+    if plotLSD is False:
+        fLSDPlotImg = 0
+    else:
+        fLSDPlotImg = 1
+    if outPlotLSDName is None:
+        fSavePlotImg = 0
+        outPlotImgName = ''
+    else:
+        fSavePlotImg = 1
+        outPlotImgName = outPlotLSDName
+    if outModelName is None:
+        _outModelName = ''
+    else:
+        _outModelName = outModelName
+    if removeContPol is False:
+        _removeContPol = 0
+    else:
+        _removeContPol = 1
+    if trimMask is False:
+        _trimMask = 0
+    else:
+        _trimMask = 1
+
+    if velPixel is None:
+        #Get average observed wavelength spacing
+        cvel = 2.99792458e5 #c in km/s
+        obsSp = read_spectrum(obs)
+        wlStep = obsSp.wl[1:] - obsSp.wl[:-1]
+        medianVelPix = np.median(wlStep/obsSp.wl[:-1]*cvel)
+        #indWlSteps = ((wlStep > 0.) & (wlStep < 0.5))
+        #meanVelPix = np.average(wlStep[indWlSteps]/obsSp.wl[:-1][indWlSteps]*cvel)        
+        velPixel = round(medianVelPix, ndigits=2)
+
     vel, sI, sIerr, sV, sVerr, sN1, sN1err, headerTxt, specList = LSDpy.lsd(
         obs, mask, outName, velStart, velEnd, velPixel, 
-        normDepth, normLande, normWave, removeContPol, trimMask, 
-        sigmaClipIter, sigmaClip, interpMode, 1, outModelName, 
+        normDepth, normLande, normWave, _removeContPol, _trimMask, 
+        sigmaClipIter, sigmaClip, interpMode, 1, _outModelName, 
         fLSDPlotImg, fSavePlotImg, outPlotImgName)
 
     prof = LSD(vel, sI, sIerr, sV, sVerr, sN1, sN1err, header=headerTxt)
