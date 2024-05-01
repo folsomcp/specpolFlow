@@ -13,8 +13,8 @@ The current and past members of the SpecpolFlow Development team are listed belo
 * Gregg Wade
 
 ## Past SpecpolFlow Team Developers
-* Federico Villadiego Forero
-* DJ Meleney
+* Federico Villadiego-Forero
+* David Meleney Jr.
 * Robin Moore
 * Dax Moraes
 * Marisol Catalan Olais
