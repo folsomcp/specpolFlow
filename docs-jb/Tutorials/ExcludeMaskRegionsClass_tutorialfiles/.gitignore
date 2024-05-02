@@ -1,0 +1,4 @@
+# Ignore output files in this directory
+*.s
+*.out
+*.dat
