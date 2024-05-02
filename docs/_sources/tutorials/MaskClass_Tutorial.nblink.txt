@@ -1,3 +1,0 @@
-{
-    "path": "../../../tutorials/MaskClass_Tutorial.ipynb"
-}

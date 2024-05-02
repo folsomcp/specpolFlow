@@ -1,4 +1,3 @@
-## @module mask.py
 """
 Tools for generating and manipulating line masks for LSD.
 Includes creating a line mask from a VALD line list, cleaning problem 
@@ -7,7 +6,7 @@ and interacively cleaning and tweaking.
 """
 
 import numpy as np
-from . import lineList as lineListLib
+#from . import lineList as lineListLib #(moved inside some functions)
 
 ###################################
 ###################################
@@ -336,7 +335,7 @@ def get_telluric_regions_default():
     
     :rtype: ExcludeMaskRegions
     '''
-    start = np.array([587.5,627.5,686.0,717.0,759.0,790.0,809.0])  # nm
+    start = np.array([587.5,627.5,684.0,717.0,757.0,790.0,809.0])  # nm
     stop   = np.array([592.0,632.5,705.3,735.0,771.0,795.0,990.0])  # nm
 
     return ExcludeMaskRegions(start, stop,
@@ -346,7 +345,7 @@ def get_telluric_regions_default():
 ###################################
 ###################################
 
-def make_mask(lineListFile, maskFile, depthCutoff=0.0, 
+def make_mask(lineListFile, maskFile=None, depthCutoff=0.0, 
               wlStart=None, wlEnd=None, landeStart=None, landeEnd=None,
               elementsUsed=[], elementsExclude=[],
               atomsOnly=True, includeNoLande=False, defaultLande=1.0):
@@ -362,7 +361,7 @@ def make_mask(lineListFile, maskFile, depthCutoff=0.0,
     :param lineListFile: The name of the file containing the line list
                          (in the VALD3 'extract stellar' 'long' format)
     :param maskFile: The name of the to write the mask to
-                     (set this to None to avoid saving a files)
+                     (set this to None to avoid saving a file)
     :param depthCutoff: Only include lines in the mask deeper than this value
                         (defaults to 0, all lines included)
     :param wlStart: Optionally, only use lines with wavelengths above this
@@ -390,6 +389,7 @@ def make_mask(lineListFile, maskFile, depthCutoff=0.0,
                          includeNoLande = True)
     :rtype: Mask
     """
+    from . import lineList as lineListLib
     lineList = lineListLib.read_VALD(lineListFile)
     
     mask = convert_list_to_mask(lineList, depthCutoff=depthCutoff,
@@ -411,7 +411,7 @@ def make_mask(lineListFile, maskFile, depthCutoff=0.0,
 def convert_list_to_mask(lineList, depthCutoff=0.0, atomsOnly = True,
                          includeNoLande = False, defaultLande=1.0):
     """
-    Convert a VALD line list to an LSD line mask.
+    Convert a lineList to an LSD line mask.
     
     This estimates Lande factors when VALD doesn't have a known value
     This also can automatically reject any H lines and any molecular lines.
@@ -430,7 +430,7 @@ def convert_list_to_mask(lineList, depthCutoff=0.0, atomsOnly = True,
                          (only used if includeNoLande = True)
     :rtype: Mask
     """
-    
+    from . import lineList as lineListLib
     elements=('H' ,'He','Li','Be','B' ,'C' ,'N' ,'O' ,'F' ,'Ne','Na','Mg',
               'Al','Si','P' ,'S' ,'Cl','Ar','K' ,'Ca','Sc','Ti','V' ,'Cr',
               'Mn','Fe','Co','Ni','Cu','Zn','Ga','Ge','As','Se','Br','Kr',

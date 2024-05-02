@@ -1,4 +1,3 @@
-## @module lineList.py
 """
 Tools for manipulating lists of spectral line data.
 Includes tools for reading and parsing VALD version 3 line lists 

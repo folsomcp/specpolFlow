@@ -1,4 +1,3 @@
-## @module cleanMaskUI.py
 """
 An interactive program for cleaning problem lines from a LSD line mask
 and tweaking (fitting) depths of some lines.  This opens its main
@@ -86,9 +85,8 @@ def cleanMaskUI(maskName, obsName, outMaskName=None,
             normLande=lsdp.normLande, normWave=lsdp.normWave,
             removeContPol=lsdp.removeContPol, trimMask=lsdp.trimMask,
             sigmaClipIter=lsdp.sigmaClipIter, sigmaClip=lsdp.sigmaClip,
-            interpMode=lsdp.interpMode, outModelName=lsdp.outModelName,
-            fLSDPlotImg=lsdp.fLSDPlotImg, fSavePlotImg=lsdp.fSavePlotImg,
-            outPlotImgName=lsdp.outPlotImgName)
+            outModelName=lsdp.outModelName,
+            plotLSD=lsdp.plotLSD, outPlotLSDName=lsdp.outPlotLSDName)
         
         #Make a plot of the reference observation, mask, and LSD model spectrum
         fig =  Figure()

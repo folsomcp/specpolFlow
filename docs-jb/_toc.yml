@@ -1,0 +1,38 @@
+# Table of contents
+# Learn more at https://jupyterbook.org/customize/toc.html
+
+format: jb-book
+root: index.md
+parts:
+  - caption: About SpecpolFlow
+    chapters:
+    - file: About/Installation.md
+    - file: About/ColabSetup_Tutorial.ipynb
+    - file: About/Highlights.md
+    - file: About/Credits.md
+  - caption: Getting Started
+    chapters:
+    - file: GetStarted/NormalizingOneSpectrum.md
+    - file: GetStarted/OneObservationFlow_Tutorial.ipynb
+    - file: GetStarted/LoopFlow_Tutorial.ipynb
+  - caption: Tutorials
+    chapters: 
+    - file: Tutorials/1-ConvertToSFiles_Tutorial.ipynb
+    - file: Tutorials/2-Normalizing_Tutorial.md
+    - file: Tutorials/3-ExcludeMaskRegionClass_Tutorial.ipynb
+    - file: Tutorials/4-MaskClass_Tutorial.ipynb
+    - file: Tutorials/4b-MaskUI_Tutorial.md
+    - file: Tutorials/5-LSDClass_Tutorial.ipynb
+    - file: Tutorials/5b-LSDsonification_Tutorial.ipynb
+    - file: Tutorials/6-CalculateBz_Tutorial.ipynb
+    - file: Tutorials/6b-CalculateBzFromSingleLine_Tutorial.ipynb
+    - file: Tutorials/7-CalculateBisector_Tutorial.ipynb
+    - file: Tutorials/8-IndividualLine_Tutorial.ipynb
+  - caption: API
+    chapters:
+    - file: API/Converters_API.rst
+    - file: API/Spectrum_API.rst
+    - file: API/Mask_API.rst
+    - file: API/LSD_API.rst
+    - file: API/LineList_API.rst
+    #- file: API/API_full.rst
