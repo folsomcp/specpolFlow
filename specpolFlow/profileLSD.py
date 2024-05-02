@@ -894,9 +894,9 @@ def run_lsdpy(obs, mask, outName='prof.dat',
                           (Default = 500.)
     :param outModelName:  if provided, save the output model spectrum to this
                           file.  (Default = None, not saved)
-    :param LSDPlotImg:    flag for whether to plot the LSD profile
+    :param plotLSD:       flag for whether to plot the LSD profile
                           (using matplotlib) (Default = True)
-    :param outPlotImgName: if provided, save the the plotted figure of the LSD 
+    :param outPlotLSDName: if provided, save the the plotted figure of the LSD 
                            profile  to this file (e.g. 'figProf.pdf'). Supports
                            the output file formats using the matplotlib savefig
                            function.
