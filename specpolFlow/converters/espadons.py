@@ -34,6 +34,7 @@ def espadons(flist, flistout=None):
         raise ValueError('in espadons(), the flist argument must be a Python '
                          'list of input file names (or a single file name)')
     if not (flistout is None):
+        if isinstance(flistout, str): flistout = [flistout,]
         if not isinstance(flistout, list):
             raise ValueError('in espadons(), the flistout argument must be a '
                              'Python list of output file names')
