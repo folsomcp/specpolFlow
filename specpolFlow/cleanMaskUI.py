@@ -26,6 +26,10 @@ def cleanMaskUI(maskName, obsName, outMaskName=None,
     The parameters for the LSD calculation are taken from the defaults in
     the cleanMaskUISubroutines lsdParams() function.
 
+    This saves a copy of the cleaned mask to a file, and also returns
+    a copy as a Mask object, and the regions excluded from the mask
+    as an ExcludeMaskRegions object.
+
     :param maskName: File name, or a Mask object, for the input line mask
                      to clean.
     :param obsName: File name for the reference observation to compare with.
@@ -34,7 +38,8 @@ def cleanMaskUI(maskName, obsName, outMaskName=None,
     :param excludeFileName: File name for a set of regions to be excluded from
                             the line mask (read from and write to). If the file
                             doesn't exist a set of default values will be used.
-    :rtype: Mask
+    :return: a Mask object with the cleaned mask,
+             and an ExcludeMaskRegions with the selected exclude regions.
     """
     
     if outMaskName is None:
@@ -111,7 +116,13 @@ def cleanMaskUI(maskName, obsName, outMaskName=None,
         cleanSub.makeWin(fig, ax1, mask, obs, lsdp, pltMaskU, 
                          pltMaskN, pltMaskF, pltModelI, excludeRanges, 
                          excludeFileName, fitDepthFlags)
-    
+
+    #make an ExcludeMaskRegions object to return
+    wlStarts = np.array([ran[0] for ran in excludeRanges])
+    wlEnds = np.array([ran[1] for ran in excludeRanges])
+    labels = np.array(['cleanMaskUI']*len(excludeRanges),dtype=object)
+    regions = maskTools.ExcludeMaskRegions(wlStarts, wlEnds, labels)
+
     #Save the final result
     mask.save(outMaskName)
-    return mask
+    return mask, regions

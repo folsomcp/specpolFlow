@@ -743,11 +743,6 @@ class saveRanges:
         regions = maskTools.ExcludeMaskRegions(wlStarts, wlEnds, labels)
         #Save the set of exclude ranges to a file
         regions.save(self.fname)
-        #fout = open(self.fname,'w')
-        #fout.write('#exclude wavelength ranges\n')
-        #for ran in self.ranges:
-        #    fout.write('{:9.3f} {:9.3f}\n'.format(ran[0], ran[1]))
-        #fout.close()
         return
 
 

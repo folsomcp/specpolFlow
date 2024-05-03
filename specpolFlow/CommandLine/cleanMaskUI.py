@@ -32,9 +32,10 @@ def clean_mask_cli():
     excludeFileName = args.exclude
     batchMode = args.batch
     
-    cleanMask = pol.cleanMaskUI(maskName, obsName, outMaskName=outMaskName,
-                                excludeFileName=excludeFileName,
-                                batchMode=batchMode)
+    cleanMask, excludeRanges = pol.cleanMaskUI(maskName, obsName,
+                                               outMaskName=outMaskName,
+                                               excludeFileName=excludeFileName,
+                                               batchMode=batchMode)
     return
 
 #For running this Python script as a terminal program
