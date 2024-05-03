@@ -296,7 +296,7 @@ class Spectrum:
         
         return orders
 
-    def get_orders_in_range(self, wl1, wl2, ignoreGaps=False):
+    def get_orders_in_range(self, wl1, wl2=None, ignoreGaps=False):
         """
         Split an observed echelle spectrum into individual orders,
         and return orders that include the specified wavelength range.
@@ -308,11 +308,15 @@ class Spectrum:
 
         :param wl1: the start of the wavelength range to include
         :param wl2: the end of the wavelength range to include
+                    (if not provided, orders including just the point in
+                    wavelength wl1 will be returned)
         :param ignoreGaps: if True then regions separated by gaps in wavelength
                            are treated as one order, otherwise gaps are used as
                            order edges
         :return: a list of Spectrum objects, one for each relevant order
         """
+        if wl2 is None:  #If we just want to check one point in wavelength
+            wl2 = wl1
         if wl1 > wl2:
             raise ValueError('Start wavelength must be smaller than end wavelength'
                              ' got {:} {:}'.format(wl1, wl2))
