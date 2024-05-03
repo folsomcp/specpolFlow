@@ -19,9 +19,9 @@ parts:
     chapters: 
     - file: Tutorials/1-ConvertToSFiles_Tutorial.ipynb
     - file: Tutorials/2-Normalizing_Tutorial.md
-    - file: Tutorials/3-ExcludeMaskRegionClass_Tutorial.ipynb
-    - file: Tutorials/4-MaskClass_Tutorial.ipynb
-    - file: Tutorials/4b-MaskUI_Tutorial.md
+    - file: Tutorials/3-MaskClass_Tutorial.ipynb
+    - file: Tutorials/3b-MaskUI_Tutorial.md
+    - file: Tutorials/4-ExcludeMaskRegionClass_Tutorial.ipynb
     - file: Tutorials/5-LSDClass_Tutorial.ipynb
     - file: Tutorials/5b-LSDsonification_Tutorial.ipynb
     - file: Tutorials/6-CalculateBz_Tutorial.ipynb
@@ -35,4 +35,3 @@ parts:
     - file: API/Mask_API.rst
     - file: API/LSD_API.rst
     - file: API/LineList_API.rst
-    #- file: API/API_full.rst
