@@ -9,6 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.special as specialf
 from scipy.optimize import curve_fit
+import warnings
 
 from .obsSpec import Spectrum, read_spectrum
 
@@ -612,7 +613,28 @@ class LSD:
                 p_bzwidth = [cog_val-bzwidth, cog_val+bzwidth]
                 lsd_bz = self[ np.logical_and(self.vel >= p_bzwidth[0], self.vel <= p_bzwidth[1]) ]
 
+    
+        # Dealing with potential order overlaps 
+        # or uneven velocity grid
+        deltav_array = lsd_bz.vel[1:]-lsd_bz.vel[:-1]
+        if True in (deltav_array < 0):
+            warnings.warn("""The velocity array is not monotonically increasing. 
+                          There might be an order overlap in the BZwidth. The calc_BZ function will sort the LSD profile in velocity order. 
+                          Make sure this is what you want -- see merging order overlap option in documentation"""
+                          , stacklevel=2)
+            lsd_bz = lsd_bz._sortvel()
+            deltav_array = lsd_bz.vel[1:]-lsd_bz.vel[:-1]
+
+        # check if the spacing is uneven by a lot
+        deltav_min = deltav_array.min()
+        deltav_max = deltav_array.max()
+        if (deltav_max - deltav_min) > 0.1 : # in km/s
+            warnings.warn("""The velocity spacing is uneven: 
+                          min spacing {}km/s, max spacing {}km/s""".format(deltav_min, deltav_max)
+                          , stacklevel=2)
+
         # Actual calculation of the Bz:
+
         # Call the integration function for each V, Null1, Null2 parameter
         blv, blvSig = _integrate_bz(lsd_bz.vel, lsd_bz.specV, lsd_bz.specSigV, 
                     geff, lambda0, cog_val, lsd_bz.specI, lsd_bz.specSigI, norm_val)
@@ -650,6 +672,10 @@ class LSD:
             return result,fig
         else:
             return result
+        
+    def _sortvel(self):
+        n = np.argsort(self.vel)
+        return self[n]
 
 ##################
 ##################
@@ -687,21 +713,40 @@ def _integrate_bz(vel, spec, specSig, geff, lambda0, cog_val,
     cvel = 2.99792458e5 #c in km/s to match/cancel the LSD profile velocities
     
     # set the velocity step for error propagation
-    deltav = (vel[1] - vel[0]) # This is in km/s
+    # There might be some issues with order overlap if the function is used with an
+    # LSD object that was calculated with individual_line function. 
+    ###
+    # trapeze: sum of  0.5 [ x_(i+1) - x_(i) ]*[ Y_(i) + Y_(i+1) ]
+    # If we define dx_i = x_(i+1) - x_(i)
+    # we can rewrite this as: sum of 0.5*dx_(i)*[ Y_(i) + Y_(i+1) ]
+    # if we expand the sum, and gather all of the Y_i together, we get:
+    # dx1 Y1 + [dx1+dx2]Y2 + [dx2+dx3]Y3 + ... + dx_(n-1)Yn
+    # Now, assuming only the uncertainty in the Yi, the propagated error on the uncertainty is
+    # error^2 =  (dx1 Y1)**2 + ([dx1+dx2]Y2)**2 + ([dx2+dx3]Y3)**2 + ... + (dx_(n-1)Yn)**2
+    # numerically, if we have [x1, x2, x3, ..., xn], then [dx1, dx2, dx3, ..., dx_(n-1)]
+    # adding a zero at each end: [0, dx1, dx2, dx3, ..., dx_(n-1), ], and doing [1:]+[:-1] 
+    # will give us the array that we need to multiply with the Yi array. Et voila!
+    ###
+    deltav_arr = vel[1:]-vel[:-1]
+    dx = np.hstack([ 0, deltav_arr, 0 ])
+    spacing_term = 0.5*(dx[:-1]+dx[1:])
+
+    #deltav = (vel[1] - vel[0]) # This is in km/s # Old from using equal spacing to calculate uncertainty. 
+
     
     # Calculation of the integral in the numerator of the Bz function
     # with a trapezoidal numerical integral
-    # For the error calculation, we propagate like we would for
-    # summation in a numerical integral.
     fnum = np.trapz( (vel - cog_val) * spec, x=vel-cog_val ) #in (km/s)^2
-    sfnum = np.sqrt(np.sum( (vel - cog_val )**2 * specSig**2 ) * deltav**2)
+    sfnum = np.sqrt(np.sum( (vel - cog_val )**2 * specSig**2  * spacing_term**2))
+    #sfnum = np.sqrt(np.sum( (vel - cog_val )**2 * specSig**2 ) * deltav**2)
     
     # Calculation of the integral in the denominator of the Bz function
     # with a trapezoidal numerical integral
     # For the square error calculation, we propagate like we would for
     # summation in a numerical integral.
     ri0v = np.trapz(norm_val-specI, x=vel ) # in km/s
-    si0v = np.sqrt(np.sum(specSigI**2 )* deltav**2) # in km/s
+    #si0v = np.sqrt(np.sum(specSigI**2 )* deltav**2) # in km/s
+    si0v = np.sqrt(np.sum(specSigI**2 * spacing_term**2)) # in km/s
     
     # Make the actual Bz calculation.
     # for the units to work out, lambda0 should be in nm
