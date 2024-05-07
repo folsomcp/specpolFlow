@@ -26,14 +26,10 @@ pip uninstall LSDpy
 For a developer, it is also possible to install the development version from the current Github repository:
 ```
 pip install "git+https://github.com/folsomcp/LSDpy"
-pip install "git+https://github.com/folsomcp/SpecpolFlow"
+pip install "git+https://github.com/folsomcp/specpolFlow"
 ```
+This needs a relatively recent version of pip to work properly.  Version 24 or later is recommended (`pip install --upgrade pip`).
 
-Or from any version release:
-```
-pip install "git+https://github.com/folsomcp/LSDpy/INSERT_RELEASE_TAG"
-pip install "git+https://github.com/folsomcp/SpecpolFlow/INSERT_RELEASE_TAG"
-```
 
 ## Using the command line tools
 
