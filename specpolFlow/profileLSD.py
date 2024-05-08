@@ -5,11 +5,11 @@ around LSDpy.
 """
 
 import copy
+import warnings
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.special as specialf
 from scipy.optimize import curve_fit
-import warnings
 
 from .obsSpec import Spectrum, read_spectrum
 
@@ -187,7 +187,6 @@ class LSD:
         :param normValue: the value to renormalize (divide) the LSD profile by
         :rtype: LSD
         """
- 
         new = LSD(self.vel, 
                   self.specI/normValue, self.specSigI/normValue, 
                   self.specV/normValue, self.specSigV/normValue,
@@ -195,7 +194,6 @@ class LSD:
                   self.specN2/normValue, self.specSigN2/normValue, 
                   self.header)
         new.numParam = self.numParam
-
         return new
 
     def vshift(self, velShift):
@@ -212,7 +210,6 @@ class LSD:
                   self.specN2, self.specSigN2, 
                   self.header)
         new.numParam = self.numParam
-
         return new
 
     def scale(self, scale_int, scale_pol):
@@ -232,6 +229,34 @@ class LSD:
                   self.specN2*scale_pol, self.specSigN2*scale_pol, 
                   self.header)
         new.numParam = self.numParam
+        
+        # If we have scaled the profile we may need to adjust 
+        # the weights in the header. Parse the old header,
+        # and if necessary re-write the portion with the weights.
+        if 'normalizing: d=' in self.header:
+            ihead = self.header.index('normalizing: d=') - 1
+            depth = 0; lande = 0; wl0 = 0
+            #Get the old depth
+            indDepth = self.header.find('d=')
+            if indDepth >= 0:
+                depth = float(self.header[indDepth+2:].split()[0])
+            #Get the old Lande factor
+            indLande = self.header.find('lande=')
+            if indLande >= 0:
+                lande = float(self.header[indLande+6:].split()[0])
+            #Get the old waveength
+            indWl0 = self.header.find('wl=')
+            if indWl0 >= 0:
+                wl0 = float(self.header[indWl0+3:].split()[0])
+
+            depth *= scale_int
+            wl0 *= scale_pol/scale_int
+            sFormat = (' normalizing: d={:5.3f} lande={:5.3f} wl={:6.1f} '
+                       '(I norm weight {:5.3f}, V norm weight {:7.3f})\n')
+            headerAdd = sFormat.format(depth, lande, wl0, depth,
+                                       depth*lande*wl0)
+            headder = self.header[:ihead] + headerAdd
+            new.header = headder
 
         return new
 
@@ -421,7 +446,8 @@ class LSD:
         deltav = self.vel[1] - self.vel[0]
         nominatorSig = np.sqrt(np.sum(self.vel**2 * self.specSigI**2) * deltav**2)
         denominatorSig = np.sqrt(np.sum(self.specSigI**2) * deltav**2)
-        rvSig = np.abs(rv *np.sqrt((nominatorSig/nominator)**2 + (denominatorSig/denominator)**2))
+        rvSig = np.abs(rv * np.sqrt((nominatorSig/nominator)**2
+                                    + (denominatorSig/denominator)**2))
 
         #Optionally return the rv and its error 
         if fullOutput == True:
@@ -559,7 +585,8 @@ class LSD:
                 print('  using the median of the continuum outside of the line')
                 norm_val = np.median(lsd_out.specI)
             else:
-                print('  no range in velocity given, using the median of the whole specI to determine continuum')
+                print('  no range in velocity given, using the median '
+                      +'of the whole specI to determine continuum')
                 norm_val = np.median(lsd_in.specI)
         else:
             norm_val = copy.copy(norm)
@@ -577,7 +604,8 @@ class LSD:
             elif cog == 'V':
                 cog_val = lsd_in.cog_V()
             else:
-                raise ValueError('calcBz got unrecognized value for cog: {:}'.format(cog))
+                raise ValueError('calcBz got unrecognized value for cog: '
+                                 +'{:}'.format(cog))
         else:
             cog_val=copy.copy(cog)
         
@@ -601,14 +629,17 @@ class LSD:
                     #print('list with one element')
                     # keeping the actual bz calculation range for plotting later.
                     p_bzwidth = [cog_val-bzwidth, cog_val+bzwidth]
-                    lsd_bz = self[ np.logical_and(self.vel >= p_bzwidth[0], self.vel <= p_bzwidth[1]) ]
+                    lsd_bz = self[ np.logical_and(self.vel >= p_bzwidth[0],
+                                                  self.vel <= p_bzwidth[1]) ]
                 elif len(bzwidth) == 2:
                     #print('list with two elements')
                     p_bzwidth = [cog_val-bzwidth[0], cog_val+bzwidth[1]]
-                    lsd_bz = self[ np.logical_and(self.vel >= p_bzwidth[0], self.vel <= p_bzwidth[1]) ]
+                    lsd_bz = self[ np.logical_and(self.vel >= p_bzwidth[0],
+                                                  self.vel <= p_bzwidth[1]) ]
                 else:
                     print('bzwidth has too many elements (need one or two)')
-                    raise ValueError('bzwidth has too many elements {:} (need 1 or 2)'.format(len(bzwidth)))
+                    raise ValueError('bzwidth has too many elements '
+                                     +'{:} (need 1 or 2)'.format(len(bzwidth)))
             else:
                 p_bzwidth = [cog_val-bzwidth, cog_val+bzwidth]
                 lsd_bz = self[ np.logical_and(self.vel >= p_bzwidth[0], self.vel <= p_bzwidth[1]) ]
