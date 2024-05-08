@@ -20,7 +20,7 @@ python normPlot2.py observation_file.s
 
 Once executed, you should see the following window appear
 
-```{image} normplot_images/user_guide_gui.png
+```{image} ../normplot_images/user_guide_gui.png
 :alt: gui_snapshot
 :class: bg-primary mb-1
 :width: 800px
@@ -42,7 +42,7 @@ Clicking this button will apply any parameter changes made and update the contin
 
 **set output params**:  
 
-```{image} normplot_images/user_guide_set_output.png
+```{image} ../normplot_images/user_guide_set_output.png
 :alt: gui_set_output
 :class: bg-primary mb-1
 :width: 400px
@@ -53,7 +53,7 @@ Here you can determine the structure of the spectrum in the output file. If you 
 
 **set poly. degree**:
 
-```{image} normplot_images/user_guide_polyfit_params.png
+```{image} ../normplot_images/user_guide_polyfit_params.png
 :alt: gui_set_output
 :class: bg-primary mb-1
 :width: 200px

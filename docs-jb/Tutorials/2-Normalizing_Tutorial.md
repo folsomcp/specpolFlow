@@ -32,7 +32,7 @@ Now let’s use the normalization GUI on our data. The main file for executing t
 
 The files you want to execute should be in the same working directory as normplot.py. Once executed, a window will pop up and you will see the spectra separated by order with polynomial fit (these are fits to the continuum per order and they will vary in color based on their order).
 
-```{image} normplot_images/gui_open.png
+```{image} ../normplot_images/gui_open.png
 :alt: gui_open
 :class: bg-primary mb-1
 :width: 600px
