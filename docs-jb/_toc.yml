@@ -10,8 +10,8 @@ parts:
     - file: About/Credits.md
   - caption: Getting Started
     chapters:
-    - file: About/Installation.md
-    - file: About/ColabSetup_Tutorial.ipynb
+    - file: GetStarted/Installation.md
+    - file: GetStarted/ColabSetup_Tutorial.ipynb
     - file: GetStarted/Quickstart_CLI.md
     - file: GetStarted/NormalizingOneSpectrum.md
     - file: GetStarted/OneObservationFlow_Tutorial.ipynb

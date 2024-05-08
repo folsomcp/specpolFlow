@@ -2,7 +2,7 @@
 
 This guide covers some of the more frequently used features of SpecpolFlow. It is aimed at people who are already familiar with spectropolarimetric data analysis and LSD. For more in-depth guides see [Normalizing one spectrum with the interactive tool](NormalizingOneSpectrum.md), [From normalized spectrum to Bz measurement](OneObservationFlow_Tutorial.ipynb).
 
-To begin, install SpecpolFlow with pip, see [Installation](../About/Installation.md).
+To begin, install SpecpolFlow with pip, see [Installation](Installation.md).
 
 ## Converting file formats
 
