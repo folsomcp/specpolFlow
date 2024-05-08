@@ -181,8 +181,8 @@ class LSD:
 
     def norm(self, normValue):
         """
-        Return a renormalize an LSD profile, divide the I, V, and null 
-        profiles by a value.
+        Return a renormalized LSD profile. Divides the I, V, and null 
+        profiles, and their uncertainties, by a value.
         
         :param normValue: the value to renormalize (divide) the LSD profile by
         :rtype: LSD
@@ -198,7 +198,7 @@ class LSD:
 
     def vshift(self, velShift):
         """
-        Return a LSD profile with a shift to the velocities of the LSD profile
+        Return an LSD profile, with a shift to the velocities of the LSD profile
         
         :param velShift: the change in velocity to be added
         :rtype: LSD
@@ -214,7 +214,7 @@ class LSD:
 
     def scale(self, scale_int, scale_pol):
         """
-        Return a LSD profile with rescaled amplitudes of the LSD profile
+        Return an LSD profile with rescaled amplitudes of the LSD profile
         (see also set_weights())
         
         :param scale_int: scale the intensity profile by this
@@ -262,7 +262,7 @@ class LSD:
 
     def set_weights(self, wint_old, wpol_old, wint_new, wpol_new):
         """
-        Return a LSD profile with different mask normalization/scaling weights
+        Return an LSD profile with different mask normalization/scaling weights
         (see also scale())
         
         :param wint_old: The current intensity weight (d)
@@ -491,7 +491,7 @@ class LSD:
         cog_min = self.vel[self.specI.argmin()]
         if cog_min.size > 1:
             cog_min = cog_min[0]
-        return cog_min 
+        return cog_min
 
     def calc_fap(self):
         '''Helper function that calculates the FAP for Stokes V, null1,
