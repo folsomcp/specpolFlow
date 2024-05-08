@@ -1,0 +1,5 @@
+# Ignore output files in this directory
+*.s
+*.out
+*.csv
+MyNewLSD.lsd
