@@ -1,12 +1,6 @@
 .DS_Store
 __pycache__/
 *.wav
-docs-src/build
-docs-src/source/.DS_Store
-tutorials/BzTable.csv
-tutorials/Convert_tutorialfiles/2378196p.out
-tutorials/Convert_tutorialfiles/2378196pn.s
-tutorials/Convert_tutorialfiles/2378196pu.s
 dist/
 specpolFlow.egg-info/
 docs-jb/_build

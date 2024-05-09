@@ -1,0 +1,2 @@
+# Ignore any normalized spectrum files the end up here
+*.norm

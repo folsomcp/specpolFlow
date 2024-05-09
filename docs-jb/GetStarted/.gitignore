@@ -1,0 +1,4 @@
+# Ignore some output files that may end up here
+exclude.dat
+params.dat
+poly-deg.dat
