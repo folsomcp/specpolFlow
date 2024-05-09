@@ -538,10 +538,10 @@ class LSD:
         
         :param cog: The value, or calculation method for the center of gravity.
                     The choices are:
-                    'I': center of gravity of I,
-                    'V': center of gravity of V,
+                    'I': center of gravity of Stokes I,
+                    'V': center of gravity of Stokes V,
                     'IV': center of gravity of I*V,
-                    'min': velocity of the minimum of I,
+                    'min': velocity of the minimum of Stokes I,
                     or a float: a user defined value in km/s.
         :param norm: calculation method for the continuum. The choices are:
                     'auto': the median of I outside of velrange (if defined)
@@ -650,8 +650,10 @@ class LSD:
         deltav_array = lsd_bz.vel[1:]-lsd_bz.vel[:-1]
         if True in (deltav_array < 0):
             warnings.warn("""The velocity array is not monotonically increasing. 
-                          There might be an order overlap in the BZwidth. The calc_BZ function will sort the LSD profile in velocity order. 
-                          Make sure this is what you want -- see merging order overlap option in documentation"""
+                          There might be an order overlap in the BZwidth.
+                          The calc_BZ function will sort the LSD profile in 
+                          velocity order. Make sure this is what you want
+                          -- see merging order overlap option in documentation"""
                           , stacklevel=2)
             lsd_bz = lsd_bz._sortvel()
             deltav_array = lsd_bz.vel[1:]-lsd_bz.vel[:-1]
@@ -661,8 +663,8 @@ class LSD:
         deltav_max = deltav_array.max()
         if (deltav_max - deltav_min) > 0.1 : # in km/s
             warnings.warn("""The velocity spacing is uneven: 
-                          min spacing {}km/s, max spacing {}km/s""".format(deltav_min, deltav_max)
-                          , stacklevel=2)
+                          min spacing {}km/s, max spacing {}km/s""".format(
+                              deltav_min, deltav_max), stacklevel=2)
 
         # Actual calculation of the Bz:
 
