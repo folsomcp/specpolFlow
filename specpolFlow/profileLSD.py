@@ -533,7 +533,7 @@ class LSD:
         return(probV, probN1, probN2)
 
     def calc_bz(self, cog='I', norm='auto', lambda0=500., geff=1.2,
-                velrange=None, bzwidth=None, plot=True):
+                velrange=None, bzwidth=None, plot=True, **kwargs):
         '''Calculate the Bz of an LSD profile
         
         :param cog: The value, or calculation method for the center of gravity.
@@ -701,7 +701,7 @@ class LSD:
 
         if plot:
             fig  = _plot_bz_calc(self, lsd_in, lsd_bz, velrange,
-                            p_bzwidth, norm_val, cog_val, cog)
+                            p_bzwidth, norm_val, cog_val, cog, **kwargs)
             return result,fig
         else:
             return result
@@ -788,7 +788,7 @@ def _integrate_bz(vel, spec, specSig, geff, lambda0, cog_val,
     return bl, blSig
 
 
-def _plot_bz_calc(lsd, lsd_in, lsd_bz, velrange, p_bzwidth, norm_val, cog_val, cog):
+def _plot_bz_calc(lsd, lsd_in, lsd_bz, velrange, p_bzwidth, norm_val, cog_val, cog, **kwargs):
     """
     Generate a plot showing the center of gravity and integration ranges used
     in the calculation of Bz from and LSD profile.  Called by the calc_bz
@@ -805,7 +805,7 @@ def _plot_bz_calc(lsd, lsd_in, lsd_bz, velrange, p_bzwidth, norm_val, cog_val, c
     :return: a matplotlib figure object
     """
     #This function relies on the plot method of the LSD profile class
-    fig, ax = lsd.plot(sameYRange=False)
+    fig, ax = lsd.plot(sameYRange=False, **kwargs)
     
     for item in ax:
         if velrange != None:
