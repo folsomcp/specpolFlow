@@ -26,7 +26,7 @@ parts:
     - file: Tutorials/5-LSDClass_Tutorial.ipynb
     - file: Tutorials/5b-LSDsonification_Tutorial.ipynb
     - file: Tutorials/6-CalculateBz_Tutorial.ipynb
-    - file: Tutorials/6b-CalculateBzFromSingleLine_Tutorial.ipynb
+    #- file: Tutorials/6b-CalculateBzFromSingleLine_Tutorial.ipynb
     - file: Tutorials/7-CalculateBisector_Tutorial.ipynb
     - file: Tutorials/8-IndividualLine_Tutorial.ipynb
   - caption: API
