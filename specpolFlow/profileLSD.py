@@ -34,7 +34,7 @@ class LSD:
 
     And integers:
     
-    * numParam - The number of Stokes I V & Null profiles used (usually 1, 3, or 4)
+    * numParam - The number of Stokes I, V, & Null profiles used (usually 1, 3, or 4)
     * npix - the number of pixels (points in velocity) in the LSD profile
     """
     def __init__(self, vel, specI, specSigI, specV=None, specSigV=None,
@@ -123,7 +123,7 @@ class LSD:
 
     def __setitem__(self, key, newval):
         """
-        Sets all values of the LSD at the specified location equal to the
+        Sets all values of the LSD object at the specified location equal to the
         input profile's values.
 
         :param key: the index or slice being overwritten
@@ -148,7 +148,7 @@ class LSD:
         
         This saves to a text file in Donati's format.
         
-        :param fname: the name of the file the LSD profile to save to.
+        :param fname: the name of the file the LSD profile to saves to.
         """
         
         oFile = open(fname, 'w')
@@ -181,7 +181,7 @@ class LSD:
 
     def norm(self, normValue):
         """
-        Return a renormalized LSD profile. Divides the I, V, and null 
+        Return a renormalized LSD profile. Divides the I, V, and Null 
         profiles, and their uncertainties, by a value.
         
         :param normValue: the value to renormalize (divide) the LSD profile by
@@ -198,7 +198,7 @@ class LSD:
 
     def vshift(self, velShift):
         """
-        Return an LSD profile, with a shift to the velocities of the LSD profile
+        Return an LSD profile, with a shift to the velocities of the LSD profile.
         
         :param velShift: the change in velocity to be added
         :rtype: LSD
@@ -215,7 +215,7 @@ class LSD:
     def scale(self, scale_int, scale_pol):
         """
         Return an LSD profile with rescaled amplitudes of the LSD profile
-        (see also set_weights())
+        (see also set_weights()).
         
         :param scale_int: scale the intensity profile by this
         :param scale_pol: scale the polarization and null profiles by this
@@ -263,7 +263,7 @@ class LSD:
     def set_weights(self, wint_old, wpol_old, wint_new, wpol_new):
         """
         Return an LSD profile with different mask normalization/scaling weights
-        (see also scale())
+        (see also scale()).
         
         :param wint_old: The current intensity weight (d)
         :param wpol_old: The current polarization weight (g*d*lambda)
@@ -280,7 +280,7 @@ class LSD:
 
         This generates a matplotlib figure. To display the figure, after
         running this function, use 'import matplotlib.pyplot as plt' and
-        'plt.show()'. To save the figure you can use 
+        'plt.show()'. To save the figure, you can use 
         'fig.savefig("fileName.pdf")' on the new figure object.
         
         :param figsize: the size of the figure being created
@@ -362,16 +362,16 @@ class LSD:
         Fit a Gaussian function to this LSD profile, to determine a
         radial velocity.
         
-        :param velrange: Range of velocity to fit include in the fit
-                         (a tuple or list with 2 elements)
-                         If not given, the whole range will be used
-        :param plotFit: If True, Plot the fit to the LSD profile with matplotlib
-        :param fullOutput: If True, Return all the Gaussian best fit parameters,
+        :param velrange: Range of velocities included in the fit
+                         (a tuple or list with 2 elements).
+                         If not given, the whole range will be used.
+        :param plotFit: If True, plot the fit to the LSD profile with matplotlib
+        :param fullOutput: If True, return all the Gaussian best fit parameters,
                            rather than just the RV and RV error
-        :param scaleErrs: If True scale the errors on the fitting parameters by
+        :param scaleErrs: If True, scale the errors on the fitting parameters by
                           the square root of the reduced chi^2
-        :return: Tuple of best fit RV and RV error.
-                 If fullOutput is True then also includes continuum & error,
+        :return: Tuple of best fit RV and RV error;
+                 If fullOutput is True, then also includes continuum & error,
                  amplitude & error, and width & error
         """
 
@@ -429,11 +429,11 @@ class LSD:
     def cog_I(self, Ic=1.0, fullOutput=False):
         '''
         Helper function to return the center of gravity of Stokes I for
-        this LSD profile, for a given continuum level
+        the LSD profile, for a given continuum level.
 
         :param Ic: the continnum level to use the the COG calculation
                    (float, default=1.0)
-        :param fullOutput: If True, Return also the error of the velocity
+        :param fullOutput: If True, return the error of the velocity
                             of the center of gravity
         :return: the velocity of the center of gravity
         '''
@@ -457,7 +457,7 @@ class LSD:
     def cog_IV(self, Ic=1.0):
         '''
         Helper function to return the center of gravity of (Stokes I)*(Stoke V)
-        for this LSD profile, for a given continuum level
+        for the LSD profile, for a given continuum level.
 
         :param Ic: the continnum level to use the the COG calculation
                    (float, default=1.0)
@@ -471,8 +471,8 @@ class LSD:
 
     def cog_V(self):
         '''
-        Helper function to return the center of gravity of this Stokes V
-        LSD profile
+        Helper function to return the center of gravity of the Stokes V
+        LSD profile.
         
         :return: the velocity of the center of gravity
         '''
@@ -482,10 +482,10 @@ class LSD:
 
     def cog_min(self):
         '''
-        Helper function to return the velocity of the minimum of this
-        Stokes I LSD profile
+        Helper function to return the velocity of the minimum of the
+        Stokes I LSD profile.
         
-        :return: the velocity of the Stokes I minumum
+        :return: the velocity of the Stokes I minimum
         '''
         
         cog_min = self.vel[self.specI.argmin()]
@@ -495,7 +495,7 @@ class LSD:
 
     def calc_fap(self):
         '''Helper function that calculates the FAP for Stokes V, null1,
-        and null2, for this LSD profile.
+        and null2, for the LSD profile.
 
         The False Alarm Probability (FAP) is the probability that the observed
         data are consistent with the null hypothesis of no magnetic field.
@@ -536,7 +536,7 @@ class LSD:
                 velrange=None, bzwidth=None, plot=True, **kwargs):
         '''Calculate the Bz of an LSD profile
         
-        :param cog: The value, or calculation method for the center of gravity.
+        :param cog: The value or calculation method for the center of gravity.
                     The choices are:
                     'I': center of gravity of Stokes I,
                     'V': center of gravity of Stokes V,
@@ -544,7 +544,7 @@ class LSD:
                     'min': velocity of the minimum of Stokes I,
                     or a float: a user defined value in km/s.
         :param norm: calculation method for the continuum. The choices are:
-                    'auto': the median of I outside of velrange (if defined)
+                    'auto': the median of I outside of velrange (if defined),
                     or the full range (if velrange is not defined),
                     or float: a user defined value to use for Ic.
         :param lambda0: wavelength of the transition in nanometers (default=500).
@@ -561,7 +561,7 @@ class LSD:
                     One element = same on each side of line center.
                     Two elements, left and right of line center.
                     Not defined: using velrange.
-        :param plot: whether or not a graph is generated, and returned.
+        :param plot: whether or not a graph is generated and returned.
         :return: a dictionary with Bz (in G) and FAP calculations,
                  optionally also a matplotlib figure.
         '''
@@ -724,8 +724,8 @@ def _gaussProf(x, cont, ampl, center, width):
 def _integrate_bz(vel, spec, specSig, geff, lambda0, cog_val,
                   specI, specSigI, norm_val):
     '''
-    Helper function that is used in the Bz calculations. Internal.
-    to integrate one Stokes parameter. 
+    Helper function that is used in the Bz calculations to integrate one Stokes parameter. 
+    Internal.
 
     :param vel: (numpy array) the velocity array
     :param spec: (numpy array) the associated Stokes parameter array
@@ -791,7 +791,7 @@ def _integrate_bz(vel, spec, specSig, geff, lambda0, cog_val,
 def _plot_bz_calc(lsd, lsd_in, lsd_bz, velrange, p_bzwidth, norm_val, cog_val, cog, **kwargs):
     """
     Generate a plot showing the center of gravity and integration ranges used
-    in the calculation of Bz from and LSD profile.  Called by the calc_bz
+    in the calculation of Bz from an LSD profile.  Called by the calc_bz
     function. Mostly just for internal use.
 
     :param lsd: the full LSD profile to plot
@@ -843,10 +843,10 @@ def _plot_bz_calc(lsd, lsd_in, lsd_bz, velrange, p_bzwidth, norm_val, cog_val, c
 
 def read_lsd(fname):
     """
-    Read in an LSD profile and return an instance of the LSD class
+    Read in an LSD profile and return an instance of the LSD class.
     
-    The LSD profiles are in Donati's text format.
-    However, the two lines of header in Donati's format are optional.
+    The LSD profiles are in Donati's text format;
+    however, the two lines of header in Donati's format are optional.
     
     :param fname: the name of the file containing the LSD profile
     :rtype: LSD
@@ -933,11 +933,11 @@ def run_lsdpy(obs, mask, outLSDName=None,
               plotLSD=True,  outPlotLSDName=None):
     """
     Run the LSDpy code and return an LSD object  
-    (a convenience wrapper around the lsdpy.main() function)
+    (a convenience wrapper around the lsdpy.main() function).
 
     This requires LSDpy to be installed and in your Python path,
-    which should be installed if you installed specpolFlow with pip.
-    (see https://github.com/folsomcp/LSDpy )
+    which should be installed if you installed specpolFlow with pip
+    (see https://github.com/folsomcp/LSDpy ).
     
     While some reasonable default values are included, pay attention to
     the parameters: velPixel, normDepth, normLande, normWave, and outName.
@@ -947,7 +947,7 @@ def run_lsdpy(obs, mask, outLSDName=None,
     :param obs:           name of the input observed spectrum file
     :param mask:          name of the input LSD mask file
     :param outLSDName:    if provided, save the output LSD profile to this
-                          file.  (Default = None, not saved)
+                          file (Default = None, not saved)
     :param velStart:      float, starting velocity for the LSD profile (km/s)
     :param velEnd:        float, ending  velocity (km/s)
     :param velPixel:      float, velocity pixel size (km/s). If not provided,
@@ -972,7 +972,7 @@ def run_lsdpy(obs, mask, outLSDName=None,
                           bad pixels are rejected.
                           (Default = 500.)
     :param outModelName:  if provided, save the output model spectrum to this
-                          file.  (Default = None, not saved)
+                          file  (Default = None, not saved)
     :param plotLSD:       flag for whether to plot the LSD profile
                           (using matplotlib) (Default = True)
     :param outPlotLSDName: if provided, save the the plotted figure of the LSD 

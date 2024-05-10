@@ -16,7 +16,7 @@ except ModuleNotFoundError:
 
 def plot_lsd_cli():
     """
-    Function for quickly reading and plotting LSD profiles from a terminal
+    Function for quickly reading and plotting LSD profiles from a terminal.
     """
     #Take input file names as command line arguments,
     #with some additional optional control parameters.

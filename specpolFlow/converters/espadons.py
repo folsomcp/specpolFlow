@@ -12,17 +12,17 @@ def espadons(flist, flistout=None):
     text .s files. 
 
     The code provides two files in .s format:
-    * The UPENA normalized spectrum, with automated radial velocity corrections from the telluric lines.
-    * The UPENA unnormalized spectrum, using the automated radial velocity correction from the normalized spectrum.
-    For we use the unnormalized spectrum without the automated radial velocity correction, 
-    and we apply the radial velocity correction determined from the normalized spectrum.  
+    * The UPENA normalized spectrum (n.s), with automated radial velocity corrections from the telluric lines.
+    * The UPENA unnormalized spectrum (u.s), using the automated radial velocity correction from the normalized spectrum.
+    This is done starting from the unnormalized spectrum without the automated radial velocity correction, to which 
+    we apply the radial velocity correction determined from the normalized spectrum.  
     The reason behind this is that the UPENA automated radial velocity determination performed on 
     unnormalized spectra does not produce consistently reliable results. 
     The content of the fits header is also saved in a .out ascii file.
-    If flistout=None (default) The files are written at the same path as the fits-format data, with the '.fits' stripped, 
+    If flistout=None (default), the files are written at the same path as the fits-format data, with the '.fits' stripped, 
     and 'n.s' and 'u.s' appended to the filename root. 
     If flistout is a list of paths ending with a rootname, the files will be saved at that path with that rootname, 
-    and 'n.s' and 'u.s' appended to the filename root
+    and 'n.s' and 'u.s' appended to the filename root.
 
     :param flist: (list of strings) a list of ESPaDOnS filenames
     :param flistout: (list of strings) optional, list of output file rootnames

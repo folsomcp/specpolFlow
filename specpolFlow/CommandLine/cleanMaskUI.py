@@ -16,7 +16,7 @@ except ModuleNotFoundError:
     import specpolFlow as pol
 
 def clean_mask_cli():
-    """Main function for running cleanMaskUI as a terminal program
+    """Main function for running cleanMaskUI as a terminal program.
     """
     parser = argparse.ArgumentParser(description='Interactively remove poor lines from an LSD line mask, and optionally modify line depths. This plots the mask, a comparison observation, and the model LSD spectrum (the convolution of the mask and LSD profile). For the model LSD spectrum calculation, some more useful parameters can be set within the graphical UI, and there is an option for displaying the resulting profile.')
     parser.add_argument('mask', help='The line mask to clean')

@@ -15,7 +15,7 @@ except ModuleNotFoundError:
 
 def make_mask_cli():
     """
-    Main function for running make_mask as a terminal program
+    Main function for running make_mask as a terminal program.
 
     Takes no arguments, but uses command line parameters instead.
     """
