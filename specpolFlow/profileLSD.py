@@ -925,7 +925,7 @@ def read_lsd(fname):
 
 ###################################
 
-def run_lsdpy(obs, mask, outName='prof.dat',
+def run_lsdpy(obs, mask, outLSDName=None,
               velStart=-200.0, velEnd=+200.0, velPixel=None, 
               normDepth=0.2, normLande=1.2, normWave=500.0,
               removeContPol=True, trimMask=True, sigmaClipIter=0,
@@ -946,7 +946,8 @@ def run_lsdpy(obs, mask, outName='prof.dat',
     
     :param obs:           name of the input observed spectrum file
     :param mask:          name of the input LSD mask file
-    :param outName:       name of the output LSD profile (Default = 'prof.dat')
+    :param outLSDName:    if provided, save the output LSD profile to this
+                          file.  (Default = None, not saved)
     :param velStart:      float, starting velocity for the LSD profile (km/s)
     :param velEnd:        float, ending  velocity (km/s)
     :param velPixel:      float, velocity pixel size (km/s). If not provided,
@@ -984,21 +985,9 @@ def run_lsdpy(obs, mask, outName='prof.dat',
     """
     import LSDpy
 
+
+    # Passing LSD calculation controls to the LSDpy.lsd call
     interpMode = 1
-    if plotLSD is False:
-        fLSDPlotImg = 0
-    else:
-        fLSDPlotImg = 1
-    if outPlotLSDName is None:
-        fSavePlotImg = 0
-        outPlotImgName = ''
-    else:
-        fSavePlotImg = 1
-        outPlotImgName = outPlotLSDName
-    if outModelName is None:
-        _outModelName = ''
-    else:
-        _outModelName = outModelName
     if removeContPol is False:
         _removeContPol = 0
     else:
@@ -1008,6 +997,19 @@ def run_lsdpy(obs, mask, outName='prof.dat',
     else:
         _trimMask = 1
 
+    # Passing figure generation and saving controls to the LSDpy.lsd call
+    if plotLSD is False:
+        _fLSDPlotImg = 0
+    else:
+        _fLSDPlotImg = 1
+    if outPlotLSDName is None:
+        _fSavePlotImg = 0
+        _outPlotImgName = ''
+    else:
+        _fSavePlotImg = 1
+        _outPlotImgName = outPlotLSDName
+
+    # Make a default calculation for the pixel spacing if not user-defined
     if velPixel is None:
         #Get average observed wavelength spacing
         cvel = 2.99792458e5 #c in km/s
@@ -1018,15 +1020,29 @@ def run_lsdpy(obs, mask, outName='prof.dat',
         #meanVelPix = np.average(wlStep[indWlSteps]/obsSp.wl[:-1][indWlSteps]*cvel)        
         velPixel = round(medianVelPix, ndigits=2)
 
+    # Set the controls to the call to LSDpy for saving the files if needed.
+    if outModelName is None:
+        _outModelName = ''
+    else:
+        _outModelName = outModelName
+    _fSaveModelS = 1     # and set the model spectrum calculation flag
+
+    if outLSDName is None:
+        _outLSDName = ''
+    else:
+        _outLSDName = outLSDName
+        
+    # Make the call to LSDpy.py
     vel, sI, sIerr, sV, sVerr, sN1, sN1err, headerTxt, specList = LSDpy.lsd(
-        obs, mask, outName, velStart, velEnd, velPixel, 
+        obs, mask, _outLSDName, velStart, velEnd, velPixel, 
         normDepth, normLande, normWave, _removeContPol, _trimMask, 
-        sigmaClipIter, sigmaClip, interpMode, 1, _outModelName, 
-        fLSDPlotImg, fSavePlotImg, outPlotImgName)
+        sigmaClipIter, sigmaClip, interpMode, _fSaveModelS, _outModelName, 
+        _fLSDPlotImg, _fSavePlotImg, _outPlotImgName)
 
     prof = LSD(vel, sI, sIerr, sV, sVerr, sN1, sN1err, header=headerTxt)
     modelSpec = Spectrum(specList[0], specList[1], specList[2], specList[3],
                             np.zeros_like(specList[0]), np.zeros_like(specList[0]))
+    
     return prof, modelSpec
 
 ###################################
