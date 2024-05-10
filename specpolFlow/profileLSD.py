@@ -20,7 +20,7 @@ class LSD:
     Holds the LSD profile data.
 
     This usually includes numpy arrays:
-    
+
     * vel - velocity grid for the LSD profile
     * specI - the Stokes I profile
     * specSigI - the uncertainties on Stokes I
@@ -33,7 +33,7 @@ class LSD:
     * header - an optional text header for the LSD profile file
 
     And integers:
-    
+      
     * numParam - The number of Stokes I, V, & Null profiles used (usually 1, 3, or 4)
     * npix - the number of pixels (points in velocity) in the LSD profile
     """
@@ -145,7 +145,6 @@ class LSD:
     def save(self, fname):
         """
         Save the LSD profile to a file.
-        
         This saves to a text file in Donati's format.
         
         :param fname: the name of the file the LSD profile to saves to.

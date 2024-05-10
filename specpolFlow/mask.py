@@ -16,7 +16,8 @@ class Mask:
     """
     The data for the LSD line Mask.
 
-    This usually contains the arrays:
+    This usually contains the arrays: 
+
     * wl - wavelengths of lines
     * element - the element+ion code for the line
     * depth - the depth of the line
@@ -148,7 +149,8 @@ def read_mask(fname):
     """
     Read in an LSD line mask file and return a Mask object.
 
-    The mask file will have one line of header and columns of:
+    The mask file will have one line of header and columns of:  
+
     * Wavelength (nm)
     * Atomic number + (ionization state)*0.01
     * Line depth
@@ -180,7 +182,8 @@ class ExcludeMaskRegions:
     """
     Class for a region object that records spectral regions to exclude from a Mask.
 
-    Usually contrains arrays of:
+    Usually contrains arrays of:  
+    
     * start - starting wavelengths for the regions
     * stop - ending wavelengths for the regions
     * type - optionally, text comments for the type of region \

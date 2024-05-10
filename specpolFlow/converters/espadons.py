@@ -11,7 +11,8 @@ def espadons(flist, flistout=None):
     Convert a list of .fits files in the CADC ESPaDOnS format into
     text .s files. 
 
-    The code provides two files in .s format:
+    The code provides two files in .s format:  
+     
     * The UPENA normalized spectrum (n.s), with automated radial velocity corrections from the telluric lines.
     * The UPENA unnormalized spectrum (u.s), using the automated radial velocity correction from the normalized spectrum.
     This is done starting from the unnormalized spectrum without the automated radial velocity correction, to which 
