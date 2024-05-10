@@ -345,7 +345,7 @@ def get_telluric_regions_default():
 ###################################
 ###################################
 
-def make_mask(lineListFile, maskFile=None, depthCutoff=0.0, 
+def make_mask(lineListFile, outMaskName=None, depthCutoff=0.0, 
               wlStart=None, wlEnd=None, landeStart=None, landeEnd=None,
               elementsUsed=[], elementsExclude=[],
               atomsOnly=True, includeNoLande=False, defaultLande=1.0):
@@ -360,8 +360,8 @@ def make_mask(lineListFile, maskFile=None, depthCutoff=0.0,
     
     :param lineListFile: The name of the file containing the line list
                          (in the VALD3 'extract stellar' 'long' format)
-    :param maskFile: The name of the to write the mask to
-                     (set this to None to avoid saving a file)
+    :param outMaskName: The name of the to write the mask to
+                     (set this to None to avoid saving a file, default)
     :param depthCutoff: Only include lines in the mask deeper than this value
                         (defaults to 0, all lines included)
     :param wlStart: Optionally, only use lines with wavelengths above this
@@ -403,8 +403,8 @@ def make_mask(lineListFile, maskFile=None, depthCutoff=0.0,
                        elementsUsed=elementsUsed,
                        elementsExclude=elementsExclude)
 
-    if maskFile is not None:
-        mask.save(maskFile)
+    if outMaskName is not None:
+        mask.save(outMaskName)
     return mask
 
     
