@@ -52,14 +52,14 @@ Lets now manually exclude a region around that emission line. On the bottom righ
 ```{image} ../MaskUI_images/excludelinesButton.png
 :alt: excludelinesButton
 :class: bg-primary mb-1
-:width: 100px
+:width: 300px
 :align: center
 ```
 
 We can now click on the plot to create a vertical dotted line indicating one edge of the region. We can then click on another part of the plot to finish selecting the region. The region selection is shown below.
 
-```{image} ../MaskUI_images/excludeRegions1.png
-:alt: excludeRegions1
+```{image} ../MaskUI_images/excludingRegions1.png
+:alt: excludingRegions1
 :class: bg-primary mb-1
 :width: 600px
 :align: center
@@ -68,7 +68,7 @@ We can now click on the plot to create a vertical dotted line indicating one edg
 Once we select a second line to close the region, you should see that all spectral lines within the selected region now turn red. 
 
 ```{image} ../MaskUI_images/excludeRegions2.png
-:alt: excludeRegions2
+:alt: excludingRegions2
 :class: bg-primary mb-1
 :width: 600px
 :align: center
