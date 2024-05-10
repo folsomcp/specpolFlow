@@ -925,7 +925,7 @@ def read_lsd(fname):
 
 ###################################
 
-def run_lsdpy(obs, mask, outLSDName=None,
+def run_lsdpy(obs, mask, outLSDName=None, outName=None,
               velStart=-200.0, velEnd=+200.0, velPixel=None, 
               normDepth=0.2, normLande=1.2, normWave=500.0,
               removeContPol=True, trimMask=True, sigmaClipIter=0,
@@ -946,6 +946,7 @@ def run_lsdpy(obs, mask, outLSDName=None,
     
     :param obs:           name of the input observed spectrum file
     :param mask:          name of the input LSD mask file
+    :param outName:       Deprecated. Please use outLSDName
     :param outLSDName:    if provided, save the output LSD profile to this
                           file (Default = None, not saved)
     :param velStart:      float, starting velocity for the LSD profile (km/s)
@@ -985,6 +986,11 @@ def run_lsdpy(obs, mask, outLSDName=None,
     """
     import LSDpy
 
+    ### Deprecation warning for the outName keyword. 
+    ## In version 1.0, remove keyword altogether and remove from
+    ## docstring and interface.
+    if outName is not None:
+        warnings.warn("outName has been renamed outLSDName", DeprecationWarning, 2)
 
     # Passing LSD calculation controls to the LSDpy.lsd call
     interpMode = 1
