@@ -6,6 +6,7 @@ and interacively cleaning and tweaking.
 """
 
 import numpy as np
+import warnings
 #from . import lineList as lineListLib #(moved inside some functions)
 
 ###################################
@@ -345,7 +346,7 @@ def get_telluric_regions_default():
 ###################################
 ###################################
 
-def make_mask(lineListFile, outMaskName=None, depthCutoff=0.0, 
+def make_mask(lineListFile, *args, outMaskName=None, depthCutoff=0.0, 
               wlStart=None, wlEnd=None, landeStart=None, landeEnd=None,
               elementsUsed=[], elementsExclude=[],
               atomsOnly=True, includeNoLande=False, defaultLande=1.0):
@@ -389,6 +390,14 @@ def make_mask(lineListFile, outMaskName=None, depthCutoff=0.0,
                          includeNoLande = True)
     :rtype: Mask
     """
+
+    ## Warning for the deprecated 2nd positional keyword which is now
+    # the outMaskName kwarg
+    if len(args) > 0:
+        warnings.warn("""The second positional argument is now deprecated. 
+                      Please use the outMaskName keyword instead.""", DeprecationWarning, 2)
+
+
     from . import lineList as lineListLib
     lineList = lineListLib.read_VALD(lineListFile)
     
