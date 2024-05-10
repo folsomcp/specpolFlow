@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This tutorial will formally introduce you to the procedure of normalizing echelle spectra and use of **NormPlot2.1.py**. The interactive normalization gui is a part of the SpecpolFlow pipeline as steps that proceed the polarimetric analysis. In this introduction to spectra normalization, we will be using ESPADonS observations of the star Psi 1 CMa. This is the same observation that is used in the example LSD and Mean Longitudinal Field tutorial, so skipping this tutorial will not prevent you from advancing further in the pipeline (If you'd like, you're welcome to use normalized spectrum you create while doing this tutorial and seeing how the magnetic field measurements compare).  
+This tutorial will formally introduce you to the procedure of normalizing echelle spectra and use of **NormPlot2.1.py**. The interactive normalization gui is a part of the SpecpolFlow pipeline as steps that proceed the polarimetric analysis. In this introduction to spectra normalization, we will be using ESPADonS observations of the star xi1 CMa. This is the same observation that is used in the example LSD and Mean Longitudinal Field tutorial, so skipping this tutorial will not prevent you from advancing further in the pipeline (If you'd like, you're welcome to use normalized spectrum you create while doing this tutorial and seeing how the magnetic field measurements compare).  
 
 
 
@@ -38,7 +38,6 @@ The files you want to execute should be in the same working directory as normplo
 :width: 600px
 :align: center
 ```
-
 
 In the bottom left corner there are the conventional commands that allow you to navigate this python interface (panning, zooming, returning to default, saving). 
 Then they are also added above it. 

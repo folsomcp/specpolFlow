@@ -2,7 +2,7 @@
 
 ## About NormPlot2.4 
 
-This current version of the interactive UI is written in Python3.8. It's major dependecies are **tkinter** and **matplotlib** (if they are not installed python will issue a running error). NormPlot can be utilized as a preliminary step in the SpecpolFlow pipeline to normalize the continuum of 1D stellar spectra (post-reduction). It is designed to work well with echelle spectra. This interactive UI was built to allow you to work on one sepctral order at a time in which you essentially establish "good" continuum points and fit a low order polynomial through them.
+This current version of the interactive UI is written in Python 3.8. Its major dependecies are **tkinter** and **matplotlib** (if they are not installed python will issue a running error). NormPlot can be utilized as a preliminary step in the `SpecpolFlow` pipeline to normalize the continuum of 1D stellar spectra (post-reduction). It is designed to work well with echelle spectra. This interactive UI was built to allow you to work on one sepctral order at a time in which you essentially establish "good" continuum points and fit a low order polynomial through them.
 
 
 ## Using the GUI
@@ -37,10 +37,10 @@ The top panel of this window displays the spectral orders and polynomial fits fo
 
 ### Button Functions in the Interactive UI
 
-We provide controls for navigating the GUI plot:
+There are controls for navigating the GUI plot:
 `auto Scales`, `auto-y`, `Zin` (zoom in), `Zout` (zoom out), and panning buttons (left, right, up, and down).The python default below these buttons also work for navigating the frame home position, revert step, redo step, pan, zoom, and snapshot.
 
-We provide different tools for deriving an optimal fit of the individual orders. Here, we will explain the other functions and features that can be utilized in the fitting process. 
+There are different tools for deriving an optimal fit of the individual orders. Here, we explain the other functions and features that can be utilized in the fitting process. 
 
 **Fit cont.**: 
 Clicking this button will apply any parameter changes made and update the continuum fit. This will simultaneously update the final normalized spectrum. 
@@ -55,7 +55,7 @@ Clicking this button will apply any parameter changes made and update the contin
 :align: center
 ```
 
-Here you can determine the structure of the spectrum in the output file. If you select **merge spectral orders** the final spectrum will be continuous rather than separate orders (if separate there will be wavelength overlap between consecutive orders). In the process of merging the orders, the program will choose the spectrum of the upper order. The lower panel in Figure 1 will change accordingly, so you will be able to preview the merged normalized spectrum. The wavelength  units can also be scaled. If converted to angstroms (set the scale to 10), the wavelengths can be converted between air and vacuum wavelengths. 
+Here you can determine the structure of the spectrum in the output file. If you select **merge spectral orders**, the final spectrum will be continuous rather than separate orders (if separate there will be wavelength overlap between consecutive orders). In the process of merging the orders, the program will choose the spectrum of the upper order. The lower panel in Figure 1 will change accordingly, so you will be able to preview the merged normalized spectrum. The wavelength units can also be scaled. If converted to angstroms (set the scale to 10), the wavelengths can be converted between air and vacuum wavelengths. 
 
 **set poly. degree**:
 
