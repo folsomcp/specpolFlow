@@ -67,7 +67,7 @@ We can now click on the plot to create a vertical dotted line indicating one edg
 
 Once we select a second line to close the region, you should see that all spectral lines within the selected region now turn red. 
 
-```{image} ../MaskUI_images/excludeRegions2.png
+```{image} ../MaskUI_images/excludingRegions2.png
 :alt: excludingRegions2
 :class: bg-primary mb-1
 :width: 600px
