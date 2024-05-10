@@ -1,8 +1,8 @@
-# NormPlot: User Guide for the Interactive Normalization GUI 
+# Normalizing a Single Spectrum with NormPlot
 
 ## About NormPlot2.4 
 
-This current version of the interactive UI is written in Python3. NormPlot can be utilized as a preliminary step in the Specpol Flow pipeline to normalize the continuum of 1D stellar spectra (post-reduction). It's is designed to work well with echelle spectra. This interactive was built to allow you to work on one sepctral order at a time in which you essentially establish "good" continuum points to fit a low order polynomial through them.
+This current version of the interactive UI is written in Python3.8. It's major dependecies are **tkinter** and **matplotlib** (if they are not installed python will issue a running error). NormPlot can be utilized as a preliminary step in the SpecpolFlow pipeline to normalize the continuum of 1D stellar spectra (post-reduction). It is designed to work well with echelle spectra. This interactive UI was built to allow you to work on one sepctral order at a time in which you essentially establish "good" continuum points and fit a low order polynomial through them.
 
 
 ## Using the GUI
@@ -12,11 +12,17 @@ This current version of the interactive UI is written in Python3. NormPlot can b
 ```
 
 
-The interactive normalization UI can be started from the terminal with the command
+Assuming you have installed the program via pip, the interactive normalization UI can be started from the terminal with the command 
 
 ```
-python normPlot2.py observation_file.s
+normplot [observation_file]
 ```
+
+`````{admonition} Command line alternative (if NormPlot is not pip installed)
+:class: tip 
+Use the command  
+python normPlot2.py [observation_file]
+`````
 
 Once executed, you should see the following window appear
 
