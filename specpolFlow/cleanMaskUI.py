@@ -38,6 +38,9 @@ def cleanMaskUI(maskName, obsName, outMaskName=None,
     :param excludeFileName: File name for a set of regions to be excluded from
                             the line mask (read from and write to). If the file
                             doesn't exist a set of default values will be used.
+    :param batchMode: Flag for skipping the GUI. False = open the GUI (the default).
+                      True = skip the GUI, just read excludeFileName and apply those
+                      exclude regions.
     :return: a Mask object with the cleaned mask,
              and an ExcludeMaskRegions with the selected exclude regions.
     """
