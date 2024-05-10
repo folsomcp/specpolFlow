@@ -12,7 +12,7 @@ class LineList:
     """
     Container for a set of spectral line data, usually from VALD.
 
-    This usually contains:
+    This usually contains:  
     * nLines - number of lines in the line list
     * ion - list of species identifiers (element or molecule and ionization)
     * wl - array of wavelengths

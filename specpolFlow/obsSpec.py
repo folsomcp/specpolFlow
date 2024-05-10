@@ -11,8 +11,7 @@ class Spectrum:
     """
     Contains an observed spectrum, usually spectropolarimetric data.
 
-    Usually contains arrays:
-    
+    Usually contains arrays:  
     * wl - wavelengths
     * specI - Stokes I spectrum
     * specV - polarized spectrum, usually Stokes V
