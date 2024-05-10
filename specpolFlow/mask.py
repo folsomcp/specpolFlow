@@ -16,8 +16,7 @@ class Mask:
     """
     The data for the LSD line Mask.
 
-    This usually contains arrays:
-    
+    This usually contains the arrays:
     * wl - wavelengths of lines
     * element - the element+ion code for the line
     * depth - the depth of the line
@@ -70,7 +69,7 @@ class Mask:
 
     def __len__(self):
         """
-        Returns the number of lines in the mask
+        Returns the number of lines in the mask.
         """
         return len(self.wl)
     
@@ -88,11 +87,11 @@ class Mask:
         
     def get_weights(self, normDepth, normWave, normLande):
         """
-        Returns the calculated the LSD weights of all the lines in the mask
+        Returns the calculated LSD weights of all the lines in the mask
         (includes lines with both the iuse flag 0 and 1).
         
         This assumes the Stokes I lines are weighted as depth,
-        and Stokes V is weighted as depth*wavelength*Lande factor
+        and Stokes V is weighted as depth*wavelength*Lande factor.
         
         :param normDepth: the normalizing line depth for the mask/LSD profile
         :param normWave: the normalizing wavelength (nm) for
@@ -109,7 +108,7 @@ class Mask:
         """
         Save the line Mask to a text file, in Donati's and LSDpy format.
         
-        :param fname: the file name to output the Mask to.
+        :param fname: the file name to output the Mask to
         """
         
         nlines = self.wl.shape[0]
@@ -147,10 +146,9 @@ class Mask:
 
 def read_mask(fname):
     """
-    Read in an LSD line mask file and returns a Mask object.
+    Read in an LSD line mask file and return a Mask object.
 
-    The mask file should one line of header and columns of:
-    
+    The mask file will have one line of header and columns of:
     * Wavelength (nm)
     * Atomic number + (ionization state)*0.01
     * Line depth
@@ -182,8 +180,7 @@ class ExcludeMaskRegions:
     """
     Class for a region object that records spectral regions to exclude from a Mask.
 
-    Usualy contrains arrays of:
-
+    Usually contrains arrays of:
     * start - starting wavelengths for the regions
     * stop - ending wavelengths for the regions
     * type - optionally, text comments for the type of region \
@@ -228,7 +225,7 @@ class ExcludeMaskRegions:
 
     def __add__(self, other):
         """
-        Concatenate two ExcludeMaskRegions objects
+        Concatenate two ExcludeMaskRegions objects.
         
         :param other: an ExcludeMaskRegions object to combine with this one
         :rtype: ExcludeMaskRegions
@@ -263,7 +260,7 @@ class ExcludeMaskRegions:
 
 def read_exclude_mask_regions(fname):
     """
-    Read in a ExcludeMaskRegions file into an ExcludeMaskRegions object. 
+    Read in an ExcludeMaskRegions file into an ExcludeMaskRegions object. 
 
     The file should be a text file with one line for each region,
     containing the start wavelength, end wavelength, and the type comment.
@@ -292,7 +289,7 @@ def get_Balmer_regions_default(velrange=500):
     '''
     Generate an ExcludeMaskRegions object with regions around Balmer H-lines
     (alpha to epsilon) up to a given radial velocity,
-    and a region that excludes the Balmer jump (from 360-392 nm)
+    and a region that excludes the Balmer jump (from 360-392 nm).
     
     :param velrange: velocity range around the H-line to be excluded
                      (default 500 km/s)
@@ -332,7 +329,7 @@ def get_Balmer_regions_default(velrange=500):
 def get_telluric_regions_default():
     '''
     Generate an ExcludeMaskRegions object with regions containing
-    heavy telluric line contamination in the optical
+    heavy telluric line contamination in the optical.
     
     :rtype: ExcludeMaskRegions
     '''
@@ -352,11 +349,11 @@ def make_mask(lineListFile, *args, outMaskName=None, depthCutoff=0.0,
               atomsOnly=True, includeNoLande=False, defaultLande=1.0):
     """
     Generate an LSD line mask from a VALD line list and save it.
-    The main interface for generating new line masks with Python scrips.
+    This is the main interface for generating new line masks with Python scrips.
     
     This generates an LSD line mask from atomic lines in the list,
-    and estimates Lande factors for lines where possible.  Lines that 
-    no Lande factor can be estimated for are omitted by default.
+    and estimates Lande factors for lines where possible.  Lines for which 
+    no Lande factor can be estimated are omitted by default.
     This assumes input line list wavelengths in A, and returns a mask in nm.
     
     :param lineListFile: The name of the file containing the line list
@@ -422,8 +419,8 @@ def convert_list_to_mask(lineList, depthCutoff=0.0, atomsOnly = True,
     """
     Convert a lineList to an LSD line mask.
     
-    This estimates Lande factors when VALD doesn't have a known value
-    This also can automatically reject any H lines and any molecular lines.
+    This estimates Lande factors when VALD doesn't have a known value.
+    This can also automatically reject any H lines and any molecular lines.
     Note, this assumes an input line list in A, and returns a mask in nm.
     See also the make_mask() function.
     
@@ -541,7 +538,7 @@ def filter_mask(mask, depthCutoff = 0.0, wlStart = None, wlEnd = None,
     (Filtering by element currently only works for atomic lines,
     not molecular lines)
 
-    :param mask: The line mask object to filter lines out of.
+    :param mask: The line mask object to filter lines out of
     :param depthCutoff: Only include lines in the mask deeper than this value
                         (defaults to 0, all lines included)
     :param wlStart: Optionally, only use lines with wavelengths above this

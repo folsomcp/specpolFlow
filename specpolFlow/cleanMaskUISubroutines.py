@@ -278,7 +278,7 @@ def removeRange(ranges1, range2):
 #A fairly simple, fairly general tooltip
 class ToolTip(object):
     """
-    Create a tooltip for a given widget, using Tkinter
+    Create a tooltip for a given widget, using Tkinter.
     This is a fairly simple class, but it wraps text at a specified length,
     puts the tooltip below the widget, and moves the tooltip to keep it 
     within the screen limits.  

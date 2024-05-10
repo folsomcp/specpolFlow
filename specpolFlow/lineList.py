@@ -1,7 +1,7 @@
 """
 Tools for manipulating lists of spectral line data.
 Includes tools for reading and parsing VALD version 3 line lists 
-(typically 'long format' 'extract stellar' requests).
+(typically 'long format', 'extract stellar' requests).
 """
 
 import numpy as np
@@ -13,7 +13,6 @@ class LineList:
     Container for a set of spectral line data, usually from VALD.
 
     This usually contains:
-    
     * nLines - number of lines in the line list
     * ion - list of species identifiers (element or molecule and ionization)
     * wl - array of wavelengths
@@ -169,7 +168,7 @@ def line_list_zeros(nLines):
     Generate a line list of zeros and blank text.
     
     Used by read_VALD
-    (It can be a bit faster to allocate all the array space at once)
+    (It can be a bit faster to allocate all the array space at once.)
     
     :param nLines: the number of lines in the LineList of zeros
     :rtype: LineList
@@ -198,7 +197,7 @@ def line_list_zeros(nLines):
 
 def read_VALD(fname):
     """
-    Read a list of spectral line data from VALD and return a LineList
+    Read a list of spectral line data from VALD and return a LineList.
 
     This expects VALD version 3 line list, in an 'extract stellar'
     'long' format.
@@ -277,7 +276,7 @@ def getEffectiveLande(landeLo, landeUp, Jlo, Jup):
 
 def estimateLande(J, config, verbose=False):
     """
-    Estimate a Lande factor for a level (if VALD doesn't have one)
+    Estimate a Lande factor for a level (if VALD doesn't have one).
 
     This supports levels in LS coupling, JJ coupling, and JK coupling.
     Levels in LK coupling are not supported.  This relies on VALD3's text 
@@ -441,7 +440,7 @@ def get_JJ_numbers(config):
     This should cover the J1-J2 case (where two subgroups combine to produce
     J1 and J2, which combine to produce the total J), the J1-j case (where
     one subgroup makes J1, which combines with an additional electron with j
-    combines to produce J), and it should work for the j-j case (for two
+    to produce J), and it should work for the j-j case (for two
     equivalent electrons with their own j, which combine to make J).
     
     :param config: the electron configuration and term symbol text string

@@ -27,7 +27,7 @@ def cleanMaskUI(maskName, obsName, outMaskName=None,
     the cleanMaskUISubroutines lsdParams() function.
 
     This saves a copy of the cleaned mask to a file, and also returns
-    a copy as a Mask object, and the regions excluded from the mask
+    a copy as a Mask object and the regions excluded from the mask
     as an ExcludeMaskRegions object.
 
     :param maskName: File name, or a Mask object, for the input line mask

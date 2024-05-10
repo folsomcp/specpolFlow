@@ -112,7 +112,7 @@ class Spectrum:
         Uses the the wavelength grid of this spectrum for the coadded spectrum.
         Other spectra are interpolated onto this spectrum's wavelengths before
         coadding.  Coadding here essentially averages spectra weighted
-        by 1/sigma**2  This assumes the spectra are continuum normalized,
+        by 1/sigma**2. This assumes the spectra are continuum normalized,
         and have reliable uncertainties.
 
         Warning: regions with order overlap, or where wavelength goes backwards,
@@ -334,7 +334,7 @@ class Spectrum:
 
     def merge_orders(self, mode='trim', midpoint=0.5):
         """
-        Simple merging of spectral orders, for echelle spectra
+        Simple merging of spectral orders, for echelle spectra.
 
         The default mode 'trim' simply uses one order up to the midpoint
         of an overlap region, and then uses the next order past the midpoint.
@@ -413,8 +413,8 @@ def read_spectrum(fname, trimBadPix=False, sortByWavelength=False):
     """
     Read in the observed spectrum and save it.
     
-    This follows the .s format from Donati's LibreESPRIT,
-    files can either have two lines of header or no header.
+    This follows the .s format from Donati's LibreESPRIT.
+    Files can either have two lines of header or no header.
     This supports 6 column spectropolarimetric files
     (wavelength, I, V|Q|U, null1, null2, errors),
     and also 3 column spectra (wavelength, I, errors).
