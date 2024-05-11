@@ -33,11 +33,11 @@ import normPlot
 normPlot.normplot('[observation_file]')
 ```
 
-`````{admonition} Command line alternative (if NormPlot is not installed with pip)
+:::::{admonition} Command line alternative (if NormPlot is not installed with pip)
 :class: tip 
-You can also run the main Python file, like:
+You can also run the main Python file for NormPlot directly, like:
 `python normPlot2.py [observation_file]`
-`````
+:::::
 
 Once executed, you should see the following window appear
 
@@ -73,7 +73,7 @@ Clicking this button will apply any parameter changes made and update the contin
 :align: center
 ```
 
-Here you can determine the structure of the spectrum in the output file. If you select **merge spectral orders** the final spectrum will be continuous rather than separate orders (if separate, there will be wavelength overlap between consecutive orders). In the process of merging the orders, where there is overlap, the program uses the first order up to the middle of the overlap then uses the second. The lower plot in the main window will change accordingly, so you will be able to preview the merged normalized spectrum. The wavelength units can also be scaled (e.g. to convert from nm to A set the scale to 10). The wavelengths can also be converted between air and vacuum wavelengths, however this requires wavelengths in angstroms (if you have wavelengths in nm: set the scale wavelengths value to 10, then it will apply scale before the air-vacuum conversion). 
+Here you can determine the structure of the spectrum in the output file. If you select **Merge spectral orders** the final spectrum will be continuous rather than separate orders (if separate, there will be wavelength overlap between consecutive orders). In the process of merging the orders, where there is overlap, the program uses the first order up to the middle of the overlap then uses the second. The lower plot in the main window will change accordingly, so you will be able to preview the merged normalized spectrum. The wavelength units can also be scaled (e.g. to convert from nm to A set the scale to 10). The wavelengths can also be converted between air and vacuum wavelengths, however this requires wavelengths in angstroms (if you have wavelengths in nm: set the scale wavelengths value to 10, then it will apply scale before the air-vacuum conversion). 
 
 **set poly. degree**
 
