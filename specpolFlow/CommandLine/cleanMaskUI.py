@@ -34,7 +34,8 @@ def clean_mask_cli():
     
     cleanMask, excludeRanges = pol.cleanMaskUI(maskName, obsName,
                                                outMaskName=outMaskName,
-                                               excludeFileName=excludeFileName,
+                                               inExcludeName=excludeFileName,
+                                               outExcludeName=excludeFileName,
                                                batchMode=batchMode)
     return
 

@@ -22,7 +22,7 @@ from . import mask as maskTools
 from . import obsSpec
 
 def makeWin(fig, ax, mask, obs, lsdp, pltMaskU, pltMaskN,
-            pltMaskF, pltModelI, excludeRanges, excludeFileName, fitDepthFlags):
+            pltMaskF, pltModelI, excludeRanges, outExcludeName, fitDepthFlags):
     #Build GUI with tkinter
     root = tk.Tk(className='Clean Masks')
     #the className seems to set an icon title (at least in Ubuntu)
@@ -182,10 +182,10 @@ def makeWin(fig, ax, mask, obs, lsdp, pltMaskU, pltMaskN,
     incRangeM.linkButton(butIncRange, excRangeM)
     excRangeM.linkButton(butExcRange, incRangeM)
     #Save the exclude ranges to a text file
-    saveRangesM = saveRanges(excludeFileName, excludeRanges)
+    saveRangesM = saveRanges(outExcludeName, excludeRanges)
     butSaveRanges = ttk.Button(master=tools, text='save\nranges',
                                command=saveRangesM.saveToFile)
-    ToolTip(butSaveRanges, 'Save the excluded wavelength ranges to the {:} file'.format(excludeFileName))
+    ToolTip(butSaveRanges, 'Save the excluded wavelength ranges to the {:} file'.format(outExcludeName))
     butSaveRanges.grid(row=0, column=9, sticky=tk.E, padx=2, pady=2)
 
     #Modify LSD control parameters
@@ -1157,22 +1157,13 @@ class updateLSD:
         lsdp = self.lsdp
         self.mask.save(lsdp.mask)
         lsdProf, modelSpec = profileLSD.run_lsdpy(obs=lsdp.obs, mask=lsdp.mask,
-            outName=lsdp.outName, velStart=lsdp.velStart, velEnd=lsdp.velEnd,
+            outLSDName=lsdp.outName, velStart=lsdp.velStart, velEnd=lsdp.velEnd,
             velPixel=lsdp.velPixel, normDepth=lsdp.normDepth,
             normLande=lsdp.normLande, normWave=lsdp.normWave,
             removeContPol=lsdp.removeContPol, trimMask=lsdp.trimMask,
             sigmaClipIter=lsdp.sigmaClipIter, sigmaClip=lsdp.sigmaClip,
             outModelName=lsdp.outModelName,
             plotLSD=lsdp.plotLSD, outPlotLSDName=lsdp.outPlotLSDName)
-        #lsdProf, modelSpec = profileLSD.run_lsdpy(obs=lsdp.obs, mask=lsdp.mask,
-        #    outName=lsdp.outName, velStart=lsdp.velStart, velEnd=lsdp.velEnd,
-        #    velPixel=lsdp.velPixel, normDepth=lsdp.normDepth,
-        #    normLande=lsdp.normLande, normWave=lsdp.normWave,
-        #    removeContPol=lsdp.removeContPol, trimMask=lsdp.trimMask,
-        #    sigmaClipIter=lsdp.sigmaClipIter, sigmaClip=lsdp.sigmaClip,
-        #    interpMode=lsdp.interpMode, outModelName=lsdp.outModelName,
-        #    fLSDPlotImg=lsdp.fLSDPlotImg, fSavePlotImg=lsdp.fSavePlotImg,
-        #    outPlotImgName=lsdp.outPlotImgName)
         #Return the cursor to normal
         self.root.config(cursor=oldCursor)
         
@@ -1294,7 +1285,7 @@ def removePoorLines(mask, pixVel, fracPix = 1.0, sumDepths=True):
 
 
 class lsdParams:
-    def __init__(self, obs, mask, outName='prof.dat',
+    def __init__(self, obs, mask, outName='',
                  velStart=-200., velEnd=200., velPixel=None,
                  normDepth=0.2, normLande=1.2, normWave=500.,
                  removeContPol=True, trimMask=False, 
@@ -1317,14 +1308,7 @@ class lsdParams:
         self.trimMask = trimMask
         self.sigmaClipIter = sigmaClipIter
         self.sigmaClip = sigmaClip
-        #self.interpMode = interpMode
         self.outModelName = outModelName
-        #self.fLSDPlotImg = fLSDPlotImg
-        #self.fSavePlotImg = fSavePlotImg
-        #self.outPlotImgName = outPlotImgName
-        # removeContPol
-        # trimMask
-        # outModelName
         self.plotLSD = plotLSD
         self.outPlotLSDName = outPlotLSDName
         
@@ -1333,8 +1317,6 @@ class lsdParams:
             #Get average observed wavelength spacing
             obsSp = obsSpec.read_spectrum(self.obs)
             wlStep = obsSp.wl[1:] - obsSp.wl[:-1]
-            ##indWlSteps = ((wlStep > 0.) & (wlStep < 0.1))
-            ##meanVelPix = np.average(wlStep[indWlSteps]/obsSp.wl[:-1][indWlSteps]*cvel)
             medianVelPix = np.median(wlStep/obsSp.wl[:-1]*cvel)
             self.velPixel = round(medianVelPix, ndigits=2)
         else:

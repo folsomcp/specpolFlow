@@ -16,8 +16,8 @@ from . import obsSpec
 ###################################
 ###################################
 
-def cleanMaskUI(maskName, obsName, outMaskName=None,
-                excludeFileName='excludeRanges.dat', batchMode=False):
+def cleanMaskUI(maskName, obsName, outMaskName=None, inExcludeName=None,
+                outExcludeName='excludeRanges.dat', batchMode=False):
     """
     Run an interactive tool for LSD line mask cleaning.
 
@@ -35,12 +35,13 @@ def cleanMaskUI(maskName, obsName, outMaskName=None,
     :param obsName: File name for the reference observation to compare with.
     :param outMaskName: File name for the output cleaned mask,
                         defaults to [maskName].clean
-    :param excludeFileName: File name for a set of regions to be excluded from
-                            the line mask (read from and write to). If the file
-                            doesn't exist a set of default values will be used.
+    :param inExcludeName: File name for reading a set of regions to be excluded
+                          from the line mask.
+    :param outExcludeName: File name for saving the set of regions excluded 
+                           from the mask. (may be the same as inExcludeName)
     :param batchMode: Flag for skipping the GUI. False = open the GUI (the default).
-                      True = skip the GUI, just read excludeFileName and apply those
-                      exclude regions.
+                      True = skip the GUI, just read inExcludeName and apply 
+                      those exclude regions.
     :return: a Mask object with the cleaned mask,
              and an ExcludeMaskRegions with the selected exclude regions.
     """
@@ -60,7 +61,8 @@ def cleanMaskUI(maskName, obsName, outMaskName=None,
     #Read a list of wavelength regions to exclude from the mask 
     #(if the file exists), or generate one from default values.
     try:
-        regions = maskTools.read_exclude_mask_regions(excludeFileName)
+        if inExcludeName is None: raise OSError #fall back to except block
+        regions = maskTools.read_exclude_mask_regions(inExcludeName)
     except OSError:
         regionsBalmer = maskTools.get_Balmer_regions_default(1000.)
         regionsTelluric = maskTools.get_telluric_regions_default()
@@ -88,7 +90,7 @@ def cleanMaskUI(maskName, obsName, outMaskName=None,
         mask.save(outMaskName)
         #then run LSDpy, with specific 'default' parameters
         lsdProf, modelSpec = profileLSD.run_lsdpy(obs=lsdp.obs, mask=lsdp.mask,
-            outName=lsdp.outName, velStart=lsdp.velStart, velEnd=lsdp.velEnd,
+            outLSDName=lsdp.outName, velStart=lsdp.velStart, velEnd=lsdp.velEnd,
             velPixel=lsdp.velPixel, normDepth=lsdp.normDepth,
             normLande=lsdp.normLande, normWave=lsdp.normWave,
             removeContPol=lsdp.removeContPol, trimMask=lsdp.trimMask,
@@ -118,7 +120,7 @@ def cleanMaskUI(maskName, obsName, outMaskName=None,
         #Run the main interactive program
         cleanSub.makeWin(fig, ax1, mask, obs, lsdp, pltMaskU, 
                          pltMaskN, pltMaskF, pltModelI, excludeRanges, 
-                         excludeFileName, fitDepthFlags)
+                         outExcludeName, fitDepthFlags)
 
     #make an ExcludeMaskRegions object to return
     wlStarts = np.array([ran[0] for ran in excludeRanges])
