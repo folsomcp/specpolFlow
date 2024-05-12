@@ -14,11 +14,18 @@ Or to install everything at once you can use:
 pip install "specpolFlow[norm]"
 ```
 
+To update SpecpolFlow and it's related packages to their most recent version use:
+```
+pip install --upgrade specpolFlow
+pip install --upgrade LSDpy
+pip install --upgrade normPlot
+```
+
 You can also uninstall specpolFlow with pip:
 ```
 pip uninstall specpolFlow
-pip uninstall normPlot
 pip uninstall LSDpy
+pip uninstall normPlot
 ```
 
 ## In-development versions
