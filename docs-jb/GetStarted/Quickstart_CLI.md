@@ -6,32 +6,31 @@ To begin, install SpecpolFlow with pip, see [Installation](Installation.md).
 
 ## Converting file formats
 
-The SpecpolFlow tool-set uses the text .s file format for spectra. This usually consists of columns of wavelength, Stokes I, Stokes V, Null 1, Null 2, and sigma (wavelength, Stokes I, and sigma is also supported).  Converters for a few more common, instrument specific, .fits formats are provided.
+The SpecpolFlow tool-set uses the text .s file format for spectra. This usually consists of columns of wavelength, Stokes I, Stokes V, Null 1, Null 2, and sigma. (A three column format: wavelength, Stokes I, and sigma is also supported).  Converters for a few more common, instrument specific, .fits formats are provided.
 
 For ESPaDOnS .fits spectra from the CADC use:
 ```
 spf-fitstos-espadons observation.fits
 ```
-This will generate a set of output files: the unnormalized spectrum (ending in u.s, e.g. `observationu.s`), automatic pipeline normalized spectrum (ending in n.s, e.g. `observationn.s`), and a header with information from the data reduction pipeline (ending in .out, e.g. `observation.out`).
+This will generate a set of output files: the unnormalized spectrum (ending in 'u.s', e.g. `observationu.s`), the automatic pipeline normalized spectrum (ending in 'n.s', e.g. `observationn.s`), and a file with header information from the data reduction pipeline (ending in '.out', e.g. `observation.out`).
 
 ## Normalizing spectra
 
-Reliable continuum normalization is needed before running LSD. Several normalization tools can do this.  SpecpolFlow includes the optional tool normPlot, which can handle the .s format with polarimetric information. **Before using this, make sure you used the option to install normPlot!** (`pip install normPlot`)
+Reliable continuum normalization is needed before running LSD. Several normalization tools can do this.  SpecpolFlow includes the optional tool normPlot, which can handle the .s format with polarimetric information. **Before running this, make sure you used the option to install normPlot!** (`pip install normPlot`)
 
 Run the interactive tool on an input observation like:
 ```
 normplot observationu.s
 ```
-On closing the window, the normalized spectrum will be saved to a file `[observation_name].norm`. (It can be helpful to rename the normalized file like `mv observationu.s.norm  observationu-n.s`)
+This will open an interactive window.  On closing the window, the normalized spectrum will be saved to a file `[observation_name].norm`. (It can be helpful to rename the normalized file like `mv observationu.s.norm  observationu-n.s`)
 
-The tool normalized spectra by fitting low degree polynomials through continuum points, and operates on spectral orders individually. In the normalization Stokes I, V, and the nulls are all divided by the continuum polynomial. There are tooltips in the program to briefly explain the controls.
+The idea is to normalize spectra by fitting low degree polynomials through well selected continuum points, operating on one spectral order at a time.  Hovering your mouse over buttons will explain some of the controls, but for a more complete guide see [Normalizing a spectrum with NormPlot](NormalizingOneSpectrum.md).   
 
 The tool can also run in a non-interactive 'batch' mode, just reading control parameters from files like:
 ```
 normplot observationu.s -b -e exclude.dat -d poly-deg.dat -c params.dat
 ```
-
-A more detailed guide is [Normalizing one spectrum with the interactive tool](NormalizingOneSpectrum.md).  For details on the command line parameters run `normplot -h`
+For details on the command line parameters run `normplot -h`
 
 ## Making and cleaning a mask
 
@@ -54,13 +53,13 @@ It is strongly recommended to clean the line mask before using it: removing line
 ```
 spf-cleanmask line_mask.dat observationu-n.s line_mask_clean.dat
 ```
-This displays the line mask, a reference observation, and the LSD model's fit to the observation. Lines can be selected to remove from the mask (red) or include (blue).  The tool also allows for fitting line depths, assuming the current LSD profile is correct.  However, line depth fitting should be treated with some caution since there is an intrinsic degeneracy between LSD profile amplitude and line mask depths.
+This displays the line mask, a reference observation, and the LSD model fit to the observation. Lines can be selected to remove from the mask (red) or include (blue).  The tool also allows for fitting line depths, assuming the current LSD profile is correct.  Line depth fitting should be treated with some caution, since there is an intrinsic degeneracy between LSD profile amplitude and line mask depths. For more details on using the program see [How to clean masks with the interactive tool](../Tutorials/3b-MaskUI_Tutorial.md).
 
-The mask cleaning can also be run in a non-interactive batch mode, using a file of exclude regions, like:
+Mask cleaning can also be run in a non-interactive batch mode, using a file of exclude regions, like:
 ```
 spf-cleanmask -b -e exclude_regions.dat line_mask.dat observationu-n.s line_mask_clean.dat
 ```
-For a full list of command line parameters run `spf-cleanmask -h`.  For more details on using the program see [How to clean masks with the interactive tool](../Tutorials/3b-MaskUI_Tutorial.md).
+For a full list of command line parameters run `spf-cleanmask -h`.  
 
 
 ## Running LSD
@@ -69,18 +68,18 @@ The LSD code in SpecpolFlow, LSDpy, can be run like:
 ```
 lsdpy -m line_mask_clean.dat observationu-n.s lsd_profile.dat
 ```
-LSDpy will try to read a set of input parameters from a file `inlsd.dat`, and output some diagnostic information to the terminal.  For a full list of command line parameters run `lsdpy -h`.
+LSDpy will try to read a set of additional input parameters from a file `inlsd.dat`, and output some diagnostic information to the terminal.  For a full list of command line parameters run `lsdpy -h`.
 
 If the `inlsd.dat` file does not yet exist, LSDpy will generate a template file and halt.  You can then edit the template for parameters specifically for your observations, and re-run the code.
 
-In the `inlsd.dat` file, pay particular attention to the  "start and end velocity", "pixel size in velocity", and "mask/profile normalization parameters" values.  It can also be helpful to set "Save LSD model spectrum?" to "`1  outModelSpec.dat`", to generate the LSD best fit model spectrum for direct comparison with an observation.
+In the `inlsd.dat` file, pay particular attention to the values of "start and end velocity", "pixel size in velocity", and "mask/profile normalization parameters".  It can also be helpful to set "Save LSD model spectrum?" to "`1  outModelSpec.dat`", to generate the LSD best fit model spectrum for direct comparison with an observation.
 
 The information printed to the terminal can be useful, and includes information about the line mask, information about the treatment of error bars, and information about detection statistics in Stokes V and the null.
 
 ## Processing LSD profiles
 
 ### Plotting LSD profiles
-For quickly plotting LSD profiles:
+For quickly plotting LSD profiles use:
 ```
 spf-plotlsd profile1.dat
 ```
@@ -90,7 +89,7 @@ spf-plotlsd -l profile1.dat profile2.dat profile2.dat
 ```
 
 ### Calculating Bz
-For calculating longitudinal magnetic fields (Bz), and detection statistics, for Stokes V and the null, you can use spf-bz like:
+For calculating longitudinal magnetic fields (Bz) and detection statistics, for Stokes I, V, and the null, you can use spf-bz like:
 ```
 spf-bz -v -20 +30 -g 1.2 -l 500 profile1.dat
 ```
@@ -101,16 +100,15 @@ To correctly choose the velocity range to use, it can be helpful to plot the LSD
 spf-bz -p -v -20 +30 -g 1.2 -l 500 profile1.dat
 ```
 
-In general the effective Landé factor and wavelength used here should be the normalizing values used for the LSD calculation.  Within the SpecpolFlow tools, LSDpy saves those values to the header of the LSD profile, and `spf-bz` can read them, so you have the option of just using:
+In general, the effective Landé factor and wavelength used here should be the normalizing values used for the LSD calculation.  Within the SpecpolFlow tools, `lsdpy` saves those values to the header of the LSD profile, and `spf-bz` can read them, so you have the option of just using:
 ```
 spf-bz -v -20 +30 profile1.dat
 ```
-(This won't work for LSD profiles from other codes).
 Multiple files can be processed at once:
 ```
 spf-bz -v -20 +30 profile1.dat profile2.dat profile3.dat
 ```
-For a full list of command line parameters run `spf-bz -h`.  For a detailed explaination of these calculations see [Calculating the longitudinal field and False Alarm Probability](../Tutorials/6-CalculateBz_Tutorial.ipynb).
+For a detailed explaination of these calculations see [Calculating the longitudinal field and False Alarm Probability](../Tutorials/6-CalculateBz_Tutorial.ipynb).  For a full list of command line parameters run `spf-bz -h`.
 
 
 ### Calculating radial velocity
@@ -123,4 +121,4 @@ This fits a Gaussian to the LSD profile (in this example using the -100 to +100 
 ```
 spf-rvfit -v -100 +100 profile1.dat profile2.dat profile3.dat
 ```
-Command line parameters can be printed with `spf-rvfit -h`.  While this Gaussian fitting approach is convenient and often reliable, alternative approaches may be more optimal for your data.
+While this Gaussian fitting approach is convenient and often reliable, alternative approaches may be more optimal for your data.  Command line parameters can be printed with `spf-rvfit -h`.  
