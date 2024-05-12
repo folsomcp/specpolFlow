@@ -362,7 +362,7 @@ def make_mask(lineListFile, outMaskName=None, depthCutoff=0.0,
     :param lineListFile: The name of the file containing the line list
                          (in the VALD3 'extract stellar' 'long' format)
     :param outMaskName: The name of the to write the mask to
-                     (set this to None to avoid saving a file, default)
+                        (set this to None to avoid saving a file, default)
     :param depthCutoff: Only include lines in the mask deeper than this value
                         (defaults to 0, all lines included)
     :param wlStart: Optionally, only use lines with wavelengths above this

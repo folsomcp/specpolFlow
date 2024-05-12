@@ -51,7 +51,8 @@ class LSD:
         :param specN1: the Null1 profile
         :param specSigN1: the uncertainties on Null1
         :param specN2: the Null2 profile, if it exists, otherwise it is all 0s (optional)
-        :param specSigN2: the uncertainties on Null2 if there are any, otherwise all 0s (optional)
+        :param specSigN2: the uncertainties on Null2 if there are any,
+                          otherwise all 0s (optional)
         :param header: the header of the LSD profile file, if it exists (optional) 
         """
         self.vel = vel
@@ -243,7 +244,7 @@ class LSD:
             indLande = self.header.find('lande=')
             if indLande >= 0:
                 lande = float(self.header[indLande+6:].split()[0])
-            #Get the old waveength
+            #Get the old wavelength
             indWl0 = self.header.find('wl=')
             if indWl0 >= 0:
                 wl0 = float(self.header[indWl0+3:].split()[0])
@@ -430,7 +431,7 @@ class LSD:
         Helper function to return the center of gravity of Stokes I for
         the LSD profile, for a given continuum level.
 
-        :param Ic: the continnum level to use the the COG calculation
+        :param Ic: the continuum level to use the the COG calculation
                    (float, default=1.0)
         :param fullOutput: If True, return the error of the velocity
                             of the center of gravity
@@ -553,22 +554,26 @@ class LSD:
                     For an LSD profile, this is the geff value the LSD profile
                     shape was scaled with.
         :param velrange: range of velocity to use for the determination of the
-                    line center and the continuum. If not defined, the whole
-                    range will be used. If bzwidth is not defined, this range
-                    will also be used for the line Bz calculation.
-        :param bzwidth: distance from the line center for the Bz calculation.
+                    line center and the continuum. If bzwidth is not given,
+                    this range will also be used for the integration range
+                    in the Bz calculation. 
+                    If not given, the whole LSD profile will be used. 
+        :param bzwidth: distance from the line center (from the cog) used 
+                    for the integration range in the Bz calculation. 
                     One element = same on each side of line center.
-                    Two elements, left and right of line center.
-                    Not defined: using velrange.
+                    Two elements = left and right of line center.
+                    Not given (default): instead use velrange for this.
         :param plot: whether or not a graph is generated and returned.
+        :param kwargs: additional keyword arguments are passed to the
+                   matplotlib plotting routines, if a plot is generated.
         :return: a dictionary with Bz (in G) and FAP calculations,
                  optionally also a matplotlib figure.
         '''
         
-        # Velrange is used to identify the position of the line,
+        # velrange is used to identify the position of the line,
         # for calculating the cog, and for calculating the position
         # of the continuum.
-        # If Velrange is not defined, it will use the whole range.
+        # If velrange is not defined, it will use the whole range.
         # The range for calculating Bz itself is controlled by bzwidth below
         if velrange != None:
             inside = np.logical_and(self.vel>=velrange[0], self.vel<=velrange[1])
@@ -618,7 +623,7 @@ class LSD:
                 # saving the range for plotting later.
                 p_bzwidth = np.copy(velrange)
             else:
-                print('no bzwidth nor velrange defined, using full velocity range to calculate Bz')
+                print('no bzwidth nor velrange defined, using full range to calculate Bz')
                 p_bzwidth = [self.vel.min(), self.vel.max()]
                 lsd_bz = copy.copy(self)
         else:
@@ -641,19 +646,20 @@ class LSD:
                                      +'{:} (need 1 or 2)'.format(len(bzwidth)))
             else:
                 p_bzwidth = [cog_val-bzwidth, cog_val+bzwidth]
-                lsd_bz = self[ np.logical_and(self.vel >= p_bzwidth[0], self.vel <= p_bzwidth[1]) ]
+                lsd_bz = self[ np.logical_and(self.vel >= p_bzwidth[0],
+                                              self.vel <= p_bzwidth[1]) ]
 
     
         # Dealing with potential order overlaps 
         # or uneven velocity grid
         deltav_array = lsd_bz.vel[1:]-lsd_bz.vel[:-1]
-        if True in (deltav_array < 0):
-            warnings.warn("""The velocity array is not monotonically increasing. 
-                          There might be an order overlap in the BZwidth.
-                          The calc_BZ function will sort the LSD profile in 
-                          velocity order. Make sure this is what you want
-                          -- see merging order overlap option in documentation"""
-                          , stacklevel=2)
+        if np.any(deltav_array < 0.0):
+            warnings.warn("\n The velocity array is not monotonically increasing. "
+                          "\n There might be an order overlap in the region of the "
+                          "observation used. \n calc_bz will sort the LSD "
+                          "profile in velocity order. \n Make sure this is what "
+                          "you want -- merge orders before running calc_bz()!",
+                          stacklevel=2)
             lsd_bz = lsd_bz._sortvel()
             deltav_array = lsd_bz.vel[1:]-lsd_bz.vel[:-1]
 
@@ -661,8 +667,8 @@ class LSD:
         deltav_min = deltav_array.min()
         deltav_max = deltav_array.max()
         if (deltav_max - deltav_min) > 0.1 : # in km/s
-            warnings.warn("""The velocity spacing is uneven: 
-                          min spacing {}km/s, max spacing {}km/s""".format(
+            warnings.warn("The velocity spacing is uneven: "
+                          "min spacing {}km/s, max spacing {}km/s".format(
                               deltav_min, deltav_max), stacklevel=2)
 
         # Actual calculation of the Bz:
@@ -697,6 +703,9 @@ class LSD:
                 'N2 bz sig (G)': bln2Sig,
                 'N2 FAP': FAP_N2
                 }
+                #maybe rename:
+                #'int. range start': p_bzwidth[0],
+                #'int. range end': p_bzwidth[1]
 
         if plot:
             fig  = _plot_bz_calc(self, lsd_in, lsd_bz, velrange,
@@ -745,49 +754,61 @@ def _integrate_bz(vel, spec, specSig, geff, lambda0, cog_val,
     cvel = 2.99792458e5 #c in km/s to match/cancel the LSD profile velocities
     
     # set the velocity step for error propagation
-    # There might be some issues with order overlap if the function is used with an
-    # LSD object that was calculated with individual_line function. 
+    # (There might be some issues with order overlap if the function is used
+    # with an LSD object that was calculated with individual_line function. )
     ###
-    # trapeze: sum of  0.5 [ x_(i+1) - x_(i) ]*[ Y_(i) + Y_(i+1) ]
-    # If we define dx_i = x_(i+1) - x_(i)
-    # we can rewrite this as: sum of 0.5*dx_(i)*[ Y_(i) + Y_(i+1) ]
+    # For trapezoidal integration
+    # A = sum of  0.5 [ x_(i+1) - x_(i) ]*[ Y_(i) + Y_(i+1) ] (from i=1 to i=N-1)
+    # If we define dx_i = x_(i+1) - x_(i) we can rewrite this as:
+    # A = sum of 0.5*dx_(i)*[ Y_(i) + Y_(i+1) ]  (from i=1 to i=N-1)
     # if we expand the sum, and gather all of the Y_i together, we get:
-    # dx1 Y1 + [dx1+dx2]Y2 + [dx2+dx3]Y3 + ... + dx_(n-1)Yn
-    # Now, assuming only the uncertainty in the Yi, the propagated error on the uncertainty is
-    # error^2 =  (dx1 Y1)**2 + ([dx1+dx2]Y2)**2 + ([dx2+dx3]Y3)**2 + ... + (dx_(n-1)Yn)**2
-    # numerically, if we have [x1, x2, x3, ..., xn], then [dx1, dx2, dx3, ..., dx_(n-1)]
-    # adding a zero at each end: [0, dx1, dx2, dx3, ..., dx_(n-1), ], and doing [1:]+[:-1] 
-    # will give us the array that we need to multiply with the Yi array. Et voila!
+    # dx_1 Y_1 + [dx_1+dx_2]Y_2 + [dx_2+dx_3]Y_3 +
+    #      ... + [dx_{N-2}+dx_{N-1}]Y_{N-1} + dx_{N-1} Y_N
+    # Now, assuming uncertainties only on the Y_i, of s_i, the propagated error is
+    # error^2 = 0.5 * ( (dx_1 s_1)**2 + ([dx_1+dx_2]s_2)**2 + ([dx_2+dx_3]s_3)**2 +
+    #           ... +  ([dx_{N-2}+dx_{N-1}]*s_{N-1})**2 + (dx_{N-1} s_N)**2 )
+    # numerically, if we have: vel = [x_1, x_2, x_3, ..., x_n],
+    #              then: vel[1:]-vel[:-1] = [dx_1, dx_2, dx_3, ..., dx_{n-1}]
+    # adding a zero at each end: [0, dx1, dx2, dx3, ..., dx_(n-1), 0], and doing [1:]+[:-1] 
+    # will give us the array that we need to multiply with the s_i array. Et voila!
     ###
-    deltav_arr = vel[1:]-vel[:-1]
-    dx = np.hstack([ 0, deltav_arr, 0 ])
-    spacing_term = 0.5*(dx[:-1]+dx[1:])
+    #deltav_arr = vel[1:] - vel[:-1]
+    #dx = np.hstack([0., deltav_arr, 0.])
+    #err_scale = 0.5*(dx[:-1] + dx[1:])
+    # or more intuitively to Colin (and marginally faster):
+    deltav_arr = vel[1:] - vel[:-1]
+    err_scale = deltav_arr[:-1] + deltav_arr[1:]
+    err_scale = 0.5*np.concatenate((deltav_arr[:1], err_scale, deltav_arr[-1:]))
 
-    #deltav = (vel[1] - vel[0]) # This is in km/s # Old from using equal spacing to calculate uncertainty. 
-
-    
     # Calculation of the integral in the numerator of the Bz function
     # with a trapezoidal numerical integral
-    fnum = np.trapz( (vel - cog_val) * spec, x=vel-cog_val ) #in (km/s)^2
-    sfnum = np.sqrt(np.sum( (vel - cog_val )**2 * specSig**2  * spacing_term**2))
-    #sfnum = np.sqrt(np.sum( (vel - cog_val )**2 * specSig**2 ) * deltav**2)
+    fnum = np.trapz((vel - cog_val) * spec, x=vel-cog_val) #in (km/s)^2
+    sfnum = np.sqrt(np.sum(((vel - cog_val) * specSig * err_scale)**2))
+    # for a constant pixel spacing deltav (with the end points treated exactly)
+    #sfnumConst = np.sqrt((0.5*(vel[0] - cog_val)*specSig[0]*deltav)**2
+    #               + np.sum(((vel[1:-1] - cog_val)*specSig[1:-1])**2)*deltav**2
+    #               + (0.5*(vel[-1] - cog_val)*specSig[-1]*deltav)**2)
     
     # Calculation of the integral in the denominator of the Bz function
     # with a trapezoidal numerical integral
     # For the square error calculation, we propagate like we would for
     # summation in a numerical integral.
-    ri0v = np.trapz(norm_val-specI, x=vel ) # in km/s
-    #si0v = np.sqrt(np.sum(specSigI**2 )* deltav**2) # in km/s
-    si0v = np.sqrt(np.sum(specSigI**2 * spacing_term**2)) # in km/s
+    ri0v = np.trapz(norm_val - specI, x=vel) # in km/s
+    si0v = np.sqrt(np.sum((specSigI * err_scale)**2)) # in km/s
+    # for a constant pixel spacing deltav (with the end points treated exactly)
+    #si0vConst = np.sqrt((0.5*specSigI[0]*deltav)**2
+    #                    + np.sum(specSigI[1:-1]**2)*deltav**2
+    #                    + (0.5*specSigI[-1]*deltav)**2)
     
     # Make the actual Bz calculation.
     # for the units to work out, lambda0 should be in nm
-    bl = -1*fnum / ( ri0v*geff*lambda0*cvel*lambda_B_constant)
-    blSig = np.abs(bl * np.sqrt( (sfnum/fnum)**2 + (si0v/ri0v)**2 ))
+    bl = -1*fnum / (ri0v*geff*lambda0*cvel*lambda_B_constant)
+    blSig = np.abs(bl * np.sqrt((sfnum/fnum)**2 + (si0v/ri0v)**2))
     return bl, blSig
 
 
-def _plot_bz_calc(lsd, lsd_in, lsd_bz, velrange, p_bzwidth, norm_val, cog_val, cog, **kwargs):
+def _plot_bz_calc(lsd, lsd_in, lsd_bz, velrange, p_bzwidth, norm_val, cog_val, cog,
+                  **kwargs):
     """
     Generate a plot showing the center of gravity and integration ranges used
     in the calculation of Bz from an LSD profile.  Called by the calc_bz

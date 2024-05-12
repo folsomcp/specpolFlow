@@ -45,12 +45,12 @@ def make_mask_cli():
     
     #Run the line mask generating code
     print('reading line list from', llistName)
-    mask = pol.make_mask(llistName, outMaskName=maskName, depthCutoff = depthCutoff,
-                                  wlStart = wl1, wlEnd = wl2,
-                                  landeStart = lande1, landeEnd = lande2,
-                                  elementsUsed = elementsUsed,
-                                  elementsExclude = elementsExclude,
-                                  includeNoLande = False)
+    mask = pol.make_mask(llistName, outMaskName = maskName, 
+                         depthCutoff = depthCutoff, wlStart = wl1, wlEnd = wl2,
+                         landeStart = lande1, landeEnd = lande2,
+                         elementsUsed = elementsUsed,
+                         elementsExclude = elementsExclude,
+                         includeNoLande = False)
     print('mask saved to', maskName)
     return
 
