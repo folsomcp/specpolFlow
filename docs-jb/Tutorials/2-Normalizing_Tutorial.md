@@ -1,20 +1,22 @@
 # How to Normalize echelle spectra with NormPlot
 
+:::{Warning}
+Still under construction.  Some commands and other details may be out of date.
+:::
+
 ## Introduction
 
-This tutorial will formally introduce you to the procedure of normalizing echelle spectra and use of NormPlot. The interactive normalization gui is a part of the SpecpolFlow pipeline as steps that proceed the polarimetric analysis. In this introduction to spectra normalization, we will be using ESPADonS observations of the star xi1 CMa. This is the same observation that is used in the example LSD and Mean Longitudinal Field tutorial, so skipping this tutorial will not prevent you from advancing further in the pipeline (If you'd like, you're welcome to use normalized spectrum you create while doing this tutorial and seeing how the magnetic field measurements compare).  
-
-
+This tutorial introduces the procedure of normalizing echelle spectra and the use of NormPlot. The interactive normalization GUI is a part of the SpecpolFlow pipeline as steps that proceed the polarimetric analysis. In this introduction to spectra normalization, we will be using ESPADonS observations of the star xi1 CMa. This is the same observation that is used in the example LSD and Mean Longitudinal Field tutorial, so skipping this tutorial will not prevent you from advancing further in the pipeline (If you'd like, you're welcome to use normalized spectrum you create while doing this tutorial and seeing how the magnetic field measurements compare).  
 
 ## Converting from Fits to text.
-Let’s proceed by converting the format for the data files from `.fits` to the `.s` text format. The data file needs to be converted in order to be used in NormPlot. These  processed data files (can also be found on CADC archives) are formatted as: `i.fits` contains spectroscopic data (usually 4 spectra), and `p.fits` contains the polarimetric data. We want to convert the `p.fits` files and use the Stokes I spectrum the normalization code. For this tutorial, we will use the ESPaDOns observation,  `2378200p.fits`.
+Let's proceed by converting the format for the data files from `.fits` to the `.s` text format. The data file needs to be converted in order to be used in NormPlot. These  processed data files (can also be found on CADC archives) are formatted as: `i.fits` contains spectroscopic data (usually 4 spectra), and `p.fits` contains the polarimetric data. We want to convert the `p.fits` files and use the Stokes I spectrum the normalization code. For this tutorial, we will use the ESPaDOns observation,  `2378200p.fits`.
 
 ESPaDOns `p.fits` files have 24 columns, and we are going to use the file-conversion script `convert-espadons-fits.py` to extract the first 12 columns. These particular columns are the normalized (0-5) and unnormalized (6-11) polarimetry products with the automatic wavelength correction applied. The columns are `[0] Wavelength`, `[1] Intensity`, `[2] Stokes`, `[3] Null 1`, `[4] Null 2`, `[5] Errorbar`, and the latter 6 follow an identical sequence. 
 
 In the command line, write the command 
 
  ``` 
- python convert-espadons-fits.py  inputfile-p.fits
+ spf-fitstos-espadons inputfile-p.fits
  ```
 
 where you will replace the inputfile-p.fits with the name of our Espadon file `2378200p.fits`. The script will return `2378200pn.s` (normalized data) and `2378200pu.s` (unnormalized data) in the same directory as the fits file. 
@@ -28,7 +30,7 @@ We want to note that this is a specific example, and the reformatting of .fits f
 
 Now let’s use the normalization GUI on our data. The main file for executing the normalization is `normPlot2.py`. This normalization code utilizes the text format spectra that would have been produced in the first steps ( it was built around LibreESPRIT reduced data). On the backend it runs off of `fittingFuncs2.py` (has functions for the normalization), and `guiMainWin2.py` and `guiControls2.py` (functions for the UI). You can run the code in the command line by 
 
-```python normPlot2.py <observation_file.s>```
+```normplot <observation_file.s>```
 
 The files you want to execute should be in the same working directory as `normplot.py`. Once executed, a window will pop up and you will see the spectra separated by order with polynomial fit (these are fits to the continuum per order and they will vary in color based on their order).
 
