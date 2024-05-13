@@ -21,7 +21,7 @@ from . import profileLSD
 from . import mask as maskTools
 from . import obsSpec
 
-def makeWin(fig, ax, mask, obs, lsdp, pltMaskU, pltMaskN,
+def makeWin(fig, ax, mask, obs, lsdp, lsdProf, pltMaskU, pltMaskN,
             pltMaskF, pltModelI, excludeRanges, outExcludeName, fitDepthFlags):
     #Build GUI with tkinter
     root = tk.Tk(className='Clean Masks')
@@ -147,8 +147,8 @@ def makeWin(fig, ax, mask, obs, lsdp, pltMaskU, pltMaskN,
     selectFitDepth.linkButton(butSelRange, unselectFitDepth)
     unselectFitDepth.linkButton(butUnselRange, selectFitDepth)
     #Apply the depth fitting
-    fitDepthsM = fitDepths(mask, obs, lsdp, fitDepthFlags, root, canvas,
-                           pltMaskU, pltMaskN, pltMaskF)
+    fitDepthsM = fitDepths(mask, obs, lsdp, lsdProf, fitDepthFlags, root,
+                           canvas, pltMaskU, pltMaskN, pltMaskF)
     butFitDepths = ttk.Button(master=tools, text='fit\ndepths',
                                command=fitDepthsM.runFit)
     ToolTip(butFitDepths, 'Fit the selected line depths, using the current LSD profile and observation')
@@ -196,7 +196,7 @@ def makeWin(fig, ax, mask, obs, lsdp, pltMaskU, pltMaskN,
     butModLSD.grid(row=3, column=8, sticky=tk.E, padx=2)
     
     #Update the LSD calculation and the plotted spectrum
-    updateLSDM = updateLSD(canvas, root, mask, lsdp, pltModelI)
+    updateLSDM = updateLSD(canvas, root, mask, lsdp, lsdProf, pltModelI)
     butUpdateLSD = ttk.Button(master=tools, text='update LSD',
                               command=updateLSDM.rerunLSD)
     ToolTip(butUpdateLSD, 'Save the mask, run LSD, and update the model spectrum')
@@ -748,11 +748,12 @@ class saveRanges:
 
 class fitDepths:
     #mini manager to run the fitting of line depths
-    def __init__(self, mask, obs, lsdp, fitDepthFlags, root, canvas,
-                 pltMaskU, pltMaskN, pltMaskF):
+    def __init__(self, mask, obs, lsdp, lsdProf, fitDepthFlags, root,
+                 canvas, pltMaskU, pltMaskN, pltMaskF):
         self.mask = mask
         self.obs = obs
         self.lsdp = lsdp
+        self.lsdProf = lsdProf
         self.fitDepthFlags = fitDepthFlags
         self.root = root
         self.canvas = canvas
@@ -776,7 +777,7 @@ class fitDepths:
         useMask1 = self.mask[indUse1]
         if len(useMask1) > 0:
             #Get the reference LSD profile
-            prof = profileLSD.read_lsd(self.lsdp.outName) 
+            prof = self.lsdProf
             #Remove degenerate (or nearly) lines
             pixVel = prof.vel[1]-prof.vel[0]
             removePoorLines(useMask1, pixVel, fracPix = 3.0, sumDepths=False)
@@ -1141,11 +1142,12 @@ class modifyLSDpar:
 
 
 class updateLSD:
-    def __init__(self, canvas, root, mask, lsdp, pltModelI):
+    def __init__(self, canvas, root, mask, lsdp, lsdProf, pltModelI):
         self.canvas = canvas
         self.root = root
         self.mask = mask
         self.lsdp = lsdp
+        self.lsdProf = lsdProf
         self.pltModelI = pltModelI
     def rerunLSD(self):
         #Recalculate the LSD profile and update the plot
@@ -1164,6 +1166,9 @@ class updateLSD:
             sigmaClipIter=lsdp.sigmaClipIter, sigmaClip=lsdp.sigmaClip,
             outModelName=lsdp.outModelName,
             plotLSD=lsdp.plotLSD, outPlotLSDName=lsdp.outPlotLSDName)
+        #update the current LSD object, rather than replacing it
+        #(since fitDepths needs to retain a reference to the same object)
+        self.lsdProf[:] = lsdProf[:]
         #Return the cursor to normal
         self.root.config(cursor=oldCursor)
         

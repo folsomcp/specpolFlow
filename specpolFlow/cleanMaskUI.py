@@ -118,8 +118,8 @@ def cleanMaskUI(maskName, obsName, outMaskName=None, inExcludeName=None,
         fitDepthFlags = np.zeros_like(mask.wl, dtype=int)
         
         #Run the main interactive program
-        cleanSub.makeWin(fig, ax1, mask, obs, lsdp, pltMaskU, 
-                         pltMaskN, pltMaskF, pltModelI, excludeRanges, 
+        cleanSub.makeWin(fig, ax1, mask, obs, lsdp, lsdProf, pltMaskU,
+                         pltMaskN, pltMaskF, pltModelI, excludeRanges,
                          outExcludeName, fitDepthFlags)
 
     #make an ExcludeMaskRegions object to return
