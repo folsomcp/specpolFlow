@@ -272,7 +272,87 @@ class LSD:
         :rtype: LSD
         """
         return self.scale(wint_new/wint_old, wpol_new/wpol_old)
-   
+
+    def coadd(self,*args):
+        """
+        coadd this LSD profile with other LSD profiles
+
+        Currently the LSD profiles must all be on the same velocity grid,
+        interpolation is not supported.  Recommend extracting all LSD
+        on the same velocity grid to avoid having to interpolate.
+        Coadding here essentially averages LSD profiles weighted
+        by 1/sigma**2. 
+
+        :param args: other LSD objects (or a list or tuple of them)
+                     to coadd with this one
+        :rtype: LSD
+        """
+        #Check if the user passed a list or tuple of spectra (unwrap it)
+        _args = args
+        if len(args) > 0:
+            if isinstance(args[0], list) or isinstance(args[0], tuple):
+                if isinstance(args[0][0], LSD): _args = args[0]
+
+        #Set up a new LSD profile for a weighted average, starting with self
+        #weight by 1/sigma**2, and save the sum of the weights
+        weightI = 1./self.specSigI**2
+        weightV = weightN1 = weightN2 = np.zeros_like(self.vel)
+        if self.numParam > 1:
+            weightV = 1./self.specSigV**2
+        if self.numParam > 2:
+            weightN1 = 1./self.specSigN1**2
+        if self.numParam > 3:
+            weightN2 = 1./self.specSigN2**2
+        prof = LSD(self.vel.copy(), self.specI*weightI, weightI,
+                   self.specV*weightV, weightV,
+                   self.specN1*weightN1, weightN1,
+                   self.specN2*weightN2, weightN2, self.header)
+        prof.numParam = self.numParam
+
+        for arg in _args:
+            #basic error checking
+            if not isinstance(arg, LSD):
+                raise TypeError('LSD.coadd can only use LSD objects!')
+            if arg.numParam != self.numParam:
+                raise ValueError('LSD.coadd requires LSD profiles with the '
+                                 'same number of columns (Stokes parameters)!')
+            if np.any(arg.vel != self.vel):
+                raise ValueError('LSD.coadd currently requires all LSD profiles'
+                                 ' to have the same velocity grid! '
+                                 '(Recommend re-calculating all profiles on  '
+                                 'the same velocity grid)')
+                                 
+            #Add this profile, weighted by 1/sigma**2
+            weightI = 1./arg.specSigI**2
+            prof.specI += arg.specI*weightI
+            prof.specSigI += weightI
+            if self.numParam > 1:
+                weightV = 1./arg.specSigV**2
+                prof.specV += arg.specV*weightV
+                prof.specSigV += weightV
+            if self.numParam > 2:
+                weightN1 = 1./arg.specSigN1**2
+                prof.specN1 += arg.specN1*weightN1
+                prof.specSigN1 += weightN1
+            if self.numParam > 3:
+                weightN2 = 1./arg.specSigN2**2
+                prof.specN2 += arg.specN2*weightN2
+                prof.specSigN2 += weightN2
+            
+        #Once all profiles have been added, complete the weighted average
+        prof.specI /= prof.specSigI
+        prof.specSigI = np.sqrt(1./prof.specSigI)
+        if self.numParam > 1:
+            prof.specV /= prof.specSigV
+            prof.specSigV = np.sqrt(1./prof.specSigV)
+        if self.numParam > 2:
+            prof.specN1 /= prof.specSigN1
+            prof.specSigN1 = np.sqrt(1./prof.specSigN1)
+        if self.numParam > 3:
+            prof.specN2 /= prof.specSigN2
+            prof.specSigN2 = np.sqrt(1./prof.specSigN2)
+        return prof
+    
     def plot(self, figsize=(10,10), sameYRange=True, plotZeroLevel=True,
              fig=None, **kwargs):
         """
