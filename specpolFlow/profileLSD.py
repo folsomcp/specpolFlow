@@ -506,6 +506,50 @@ class LSD:
                     fitAmplErr, fitWidth, fitWidthErr)
         return fitVel, fitVelErr
 
+    def cog_rv(self, velrange, norm='auto'):
+        '''
+        Calculate a radial velocity using the center of gravity
+        (i.e. first moment) of the Stokes I profile.
+
+        This uses function the cog_I function, but provides the convenience
+        of estimating the continuum level automatically and performing
+        the calculation on a user specified velocity range.
+
+        :param norm: calculation method for the continuum. The choices are:
+                    'auto': the median of I outside of velrange;
+                    or float: a user defined value to use for Ic.
+        :param velrange: range of velocity to use for the determination of the
+                    line center and the continuum.
+                    (The integration range for the first moment.)
+                    This should be a starting and ending velocity as two
+                    elements inside a list (or tuple).
+        :return:  the velocity of the center of gravity, and its uncertainty
+        '''
+        #Error checking on velrange
+        if not (isinstance(velrange, list) or isinstance(velrange, tuple)):
+            raise TypeError('LSD.cog_rv: velrange must be a list (or tuple) '
+                             'with two values!')
+        if len(velrange) < 2:
+            raise ValueError('LSD.cog_rv: velrange must be a list (or tuple) '
+                             'with two values!')
+        #Get the portion of the LSD profile inside (and outside) velrange
+        inside = (self.vel >= velrange[0]) & (self.vel <= velrange[1])
+        lsd_in = self[inside]
+        lsd_out = self[np.logical_not(inside)]
+
+        #Calculate and apply the continuum normalization
+        if isinstance(norm, str):
+            #if norm == 'auto': #If multiple normalization methods are added
+            norm_val = np.median(lsd_out.specI)
+        else:
+            norm_val = float(norm)
+
+        #Calculate the COG, and its error, using cog_I
+        cog_val, cog_err = lsd_in.cog_I(norm_val, fullOutput=True)
+        
+        return cog_val, cog_err
+        
+    
     def cog_I(self, Ic=1.0, fullOutput=False):
         '''
         Helper function to return the center of gravity of Stokes I for
@@ -515,22 +559,28 @@ class LSD:
                    (float, default=1.0)
         :param fullOutput: If True, return the error of the velocity
                             of the center of gravity
-        :return: the velocity of the center of gravity
+        :return: the velocity of the center of gravity, optionally also its error
         '''
         # Computes the velocity of the center of gravity
-        nominator = np.trapz(self.vel * (Ic-self.specI), x=self.vel)
-        denominator = np.trapz( Ic-self.specI, x=self.vel )
-        rv = nominator/denominator
-
-        # Estimate the associated error
-        deltav = self.vel[1] - self.vel[0]
-        nominatorSig = np.sqrt(np.sum(self.vel**2 * self.specSigI**2) * deltav**2)
-        denominatorSig = np.sqrt(np.sum(self.specSigI**2) * deltav**2)
-        rvSig = np.abs(rv * np.sqrt((nominatorSig/nominator)**2
-                                    + (denominatorSig/denominator)**2))
-
-        #Optionally return the rv and its error 
+        numerator = np.trapz(self.vel * (Ic - self.specI), x=self.vel)
+        denominator = np.trapz(Ic - self.specI, x=self.vel)
+        rv = numerator/denominator
+        
         if fullOutput == True:
+            #Propagate errors through the trapezoidal integration, with uneven 
+            #pixel spacing, using the same math as _integrate_bz()
+            deltav_arr = self.vel[1:] - self.vel[:-1]
+            err_scale = deltav_arr[:-1] + deltav_arr[1:]
+            err_scale = 0.5*np.concatenate((deltav_arr[:1], err_scale, deltav_arr[-1:]))
+            
+            numeratorSig = np.sqrt(np.sum((self.vel * self.specSigI * err_scale)**2))
+            denominatorSig = np.sqrt(np.sum((self.specSigI * err_scale)**2))
+            #Note, this bit of linear error propagation, assuming independent
+            #uncertainties isn't quite perfect, since the numerator and denominator
+            #depend on the same specSigI.  But the numerator dominates the total
+            #uncertainty, so treatment of the denominator isn't really important.
+            rvSig = np.abs(rv) * np.sqrt((numeratorSig/numerator)**2
+                                         + (denominatorSig/denominator)**2)
             return rv, rvSig
         return rv
 
@@ -543,11 +593,11 @@ class LSD:
                    (float, default=1.0)
         :return: the velocity of the center of gravity
         '''
-        nominator = np.trapz(self.vel * np.abs( self.specV * (Ic-self.specI) ),
+        numerator = np.trapz(self.vel * np.abs( self.specV * (Ic-self.specI) ),
                              x=self.vel )
         denominator = np.trapz(np.abs( self.specV * (Ic-self.specI) ),
                                x=self.vel )
-        return nominator/denominator
+        return numerator/denominator
 
     def cog_V(self):
         '''
@@ -556,9 +606,9 @@ class LSD:
         
         :return: the velocity of the center of gravity
         '''
-        nominator = np.trapz(self.vel * np.abs(self.specV), x=self.vel )
+        numerator = np.trapz(self.vel * np.abs(self.specV), x=self.vel )
         denominator = np.trapz( np.abs(self.specV), x=self.vel )
-        return(nominator/denominator)        
+        return(numerator/denominator)        
 
     def cog_min(self):
         '''
