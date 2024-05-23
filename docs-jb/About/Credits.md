@@ -9,6 +9,7 @@ The current and past members of the SpecpolFlow Development team are listed belo
 * Shaquann Seadrow
 * Patrick Stanley
 * Tali Natan
+* Bonnie Zaire
 * Mary Oksala
 * Gregg Wade
 
