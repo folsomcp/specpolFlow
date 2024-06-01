@@ -126,7 +126,11 @@ class LineList:
         """
         strList = []
         outStr = '\n'
-        for line in self:
+        lines = self
+        #check if this LineList contains arrays or just single values
+        if isinstance(self.ion, str) and isinstance(self.wl, float):
+            lines = [self]
+        for line in lines:
             fmt = ("'{:s}',{:17.4f},{:7.3f},{:8.4f},{:5.1f},{:8.4f},{:5.1f},"
                    "{:7.3f},{:7.3f},{:7.3f},{:6.3f},{:6.3f},{:8.3f},{:6.3f},")
             if len(line.ion) == 3: fmt = fmt[:7] + ' ' + fmt[7:]
@@ -138,6 +142,41 @@ class LineList:
             strList.append("'  {:>88}'".format(line.configUp))
             strList.append("'{:}'".format(line.refs))
         return outStr.join(strList)
+
+    def insert(self, i, newval):
+        """
+        Insert lines from a LineList at a specific index.  Returns a new 
+        LineList combining the two line lists (does not operate in place)
+
+        :param i: index to insert at
+        :param newval: LineList of new values to insert
+        :rtype: LineList
+        """
+        if not(isinstance(newval, LineList)):
+            raise TypeError('LineList.insert: can only insert a LineList')
+
+        #Re-allocating these arrays, particularly arrays of strings, is slow!
+        ion      = np.insert(self.ion     , i, newval.ion     )
+        wl       = np.insert(self.wl      , i, newval.wl      )
+        loggf    = np.insert(self.loggf   , i, newval.loggf   )
+        Elo      = np.insert(self.Elo     , i, newval.Elo     )
+        Jlo      = np.insert(self.Jlo     , i, newval.Jlo     )
+        Eup      = np.insert(self.Eup     , i, newval.Eup     )
+        Jup      = np.insert(self.Jup     , i, newval.Jup     )
+        landeLo  = np.insert(self.landeLo , i, newval.landeLo )
+        landeUp  = np.insert(self.landeUp , i, newval.landeUp )
+        landeEff = np.insert(self.landeEff, i, newval.landeEff)
+        rad      = np.insert(self.rad     , i, newval.rad     )
+        stark    = np.insert(self.stark   , i, newval.stark   )
+        waals    = np.insert(self.waals   , i, newval.waals   )
+        depth    = np.insert(self.depth   , i, newval.depth   )
+        configLo = np.insert(self.configLo, i, newval.configLo)
+        configUp = np.insert(self.configUp, i, newval.configUp)
+        refs     = np.insert(self.refs    , i, newval.refs    )
+        lList =  LineList(ion, wl, loggf, Elo, Jlo, Eup, Jup, landeLo,
+                          landeUp, landeEff, rad, stark, waals, depth,
+                          configLo, configUp, refs)
+        return lList
 
     def save(self, fname):
         """
@@ -151,7 +190,7 @@ class LineList:
         """
         
         fOut = open(fname, 'w')
-        fOut.write(("{:11.5f},{:12.5f},{:5d},{:7d},{:4.1f}, Wavelength "
+        fOut.write(("{:11.5f},{:12.5f},{:6d},{:7d},{:4.1f}, Wavelength "
                     "region, lines selected, lines processed, Vmicro\n"
                     ).format(self.wl[0], self.wl[-1], self.nLines, 999999, 0.))
         fOut.write("                                                 "
