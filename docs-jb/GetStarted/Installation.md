@@ -21,7 +21,7 @@ pip install --upgrade LSDpy
 pip install --upgrade normPlot
 ```
 
-You can also uninstall specpolFlow with pip:
+You can uninstall specpolFlow with pip:
 ```
 pip uninstall specpolFlow
 pip uninstall LSDpy
