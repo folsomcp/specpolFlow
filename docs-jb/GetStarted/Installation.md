@@ -1,11 +1,11 @@
 # Installation
 
-SpecpolFlow is available on pip, which is the easy way to install it:
+SpecpolFlow is available on pip, which is the easiest way to install it:
 ```
 pip install specpolFlow
 ```
 
-There is an optional normalization tool, NormPlot, which can be installed:
+There is an optional normalization tool, NormPlot, which can be installed using:
 ```
 pip install normPlot
 ```
