@@ -1,8 +1,9 @@
-#!/usr/bin/python3
-#
-#Read a set of FITS files, in the ESPaDOnS spectra format from the CADC
-#Can be modified for other spectra formats,
-#if you know the structure of the records in the FITS file.
+"""
+Read a set of FITS files, in the ESPaDOnS spectra format from the CADC
+Can be modified for other spectra formats,
+if you know the structure of the records in the FITS file.
+"""
+
 import numpy as np
 import astropy.io.fits as fits
 from .. import obsSpec as spf
@@ -16,15 +17,18 @@ def espadons(flist, flistout=None, writeSpecHeader=False):
      
     * The UPENA normalized spectrum (n.s), with automated radial velocity corrections from the telluric lines.
     * The UPENA unnormalized spectrum (u.s), using the automated radial velocity correction from the normalized spectrum.
-    This is done starting from the unnormalized spectrum without the automated radial velocity correction, to which 
-    we apply the radial velocity correction determined from the normalized spectrum.  
-    The reason behind this is that the UPENA automated radial velocity determination performed on 
+    This is done starting from the unnormalized spectrum without the automated 
+    radial velocity correction, to which we apply the radial velocity
+    correction determined from the normalized spectrum. The reason behind this
+    is that the UPENA automated radial velocity determination performed on 
     unnormalized spectra does not produce consistently reliable results. 
-    The content of the fits header is also saved in a .out ascii file.
-    If flistout=None (default), the files are written at the same path as the fits-format data, with the '.fits' stripped, 
+    The content of the fits header is also saved in a .out text file.
+    If flistout=None (default), the files are written at the same path as
+    the fits-format data, with the '.fits' stripped, 
     and 'n.s' and 'u.s' appended to the filename root. 
-    If flistout is a list of paths ending with a rootname, the files will be saved at that path with that rootname, 
-    and 'n.s' and 'u.s' appended to the filename root.
+    If flistout is a list of paths ending with a rootname, the files will be
+    saved at that path with that rootname, and 'n.s' and 'u.s' appended to
+    the filename root.
 
     :param flist: (list of strings) a list of ESPaDOnS filenames
     :param flistout: (list of strings) optional, list of output file rootnames
@@ -128,23 +132,3 @@ def espadons(flist, flistout=None, writeSpecHeader=False):
         outHeader.write(repr(header))
         outHeader.close()
     return
-
-#Interface function for running as a command line script
-def espadons_cli():
-    import argparse
-    parser = argparse.ArgumentParser(description='Convert FITS file spectra from the ESPaDOnS CADC archive format to text .s files. Output files as [filename]n.s for the pipeline normalized spectra, [filename]u.s for unnormalized spectra, and [filename].out for header information.')
-    parser.add_argument("observation", nargs='*', help='a list of FITS files to process.')
-    args = parser.parse_args()
-
-    flist=args.observation
-
-    if flist == []:
-        print('No files given')
-    else:
-        #Run the conversion funciton
-        espadons(flist)
-    return
-
-#For running this scirpt as a terminal program
-if __name__ == "__main__":
-    espadons_cli()
