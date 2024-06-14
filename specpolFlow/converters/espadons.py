@@ -5,8 +5,9 @@
 #if you know the structure of the records in the FITS file.
 import numpy as np
 import astropy.io.fits as fits
+from .. import obsSpec as spf
 
-def espadons(flist, flistout=None):
+def espadons(flist, flistout=None, writeSpecHeader=False):
     """
     Convert a list of .fits files in the CADC ESPaDOnS format into
     text .s files. 
@@ -27,6 +28,8 @@ def espadons(flist, flistout=None):
 
     :param flist: (list of strings) a list of ESPaDOnS filenames
     :param flistout: (list of strings) optional, list of output file rootnames
+    :param writeSpecHeader: Flag for whether to write two lines of header to the
+                         .s text file (True = include header)
     """
 
     if isinstance(flist, str): flist = [flist,]
@@ -72,13 +75,16 @@ def espadons(flist, flistout=None):
         # of the header. Using the 'COMMENT' keyword returns a 
         # list of strings
         comments = header['COMMENT']
-        # searching for the two strings in the comments that contains the radial velocity correction:
-        matches = [match for match in comments if "radial velocity correction from telluric lines" in match]
-        #print(matches)
+        # searching for the two strings in the comments that contains
+        # the radial velocity correction:
+        matches = [match for match in comments if
+                   "radial velocity correction from telluric lines" in match]
         # the one calculated for the normalized spectrum is the first instance
         radvel = float(matches[0].split(':')[1])
-        #print(radvel)
         
+        target = header['OBJECT']
+        dateUTC = header['DATE-OB1']
+        timeUTC = header['UTIME1']
         # extracting the table of data (24 columns)
         specTab = fitsSpec[0].data
 
@@ -108,17 +114,15 @@ def espadons(flist, flistout=None):
         c = 299792.458  #speed of light in km/s, since radvel is in km/s
         wlu = wlu + wlu*radvel/c
 
-        outNorm = open(fnameOut+'n.s','w')
-        for i in range(len(wln)):
-            outNorm.write('%10.4f %11.4e %11.4e %11.4e %11.4e %11.4e\n' % (
-                wln[i], specIn[i], specVn[i], specN1n[i], specN2n[i], specSign[i]))
-        outNorm.close()
-    
-        outUNorm = open(fnameOut+'u.s','w')
-        for i in range(len(wln)):
-            outUNorm.write('%10.4f %11.4e %11.4e %11.4e %11.4e %11.4e\n' % (
-                wlu[i], specIu[i], specVu[i], specN1u[i], specN2u[i], specSigu[i]))
-        outUNorm.close()
+        spec_n = spf.Spectrum(wln, specIn, specVn, specN1n, specN2n, specSign)
+        spec_n.header = '***Reduced spectrum {:} {:} {:}\n'.format(
+            target, dateUTC, timeUTC)
+        spec_n.save(fnameOut+'n.s', saveHeader=writeSpecHeader)
+
+        spec_u = spf.Spectrum(wlu, specIu, specVu, specN1u, specN2u, specSigu)
+        spec_u.header = '***Reduced spectrum {:} {:} {:}\n'.format(
+            target, dateUTC, timeUTC)
+        spec_u.save(fnameOut+'u.s', saveHeader=writeSpecHeader)
         
         outHeader = open(fnameOut+'.out','w')
         outHeader.write(repr(header))
