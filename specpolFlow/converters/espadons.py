@@ -32,7 +32,7 @@ def espadons(flist, flistout=None, writeSpecHeader=False):
 
     :param flist: (list of strings) a list of ESPaDOnS filenames
     :param flistout: (list of strings) optional, list of output file rootnames
-    :param writeSpecHeader: Flag for whether to write two lines of header to the
+    :param writeSpecHeader: Flag for whether to write two lines of header in the
                          .s text file (True = include header)
     """
 

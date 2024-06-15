@@ -11,7 +11,7 @@ def spirou(flist, flistout=None, ftype=None, nanTreatment='replace',
            removeSegmentSize=200, allowGapSize=3,
            saveFitsHeader=True, writeSpecHeader=False):
     '''
-    Convert a .fits, file or list of files, in SPIRou APERO formats into
+    Convert a .fits, file or list of files, from SPIRou APERO formats into
     text .s files.
 
     This supports intensity spectrum e.fits files, telluric corrected intensity
@@ -19,7 +19,7 @@ def spirou(flist, flistout=None, ftype=None, nanTreatment='replace',
     This calls the spirou_e, spirou_t, and spirou_p
     functions.
 
-    The fits files usually contain nan values for pixels where the telluric
+    The .fits files usually contain nan values for pixels where the telluric
     correction failed, or where the spectrum extraction failed.
     This function provides options: to remove those pixels (and optionally 
     remove some of the small fragments of spectrum that get left behind),
@@ -31,11 +31,11 @@ def spirou(flist, flistout=None, ftype=None, nanTreatment='replace',
     on the spectrum simply as sqrt(N), applies a blaze correction to
     the spectrum, and applies a barycentric velocity correction.
 
-    For p.fits files: this converts the input polarized spectrum from
-    being normalized by the intensity spectrum to being normalized by
-    the continuum (like Stokes I).
+    For p.fits files: this function converts the input polarized spectrum from
+    being normalized by the intensity spectrum (e.g. V/I) to being normalized
+    by the continuum (e.g. V/Ic, like I/Ic).
 
-    :param flist: a .fits file name or list filenames (a string or list of strings)
+    :param flist: .fits file name or list filenames (a string or list of strings)
     :param flistout: optional, an output filename or list of filenames.
                      If this is not provided output names will be generated
                      from the input filenames, replacing .fits with .s
@@ -68,9 +68,9 @@ def spirou(flist, flistout=None, ftype=None, nanTreatment='replace',
                          allowGapSize ignores gaps smaller than this value when
                          calculating the size of segments for removeSegmentSize.
     :param saveFitsHeader: Flag for whether to save the .fits header information
-                         to an extra text file, named using the output filename
+                         to a text file, named using the output filename
                          .out (True = save to file).
-    :param writeSpecHeader: Flag for whether to write two lines of header to the
+    :param writeSpecHeader: Flag for whether to write two lines of header in the
                          .s text file (True = include header)
     :return: list of Spectrum objects
     '''
@@ -137,8 +137,8 @@ def spirou_p(fname, outname=None, nanTreatment='replace',
              removeSegmentSize=200, allowGapSize=3,
              saveFitsHeader=True, writeSpecHeader=False):
     '''
-    Function to read in a SPIRou p.fits file, containing a polarized spectrum,
-    and return a Spectrum object
+    Function to read in a SPIRou p.fits file containing a polarized spectrum,
+    save it to a .s file, and return a Spectrum object
 
     The p.fits files usually contain the polarization spectrum normalized by
     the full Stokes I spectrum, not the continuum of Stokes I
@@ -152,6 +152,9 @@ def spirou_p(fname, outname=None, nanTreatment='replace',
     to replace those pixels with placeholder values, or to keep the
     nan values. (Keeping the nan values will cause problems for other
     SpecpolFlow functions!)
+    APERO p.fits files also have nan values for wavelengths, so in the 
+    'replace' mode wavelengths in nan regions are only estimates, 
+    based on the surrounding wavelength values.
     
     :param fname: name of the .fits file to read
     :param outname: name of the file to save the spectrum to.  If not provided
@@ -161,12 +164,9 @@ def spirou_p(fname, outname=None, nanTreatment='replace',
                          can be: 'remove', 'replace', 'keep'. 
                          nan values can be from places where the spectrum 
                          extraction failed or the telluric correction was too 
-                         uncertain.  'remove' deletes pixels with nans.
+                         uncertain. 'remove' deletes pixels with nans.
                          'replace' replaces the nan values with 0, and sets the
-                         uncertainties to 100. APERO p.fits files also have nan
-                         values for wavelengths, so the the wavelengths in
-                         nan regions are only rough estimates, based on the 
-                         surrounding wavelength values.
+                         uncertainties to 100. 
                          'keep' retains the nan values in the spectrum.
     :param removeSegmentSize: If nanTreatment = 'remove', this can leave a lot
                          of little fragments of spectrum in the output, mostly
@@ -180,9 +180,9 @@ def spirou_p(fname, outname=None, nanTreatment='replace',
                          allowGapSize ignores gaps smaller than this value when
                          calculating the size of segments for removeSegmentSize.
     :param saveFitsHeader: Flag for whether to save the .fits header information
-                         to an extra text file, named using the output filename
+                         to a text file, named using the output filename
                          .out (True = save to file).
-    :param writeSpecHeader: Flag for whether to write two lines of header to the
+    :param writeSpecHeader: Flag for whether to write two lines of header in the
                          .s text file (True = include header)
     :rtype: Spectrum
     '''
@@ -305,11 +305,11 @@ def spirou_e(fname, outname=None, nanTreatment='replace',
              removeSegmentSize=100, allowGapSize=3, bervCorr=True,
              saveFitsHeader=True, writeSpecHeader=False):
     '''
-    Function to read in a SPIRou e.fits file, containing an intensity spectrum,
-    and return a Spectrum object
+    Function to read in a SPIRou e.fits file containing an intensity spectrum,
+    save it to a .s file, and return a Spectrum object
 
-    This function estimates uncertainties on the spectrum simply as sqrt(N),
-    then applies a blaze correction to the spectrum.
+    This function estimates uncertainties on the spectrum simply as the 
+    square root of the flux, then applies a blaze correction to the spectrum.
     
     The e.fits files usually contain nan values for pixels where the spectrum
     extraction failed (most commonly near order edges where the flux is low).
@@ -346,9 +346,9 @@ def spirou_e(fname, outname=None, nanTreatment='replace',
                          frame, rather than the solar system barycentric rest
                          frame.
     :param saveFitsHeader: Flag for whether to save the .fits header information
-                         to an extra text file, named using the output filename
+                         to a text file, named using the output filename
                          .out (True = save to file).
-    :param writeSpecHeader: Flag for whether to write two lines of header to the
+    :param writeSpecHeader: Flag for whether to write two lines of header in the
                          .s text file (True = include header)
     :rtype: Spectrum
     '''
@@ -471,16 +471,16 @@ def spirou_t(fname, outname=None, nanTreatment='replace',
              removeSegmentSize=200, allowGapSize=3, bervCorr=True,
              saveFitsHeader=True, writeSpecHeader=False):
     '''
-    Function to read in a SPIRou t.fits file, containing a telluric corrected
-    intensity spectrum, and return a Spectrum object
+    Function to read in a SPIRou t.fits file containing a telluric corrected
+    intensity spectrum, save it to a .s file, and return a Spectrum object
 
-    This function estimates uncertainties on the spectrum simply as sqrt(N),
-    then applies a blaze correction to the spectrum.
+    This function estimates uncertainties on the spectrum simply as the 
+    square root of the flux, then applies a blaze correction to the spectrum.
     
-    The t.fits files usually contain the telluric corrected spectrum,
+    The t.fits files usually contain the telluric corrected spectrum
     and a copy of the telluric line spectrum removed from the original
     observation.  This function saves both to two different files
-    (with the telluric spectrum in [outname].telluric)
+    (with the telluric spectrum in [outname].telluric).
 
     The t.fits files usually contain nan values for pixels where the telluric
     correction failed, or where the spectrum extraction failed.
@@ -520,9 +520,9 @@ def spirou_t(fname, outname=None, nanTreatment='replace',
                          frame, rather than the solar system barycentric rest
                          frame.
     :param saveFitsHeader: Flag for whether to save the .fits header information
-                         to an extra text file, named using the output filename
+                         to a text file, named using the output filename
                          .out (True = save to file).
-    :param writeSpecHeader: Flag for whether to write two lines of header to the
+    :param writeSpecHeader: Flag for whether to write two lines of header in the
                          .s text file (True = include header)
     :rtype: Spectrum
     '''
