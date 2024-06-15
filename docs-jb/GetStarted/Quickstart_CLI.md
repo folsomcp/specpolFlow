@@ -1,6 +1,8 @@
-# Quickstart with the command line
+# Using the command line
 
-This guide covers some of the more frequently used features of SpecpolFlow. It is aimed at people who are already familiar with spectropolarimetric data analysis and LSD. For more in-depth guides see [Normalizing one spectrum with the interactive tool](NormalizingOneSpectrum.md), [From normalized spectrum to Bz measurement](OneObservationFlow_Tutorial.ipynb).
+The main functions of SpecpolFlow can be ran using command line programs.  The more detailed tutorials discuss the Python interface of SpecpolFlow, since those provide more options and are more complex.  
+
+ This guide is aimed at people who are already familiar with spectropolarimetric data analysis and LSD. For more in-depth guides see [Normalizing one spectrum with the interactive tool](NormalizingOneSpectrum.md), [From normalized spectrum to Bz measurement](OneObservationFlow_Tutorial.ipynb).
 
 To begin, install SpecpolFlow with pip, see [Installation](Installation.md).
 
@@ -8,11 +10,23 @@ To begin, install SpecpolFlow with pip, see [Installation](Installation.md).
 
 The SpecpolFlow tool-set uses the text .s file format for spectra. This usually consists of columns of wavelength, Stokes I, Stokes V, Null 1, Null 2, and sigma. (A three column format: wavelength, Stokes I, and sigma is also supported).  Converters for a few more common, instrument specific, .fits formats are provided.
 
+### ESPaDOnS .fits files
+
 For ESPaDOnS .fits spectra from the CADC use:
 ```
 spf-fitstos-espadons observation.fits
 ```
 This will generate a set of output files: the unnormalized spectrum (ending in 'u.s', e.g. `observationu.s`), the automatic pipeline normalized spectrum (ending in 'n.s', e.g. `observationn.s`), and a file with header information from the data reduction pipeline (ending in '.out', e.g. `observation.out`).
+
+### SPIRou .fits files
+
+For SPIRou .fits files from the APERO data reduction pipeline use:
+```
+spf-fitstos-spirou observation.fits
+```
+This will generate an output spectrum file (`[observation].s`). There is an option to save the header information as a text file (`-o` to generate `[observation].out`).  This program supports the SPIRou p.fits, e.fits and t.fits files.  It will try to infer the type of file from the name, or you can specify the file type with `-t p`, `-t e`, or `-t t`.  
+
+The SPIRou .fits files contain nan values for pixels where the telluric correction or spectrum extraction was unreliable. This tool offers three ways to treat these values with the `-n` flag: `-n replace` (replace nan with 0 and set the errors to 100), `-n remove` (remove the nan pixels, and by default also remove some of the small fragments of spectrum nearby), `-n keep` (keep the nan values, which may cause problems for analysis with SpecpolFlow).  For more details see the [tutorial on converters](../Tutorials/1-ConvertToSFiles_Tutorial.ipynb), and for the full list of command line options run `spf-fitstos-spirou -h`.
 
 ## Normalizing spectra
 
