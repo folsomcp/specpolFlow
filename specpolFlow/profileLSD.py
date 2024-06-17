@@ -781,6 +781,35 @@ class LSD:
         else:
             return vs
 
+    def ew_I(self, Ic=1.0, emission=False, fullOutput=False):
+        '''
+        Helper function to return the equivalent width of Stokes I for
+        this LSD profile, for a given continuum level. 
+        Note, the EW is always positive.
+
+        :param Ic: the continnum level to use in the calculation
+                   (float, default=1.0)
+        :param emission: If True, assume it is an emission line
+                   (boolean, default=False)
+        :param fullOutput: If True, Return also the error of the equivalent
+                            width
+        :return: the line equivalent width
+        '''
+        # Computes the equivalent width
+        if not emission:
+            ew = np.trapz((Ic-self.specI), x=self.vel)
+        else:
+            ew = np.trapz((self.specI-Ic), x=self.vel)
+
+        # Estimate the associated error
+        deltav = self.vel[1] - self.vel[0]
+        ewSig = np.sqrt(np.sum(self.specSigI**2) * deltav**2)
+
+        #Optionally return the ew and its error 
+        if fullOutput == True:
+            return ew, ewSig
+        return ew
+
 ##################
 ##################
 
