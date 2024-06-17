@@ -404,6 +404,58 @@ class Spectrum:
             raise ValueError("in merge_orders unrecognized mode '{:}'!".format(mode))
         return specM
     
+    def calc_Sindex(self, doppler_vel=None, instrument='ESPaDOnS', plotFit=False):
+        '''
+        Calculates the S index calibrated to the Mt Wilson S-index.
+
+        :param doppler_vel: velocity used to correct for Doppler shifts in the spectrum (Float)
+        :param instrument: sets the calibration needed to have a comparable Mt Wilson S-index. 
+                            Implemented options are 'ESPaDOnS' and 'Narval'.
+                            (Default: 'ESPaDOnS')
+        :param plotFit: If True, Plot the windows of integration used to compute the fluxes
+        :rtype: S-index (Float)
+        '''
+        spectrum = copy.copy(self)
+
+        # Use the S-index calibration from Marsden et al. 2014
+        if instrument.lower() == 'espadons':
+            c0 = 7.999; c1 = -3.904; c2 = 1.150; c3 = 1.289; c4 = -0.069
+        elif instrument.lower() == 'narval':
+            c0 = 12.873; c1 = 2.502; c2 = 8.877; c3 = 4.271; c4 = 1.183e-3 
+        
+        # Emission in Ca HK and flux in V and R continuum
+        label  = ['H'     , 'K'     , 'V'    , 'R'    ]
+        filter = ['tri'   , 'tri'   , 'rect' , 'rect' ] # bandpass type
+        w0     = [393.3663, 396.8469, 390.107, 400.107] # central wavelength
+        dw     = [0.218   , 0.218   , 2.0    , 2.0    ] # integration window width 
+
+        # speed of ligth in km/s
+        cvel = 2.99792458e5 
+
+        if doppler_vel is None:
+           doppler_vel = 0 
+
+        # Doppler shift the spectrum
+        wl_doppler = spectrum.wl*(1 - doppler_vel/cvel) 
+
+        # Get the full wavelength window used to compute the activity index
+        indWaveIndex = (wl_doppler  > w0[1] - dw[1]/2) & (wl_doppler  < w0[2] + dw[2]/2)
+        orders = spectrum[indWaveIndex].get_orders(ignoreGaps=True)
+        numOrders = len(orders)
+        if numOrders > 1:
+            print('WARNING: more than one spectral order present in the wavelength region of interest.')
+            raise 
+
+        # Calculate integrated flux with a trapezoidal numerical integral
+        int_flux = []; err_flux = []
+        for (iw0, idw, ifilter) in zip(w0, dw, filter):
+            flux_band, flux_bandSig = _integrate_flux(wl_doppler, spectrum.specI, spectrum.specSig, iw0, idw, ifilter, plotFit)
+            int_flux.append(flux_band)
+            err_flux.append(flux_bandSig) 
+        
+        Sindex = (c0*int_flux[0] + c1*int_flux[1])/(c2*int_flux[2] + c3*int_flux[3]) + c4        
+        SindexSig = np.sqrt((c0*err_flux[0])**2 + (c1*err_flux[1])**2 + Sindex**2*((c2*err_flux[2])**2 + (c3*err_flux[3])**2))/(c2*int_flux[2] + c3*int_flux[3])
+        return(Sindex, SindexSig)
 
     def calc_CaIRTindex(self, doppler_vel=None, plotFit=False):
         '''
@@ -418,42 +470,38 @@ class Spectrum:
         spectrum = copy.copy(self)
         
         # Emission in the Ca IRT and flux in V and R continuum
-        label = ['F8498', 'F8542', 'F8662', 'V8475', 'R8704']
-        w0    = [849.802, 854.209, 866.214, 847.58 , 870.49 ] # central wavelength in nm 
-        dw    = [0.200  , 0.200  , 0.200  , 0.500  , 0.500  ] # integration window width in nm
+        label  = ['F8498', 'F8542', 'F8662', 'V8475', 'R8704']
+        filter = ['rect' , 'rect' , 'rect' , 'rect' , 'rect' ] # bandpass type
+        w0     = [849.802, 854.209, 866.214, 847.58 , 870.49 ] # central wavelength in nm 
+        dw     = [0.200  , 0.200  , 0.200  , 0.500  , 0.500  ] # integration window width in nm
           
         # speed of ligth in km/s
         cvel = 2.99792458e5 
 
-        # doppler shift the spectrum
+        if doppler_vel is None:
+           doppler_vel = 0 
+
+        # Doppler shift the spectrum
         wl_doppler = spectrum.wl*(1 - doppler_vel/cvel) 
 
-        # Calculate integrated flux with a trapezoidal numerical integral
-        int_flux = []
-        for count, (iw0, idw) in enumerate(zip(w0, dw)):
-            # set the integration window
-            indWaveUse = (wl_doppler > iw0 - idw/2) & (wl_doppler < iw0 + idw/2)
-            # rectangular low pass filter
-            rect_filter = np.zeros_like(spectrum.specI)
-            rect_filter[indWaveUse] = 1
-            # compute flux
-            int_flux.append(np.trapz(spectrum.specI*rect_filter, x=wl_doppler)/idw)
+        # Get the full wavelength window used to compute the activity index
+        indWaveIndex = (wl_doppler  > w0[1] - dw[1]/2) & (wl_doppler  < w0[2] + dw[2]/2)
+        orders = spectrum[indWaveIndex].get_orders(ignoreGaps=True)
+        numOrders = len(orders)
+        if numOrders > 1:
+            print('WARNING: more than one spectral order present in the wavelength region of interest.')
+            raise 
 
-            if plotFit:
-                    import matplotlib.pyplot as plt
-                    plt.figure()
-                    plt.plot(wl_doppler,spectrum.specI)
-                    plt.plot(wl_doppler,rect_filter, label='Retangular filter')
-                    plt.axvline(x=iw0,color='r', label=r'$\lambda_0$')
-                    plt.xlim(iw0 - 2*idw, iw0 + 2*idw)
-                    plt.ylim(0,5)
-                    plt.legend()
-                    plt.show()
+        int_flux = []; err_flux = []
+        for (iw0, idw, ifilter) in zip(w0, dw, filter):
+            flux_band, flux_bandSig = _integrate_flux(wl_doppler, spectrum.specI, spectrum.specSig, iw0, idw, ifilter, plotFit)
+            int_flux.append(flux_band)
+            err_flux.append(flux_bandSig)
 
         # Get the CaIRT-index
         CaIRTindex = (int_flux[0] + int_flux[1] + int_flux[2])/(int_flux[3] + int_flux[4])
-        
-        return(CaIRTindex)
+        CaIRTindexSig = np.sqrt(err_flux[0]**2 + err_flux[1]**2 + err_flux[2]**2 + CaIRTindex**2*(err_flux[3]**2 + err_flux[4]**2))/(int_flux[3] + int_flux[4])
+        return(CaIRTindex, CaIRTindexSig)
 
     def calc_Haindex(self, doppler_vel=None, method='Gizis', plotFit=False):
         '''
@@ -471,12 +519,13 @@ class Spectrum:
         spectrum = copy.copy(self)
         
         # Emission in the Ha line and flux in V and R continuum.
-        label = ['Ha'   , 'V'    , 'R']
+        label = ['Ha'   , 'V'   , 'R'    ]
+        filter = ['rect', 'rect', 'rect' ] # bandpass type
 
         # Prescription used to compute the fluxes:
         if method.lower() == 'gizis':
             # Gizis, Reid & Hawley (2002):
-            w0    = [656.285, 655.885, 656.730] # central wavelength in nm
+            w0    = [656.281, 655.885, 656.730] # central wavelength in nm
             dw    = [0.360  , 0.220  , 0.220  ] # integration window width in nm
         elif method.lower() == 'gomes':
             # Gomes da Silva et al. (2011)
@@ -487,39 +536,32 @@ class Spectrum:
                  'Available methods are implemented as described in Gizis, Reid & Hawley (2002)'
                  'and Gomes da Silva et al. (2011)').format(method))
 
-          
-        # speed of ligth in km/s
+        # Speed of ligth in km/s
         cvel = 2.99792458e5 
 
-        # doppler shift the spectrum
+        # Doppler shift the spectrum
         wl_doppler = spectrum.wl*(1 - doppler_vel/cvel) 
 
-        # Calculate integrated flux with a trapezoidal numerical integral
-        int_flux = []
-        for count, (iw0, idw) in enumerate(zip(w0, dw)):
-            # set the integration window
-            indWaveUse = (wl_doppler > iw0 - idw/2) & (wl_doppler < iw0 + idw/2)
-            # rectangular low pass filter
-            rect_filter = np.zeros_like(spectrum.specI)
-            rect_filter[indWaveUse] = 1
-            # compute flux
-            int_flux.append(np.trapz(spectrum.specI*rect_filter, x=wl_doppler)/idw)
+        # Get the full wavelength window used to compute the activity index
+        indWaveIndex = (wl_doppler  > w0[1] - dw[1]/2) & (wl_doppler  < w0[2] + dw[2]/2)
+        orders = spectrum[indWaveIndex].get_orders(ignoreGaps=True)
+        numOrders = len(orders)
+        if numOrders > 1:
+            print('WARNING: more than one spectral order present in the wavelength region of interest.')
+            raise 
 
-            if plotFit:
-                    import matplotlib.pyplot as plt
-                    plt.figure()
-                    plt.plot(wl_doppler,spectrum.specI)
-                    plt.plot(wl_doppler,rect_filter, label='Retangular filter')
-                    plt.axvline(x=iw0,color='r', label=r'$\lambda_0$')
-                    plt.xlim(iw0 - 2*idw, iw0 + 2*idw)
-                    plt.ylim(0,5)
-                    plt.legend()
-                    plt.show()
+        # Calculates integrated flux with a trapezoidal numerical integral
+        int_flux = []; err_flux = []
+        for (iw0, idw, ifilter) in zip(w0, dw, filter):
+            flux_band, flux_bandSig = _integrate_flux(wl_doppler, spectrum.specI, spectrum.specSig, iw0, idw, ifilter, plotFit)
+            int_flux.append(flux_band)
+            err_flux.append(flux_bandSig) 
                 
 
-        # Get the Ha-index
+        # Get the Ha-index and error
         Haindex = int_flux[0]/(int_flux[1] + int_flux[2])
-        return(Haindex)
+        HaindexSig = np.sqrt(err_flux[0]**2 + Haindex**2*(err_flux[1]**2 + err_flux[2]**2))/(int_flux[1] + int_flux[2])
+        return(Haindex, HaindexSig)
     
     def calc_Naindex(self, doppler_vel=None, plotFit=False):
         '''
@@ -534,42 +576,84 @@ class Spectrum:
         
         # Emission in the Na I doublet, and flux in R & V
         label = ['F5895', 'F5889', 'V'   , 'R'   ]  
-        w0    = [589.592, 588.995, 580.50, 609.70] # central wavelength in nm 
-        dw    = [0.05000, 0.05000, 1.0000, 2.0000] # integration window width in nm
+        filter = ['rect', 'rect' , 'rect', 'rect'] # bandpass type
+        w0    = [589.592, 588.995, 580.50, 609.70] # central wavelength
+        dw    = [0.05000, 0.05000, 1.0000, 2.0000] # integration window width 
 
           
         # speed of ligth in km/s
         cvel = 2.99792458e5 
 
-        # doppler shift the spectrum
+        if doppler_vel is None:
+           doppler_vel = 0 
+
+        # Doppler shift the spectrum
         wl_doppler = spectrum.wl*(1 - doppler_vel/cvel) 
 
-        # Calculate integrated flux with a trapezoidal numerical integral
-        int_flux = []
-        for count, (iw0, idw) in enumerate(zip(w0, dw)):
-            # set the integration window
-            indWaveUse = (wl_doppler > iw0 - idw/2) & (wl_doppler < iw0 + idw/2)
-            # rectangular low pass filter
-            rect_filter = np.zeros_like(spectrum.specI)
-            rect_filter[indWaveUse] = 1
-            # compute flux
-            int_flux.append(np.trapz(spectrum.specI*rect_filter, x=wl_doppler)/idw)
+        # Get the full wavelength window used to compute the activity index
+        indWaveIndex = (wl_doppler  > w0[1] - dw[1]/2) & (wl_doppler  < w0[2] + dw[2]/2)
+        orders = spectrum[indWaveIndex].get_orders(ignoreGaps=True)
+        numOrders = len(orders)
+        if numOrders > 1:
+            print('WARNING: more than one spectral order present in the wavelength region of interest.')
+            raise 
 
-            if plotFit:
-                    import matplotlib.pyplot as plt
-                    plt.figure()
-                    plt.plot(wl_doppler,spectrum.specI)
-                    plt.plot(wl_doppler,rect_filter, label='Retangular filter')
-                    plt.axvline(x=iw0,color='r', label=r'$\lambda_0$')
-                    plt.xlim(iw0 - 2*idw, iw0 + 2*idw)
-                    plt.ylim(0,1.1)
-                    plt.legend()
-                    plt.show()
+        # Calculate integrated flux with a trapezoidal numerical integral
+        int_flux = []; err_flux = []
+        for (iw0, idw, ifilter) in zip(w0, dw, filter):
+            flux_band, flux_bandSig = _integrate_flux(wl_doppler, spectrum.specI, spectrum.specSig, iw0, idw, ifilter, plotFit)
+            int_flux.append(flux_band)
+            err_flux.append(flux_bandSig) 
 
         # Get the NaI-index
         NaIindex = (int_flux[0] + int_flux[1])/(int_flux[2] + int_flux[3]) 
-        
-        return(NaIindex)
+        NaIindexSig = np.sqrt(err_flux[0]**2 + err_flux[1]**2 + NaIindex**2*(err_flux[2]**2 + err_flux[3]**2))/(int_flux[2] + int_flux[3])
+        return(NaIindex, NaIindexSig)
+
+#####
+
+def _integrate_flux(wave, specI, specSig, lambda0, lwidth, filter_type, plotFit):
+        # Create a regular grid with steps defined based on the band resolution 
+        indWavelUse = (wave > lambda0 - lwidth/2) & (wave < lambda0 + lwidth/2)
+        dwave = wave[indWavelUse][1:] - wave[indWavelUse][:-1]
+        step = np.mean(dwave) # get the mean step in the integration window
+        wave_interp = np.arange(wave.min(), wave.max(), step) 
+
+        # Set up the integration window for the interpolated data
+        indBandpassUse = (wave_interp > lambda0 - lwidth/2) & (wave_interp < lambda0 + lwidth/2)
+
+        # Interpolate data 
+        specI_interp = np.interp(wave_interp, wave, specI)
+        specSig_interp = np.interp(wave_interp, wave, specSig)
+
+        if filter_type.lower() in ('triangular', 'tri'):
+            # Triangular filter
+            filter = np.zeros_like(wave_interp)
+            filter[indBandpassUse] = 1. - np.abs(wave_interp[indBandpassUse]-lambda0)/(lwidth/2)
+        elif filter_type.lower() in ('rectangular', 'rect'):
+            # Rectangular low pass filter
+            filter = np.zeros_like(wave_interp)
+            filter[indBandpassUse] = 1
+        else:
+            print('Filter not implemented. Currently coded options are triangular or rectangular.')
+            raise
+
+        # Calculate integrated flux with a trapezoidal numerical integral
+        int_flux = np.trapz(specI_interp*filter, x=wave_interp)/lwidth
+        err_flux = np.sqrt(np.sum(specSig_interp**2 * filter**2))/lwidth
+
+        if plotFit:
+            import matplotlib.pyplot as plt
+            plt.figure()
+            plt.plot(wave, specI, 'k')
+            plt.plot(wave_interp,specI_interp, label = 'interp')
+            plt.plot(wave_interp,filter, label='Retangular filter')
+            plt.axvline(x=lambda0,color='r', label=r'$\lambda_0$')
+            plt.xlim(lambda0 - 2*lwidth, lambda0 + 2*lwidth)
+            plt.ylim(0,5)
+            plt.legend()
+            plt.show()
+        return(int_flux, err_flux)
 
 def read_spectrum(fname, trimBadPix=False, sortByWavelength=False):
     """
