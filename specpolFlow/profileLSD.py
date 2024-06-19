@@ -819,10 +819,6 @@ class LSD:
         FAP_V, FAP_N1, FAP_N2 = lsd_bz.calc_fap()
         
         result = {
-                'Ic': norm_val,
-                'cog': cog_val,
-                'Bzwidth min': p_bzwidth[0],
-                'Bzwidth max': p_bzwidth[1],
                 'V bz (G)': blv,
                 'V bz sig (G)': blvSig,
                 'V FAP': FAP_V,
@@ -831,11 +827,14 @@ class LSD:
                 'N1 FAP': FAP_N1,
                 'N2 bz (G)': bln2,
                 'N2 bz sig (G)': bln2Sig,
-                'N2 FAP': FAP_N2
+                'N2 FAP': FAP_N2,
+                'norm_method':norm,
+                'norm': norm_val,
+                'cog_method':cog,
+                'cog': cog_val,
+                'int. range start': p_bzwidth[0],
+                'int. range end': p_bzwidth[1]
                 }
-                #maybe rename:
-                #'int. range start': p_bzwidth[0],
-                #'int. range end': p_bzwidth[1]
 
         if plot:
             fig  = _plot_bz_calc(self, lsd_in, lsd_bz, velrange,
