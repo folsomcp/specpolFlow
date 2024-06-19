@@ -1180,6 +1180,8 @@ class updateLSD:
         self.lsdProf.specSigN1 = lsdProf.specSigN1
         self.lsdProf.specN2 = lsdProf.specN2
         self.lsdProf.specSigN2 = lsdProf.specSigN2
+        self.lsdProf.npix = lsdProf.npix
+        self.lsdProf.numParam = lsdProf.numParam
         self.lsdProf.header = lsdProf.header
         #Return the cursor to normal
         self.root.config(cursor=oldCursor)
