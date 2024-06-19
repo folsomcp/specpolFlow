@@ -362,6 +362,7 @@ class viewFuncs:
         self.plObs = ax.get_lines()[0]
         self.canvas = canvas
         self.zoomRecActive = False
+        self.lastrect = None
         return
     def autoScale(self, *event):
         fracSpace = 0.05
@@ -494,7 +495,8 @@ class viewFuncs:
         else:
             self.x1rec = event.x
             self.y1rec = event.y
-            self.canvasWidget.delete(self.lastrect)
+            if self.lastrect is not None:
+                self.canvasWidget.delete(self.lastrect)
             self.canvasWidget.bind('<Motion>', self.oldBindMove)
             self.zoomRecDeactivate()
         return
@@ -1168,7 +1170,17 @@ class updateLSD:
             plotLSD=lsdp.plotLSD, outPlotLSDName=lsdp.outPlotLSDName)
         #update the current LSD object, rather than replacing it
         #(since fitDepths needs to retain a reference to the same object)
-        self.lsdProf[:] = lsdProf[:]
+        #self.lsdProf[:] = lsdProf[:]
+        self.lsdProf.vel = lsdProf.vel
+        self.lsdProf.specI = lsdProf.specI
+        self.lsdProf.specSigI = lsdProf.specSigI
+        self.lsdProf.specV = lsdProf.specV
+        self.lsdProf.specSigV = lsdProf.specSigV
+        self.lsdProf.specN1 = lsdProf.specN1
+        self.lsdProf.specSigN1 = lsdProf.specSigN1
+        self.lsdProf.specN2 = lsdProf.specN2
+        self.lsdProf.specSigN2 = lsdProf.specSigN2
+        self.lsdProf.header = lsdProf.header
         #Return the cursor to normal
         self.root.config(cursor=oldCursor)
         
