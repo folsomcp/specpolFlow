@@ -963,7 +963,7 @@ def _plot_bz_calc(lsd, lsd_in, lsd_bz, velrange, p_bzwidth, norm_val, cog_val, c
         item.axvline(x=p_bzwidth[0], ls='dotted', label='bzwidth')
         item.axvline(x=p_bzwidth[1], ls='dotted')
         
-    ax[-1].axhline(y=norm_val, ls='--', c='pink', label='Ic')
+    ax[-1].axhline(y=norm_val, ls='--', c='pink', label='norm')
     
     # for the plot, calculate and display all of the possible methods
     # for calculating the cog.
