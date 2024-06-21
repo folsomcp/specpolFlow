@@ -25,8 +25,8 @@ parts:
     - file: Tutorials/4-ExcludeMaskRegionClass_Tutorial.ipynb
     - file: Tutorials/5-LSDClass_Tutorial.ipynb
     - file: Tutorials/6-CalculateBz_Tutorial.ipynb
-    #- file: Tutorials/7-CalculateBisector_Tutorial.ipynb
-    - file: Tutorials/8-IndividualLine_Tutorial.ipynb
+    - file: Tutorials/7-IndividualLine_Tutorial.ipynb
+    - file: Tutorials/8-CalculateBisector_Tutorial.ipynb
     - file: Tutorials/9-LSDsonification_Tutorial.ipynb
   - caption: API
     chapters:

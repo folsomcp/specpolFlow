@@ -842,11 +842,173 @@ class LSD:
             return result,fig
         else:
             return result
+
+    def calc_bis(self, Ic=1.,  cog='I', biswidth=None, plotFit=False, fullOutput=False):
+        """
+        Calculate the bisector velocity span to this LSD profile for a given continuum
+        level. It follows the line bisector and velocity span definition by Gray (1982) 
+        and Queloz et al. (2001), respectively. 
         
+        :param Ic: the continnum level to use the the BIS calculation
+                   (float, default=1.0)
+        :param cog: The value, or calculation method for the center of gravity.
+                    The choices are:
+                    'I': center of gravity of I,
+                    'V': center of gravity of V,
+                    'IV': center of gravity of I*V,
+                    or a float: a user defined value in km/s.
+        :param biswidth: distance from the line center for the BIS calculation.
+                    One element = same on each side of line center.
+                    Two elements, left and right of line center.
+                    Not defined: using the entire profile.
+        :param plotFit: If True, Plot the bisector curve in the LSD profile with matplotlib
+        :param fullOutput: If True, Return all the variables used to compute the line bisector 
+                           rather than just the velocity span 
+        :return: the velocity span (Float)
+                 If fullOutput is True then also include average velocity at the 
+                 top & bottom part of the bisector (Float) and numpy arrays with the
+                 line bisector & associated intensity levels.
+        """
+
+        lsd=copy.deepcopy(self)
+
+        # Check if this is an emission line profile
+        emission = lsd._check_emission(Ic)
+
+        # Check if cog is a string.
+        if isinstance(cog, str):
+            # calculate the cog for the chosen method
+            if cog == 'I':
+                cog_val = lsd.cog_I(Ic)
+            elif cog == 'min':
+                cog_val = lsd.cog_min()
+            elif cog == 'IV':
+                cog_val = lsd.cog_IV(Ic)
+            elif cog == 'V':
+                cog_val = lsd.cog_V()
+            else:
+                raise ValueError('bis got unrecognized value for cog: {:}'.format(cog))
+        else:
+            cog_val=copy.copy(cog)
+            cog = 'fixed \; val.'
+
+        # Get the velocity range
+        if biswidth == None:
+            print('no biswidth, using full velocity range to calculate BIS')
+            velrange = (lsd.vel[1], lsd.vel[-2])
+        else:
+            # Check whether it is a numpy array
+            if isinstance(biswidth, list) or isinstance(biswidth, tuple):
+                if len(biswidth) == 1:
+                    # keeping the actual bis calculation range for plotting later.
+                    velrange = (cog_val-biswidth[0], cog_val+biswidth[0])
+                elif len(bzwidth) == 2:
+                    velrange = (cog_val-biswidth[0], cog_val+biswidth[1])
+                else:
+                    print('biswidth has too many elements (need one or two)')
+                    raise ValueError('biswidth has too many elements {:} (need 1 or 2)'.format(len(biswidth)))
+            else:
+                velrange = (cog_val-biswidth, cog_val+biswidth)
+
+        # Set the velocity window
+        indVelUse = (lsd.vel >= velrange[0]) & (lsd.vel <= velrange[1])
+
+        # Set the intensity levels for the line bisector calculation
+        # split red and blue shifted regimes
+        remove_zero = 1
+        if not emission:
+            _rshift = ((lsd.vel[indVelUse] - cog_val) >  remove_zero) & (lsd.specI[indVelUse] < Ic)
+            _bshift = ((lsd.vel[indVelUse] - cog_val) < -remove_zero) & (lsd.specI[indVelUse] < Ic)
+        else:
+            _rshift = ((lsd.vel[indVelUse] - cog_val) >  remove_zero) & (lsd.specI[indVelUse] > Ic)
+            _bshift = ((lsd.vel[indVelUse] - cog_val) < -remove_zero) & (lsd.specI[indVelUse] > Ic)
+
+        # Define the line intensity limits 
+        specImax =  max([max(lsd.specI[indVelUse][_rshift]), max(lsd.specI[indVelUse][_bshift])])
+        specImin =  min([min(lsd.specI[indVelUse][_rshift]), min(lsd.specI[indVelUse][_bshift])])
+
+        # Gets the maximum intensity variation in the LSD profile 
+        deltaI = specImax - specImin
+
+        # Get intensity levels from blueshifted region
+        specI_levels = lsd.specI[indVelUse][_bshift] 
+
+        # Re-bin the velocity vector to match the selected Stokes I levels
+        # Warning: Here, the velocity is written as a function of Stokes I 
+        # to interpolate the velocity array easily. Because of that, it is 
+        # necessary to reverse a couple of arrays to have an increasing  
+        # function of vel(specI).
+        if not emission:
+            specI_levels = specI_levels[::-1]
+            rvel_rebin =  np.interp(specI_levels, lsd.specI[indVelUse][_rshift], (lsd.vel - cog_val)[indVelUse][_rshift])
+            bvel_rebin =  (lsd.vel - cog_val)[indVelUse][_bshift][::-1] 
+            # Define mask to exclude the top %5 of the line profile 
+            _ior =  (specI_levels > (Ic-0.05*deltaI)) 
+        else:
+            rvel_rebin =  np.interp(specI_levels, lsd.specI[indVelUse][_rshift][::-1], (lsd.vel - cog_val)[indVelUse][_rshift][::-1])
+            bvel_rebin =  (lsd.vel - cog_val)[indVelUse][_bshift]
+            # Define mask to exclude the bottom %5 of the line profile 
+            _ior =  (specI_levels < (Ic+0.05*deltaI)) 
+        # Bisector: half of the difference in velocity for a given intensity level
+        bisector = (rvel_rebin + bvel_rebin)/2
+
+        # Mask out points too close to the continuum level
+        specI_levels[_ior] = np.nan
+        specI_levels[_ior] = np.nan
+        bisector[_ior] = np.nan
+        bisector[_ior] = np.nan
+
+        # Get average velocity at the top and bottom part of the bisector
+        # the top part includes all points within 10–40 per cent of the full 
+        # line depth and the bottom one those within 60–90 per cent.
+        if not emission:
+            _itop = (specI_levels <= (Ic-0.10*deltaI)) & (specI_levels >= (Ic-0.40*deltaI)) 
+            _ibot = (specI_levels <= (Ic-0.60*deltaI)) & (specI_levels >= (Ic-0.90*deltaI)) 
+        else:
+            _ibot = (specI_levels >= (Ic+0.10*deltaI)) & (specI_levels <= (Ic+0.40*deltaI)) 
+            _itop = (specI_levels >= (Ic+0.60*deltaI)) & (specI_levels <= (Ic+0.90*deltaI)) 
+        vt = np.nanmean(bisector[_itop])
+        vb = np.nanmean(bisector[_ibot])
+
+        # Get the bisector velocity span as defined in Queloz et al. 2001
+        vs = vt - vb
+
+        # Optionally plot the BIS to the observed LSD profile
+        if plotFit == True:
+            plt.figure(figsize=(5,5))
+            plt.errorbar(lsd.vel, lsd.specI,
+                          yerr=lsd.specSigI, c='k', zorder=1)
+            scale_bisector = 20 # arbitrary scale
+            plt.plot(bisector*scale_bisector, specI_levels, 'r.', label=r'BIS$\times %d$' %scale_bisector, zorder=2)
+            plt.plot(bisector*scale_bisector, specI_levels, 'r-', lw=0.2, zorder=2)
+            plt.axvline(cog_val, label = r'cog$_\mathrm{%s}$'%cog)
+            plt.axvline(velrange[0], c='k', ls=':', label='biswidth')
+            plt.axvline(velrange[1], c='k', ls=':')
+            plt.hlines(specI_levels, xmin=velrange[0], xmax=velrange[1], alpha=1/3, color='c', zorder=0)
+            plt.xlabel('Velocity (km/s)')
+            plt.ylabel('I')
+            plt.legend(loc='lower left')
+            plt.show()
+
+        #Optionally return all fit parameters
+        if fullOutput == True:
+            return (vs, vt, vb, bisector, specI_levels)
+        else:
+            return vs
+            
     def _sortvel(self):
         n = np.argsort(self.vel)
         return self[n]
-
+    
+    def _check_emission(self, Ic):
+        '''
+        Check if this is an emission line profile
+        '''
+        if np.nanmax(self.specI-Ic) > np.nanmax(Ic-self.specI):
+            print("Assuming an emission line profile")
+            return True
+        else:
+            return False
 ##################
 ##################
 
