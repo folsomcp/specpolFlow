@@ -28,6 +28,7 @@ parts:
     - file: Tutorials/7-IndividualLine_Tutorial.ipynb
     - file: Tutorials/8-CalculateBisector_Tutorial.ipynb
     - file: Tutorials/9-LSDsonification_Tutorial.ipynb
+    - file: Tutorials/10-SpectrumClass_Tutorial.ipynb
   - caption: API
     chapters:
     - file: API/Converters_API.rst
