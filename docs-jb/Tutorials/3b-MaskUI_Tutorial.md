@@ -35,13 +35,13 @@ The vertical lines indicate the locations and depths of spectral lines in the in
 
 ## Navigating
 
-The GUI's navigation controls are located in the bottom left. Hovering the mouse over the different buttons will provide a brief description of what that button does. To zoom in on a specific region we can select the `zoom` button, or the magnifying glass symbol. Now we can click and drag on the plot to create a dashed box around a region. When we release the mouse, the plot will rescale to the selected region.
+The GUI's navigation controls are located in the bottom left. Hovering the mouse over the different buttons will provide a brief description of that button's action. To zoom in on a specific region, select the `zoom` button (the magnifying glass symbol). A region can be selected by clicking and dragging the cursor on the plot to create a dashed box around the desired region. When the mouse click is released, the plot will rescale to the selected region.
 
-To return to the original view we can click `auto.` button, or the home button. To only scale the vertical axis use the `auto-y` button. We can also click the back arrow to go back to the previous view. 
+To return to the original view, click the `auto` button (the home button). To only scale the vertical axis, use the `auto-y` button. Clicking the back arrow will return to the previous view. 
 
-There are keyboard shortcuts for many of these buttons (arrow keys pan, `a` auto-scales, `i` and `o` zoom in and out).  Mouse over a button to see the keyboard shortcut.
+There are keyboard shortcuts for many of these buttons (arrow keys to pan, `a` to auto-scale, `i` and `o` to zoom in and out). Hover the mouse over a button to see the associated keyboard shortcut.
 
-The figure below shows a zoom in of a region including a line with emission present. 
+The figure below shows a zoomed-in view of a region including a line with emission present. 
 
 ```{image} ../MaskUI_images/zoomIn.png
 :alt: zoomIn
@@ -53,7 +53,7 @@ We can also click the `Zin` and `Zout` buttons to quickly zoom in or out by a sm
 
 ## Including and Excluding Lines
 
-Lets now manually exclude a region around that emission line. On the bottom right click the `exclude lines` button. The button should now have a dotted box around it indicating that it is active, as shown below. 
+Lets now manually exclude a region around that emission line. On the bottom right, click the `exclude lines` button. The button should now have a dotted box around it indicating that it is active, as shown below. 
 
 ```{image} ../MaskUI_images/excludelinesButton.png
 :alt: excludelinesButton
@@ -62,7 +62,7 @@ Lets now manually exclude a region around that emission line. On the bottom righ
 :align: center
 ```
 
-We can now click on the plot to create a vertical dotted line indicating one edge of the region. We can then click on another part of the plot to finish selecting the region. The region selection is shown below.
+Click on the plot to create a vertical dotted line indicating one edge of the region. Then, click on another part of the plot to finish selecting the region. The region selection is shown below.
 
 ```{image} ../MaskUI_images/excludingRegions1.png
 :alt: excludingRegions1
@@ -71,7 +71,7 @@ We can now click on the plot to create a vertical dotted line indicating one edg
 :align: center
 ```
 
-Once we click a second time to close the region, you should see that all spectral lines within the selected region now turn red. (You can also right click during the selection, after the first click, to cancel.)
+After the second click to close the region, all spectral lines within the selected region should now turn red. (You can also right click during the selection, after the first click, to cancel.)
 
 ```{image} ../MaskUI_images/excludingRegions2.png
 :alt: excludingRegions2
@@ -80,13 +80,13 @@ Once we click a second time to close the region, you should see that all spectra
 :align: center
 ```
 
-Once you have finished selecting regions to exclude, don't forget to click the `exclude lines` buttons again to deselect that mode. You should see the dotted box around the button disappear.  Note that the custom buttons for panning and zooming will work while the 'exclude lines' mode is active, but the default matplotlib toolbar at the very bottom does not.
+Once you have finished selecting regions to exclude, don't forget to click the `exclude lines` button again to deselect that mode. You should see the dotted box around the button disappear.  Note that the custom buttons for panning and zooming will work while the 'exclude lines' mode is active, but the default matplotlib toolbar at the very bottom does not.
 
-The above procedure works exactly the same for the `include lines` button. That button will add lines back into the mask, in other words it will turn the red (excluded) lines back to blue (included).  By default, lines in some commonly problematic regions (telluric or Balamer line regions) are excluded, but in some cases it may be helpfull to include those lines.
+The above procedure works exactly the same for the `include lines` button. That button will add lines back into the mask, in other words it will turn the red (excluded) lines back to blue (included).  By default, lines in some commonly problematic regions (telluric or Balamer line regions) are excluded, but in some cases it may be helpful to include those lines.
 
 ## Updating and Plotting the LSD Profile
 
-Once we have selected regions to exclude we can update the test LSD profile by clicking the `update LSD` button in the bottom right. This will update the purple model spectrum line as shown below and update the output cleaned mask. 
+Once we have selected the regions to exclude, we can update the test LSD profile by clicking the `update LSD` button in the bottom right. This will update the purple model spectrum line as shown below and update the output cleaned mask. 
 
 ```{image} ../MaskUI_images/updateLSD1.png
 :alt: updateLSD1
@@ -95,7 +95,7 @@ Once we have selected regions to exclude we can update the test LSD profile by c
 :align: center
 ```
 
-We can also adjust the input parameters for the test LSD profile by selecting the `LSD param.` button in the bottom right. This will open another window titled `Set LSD parameters` as shown. 
+We can also adjust the input parameters for the test LSD profile by selecting the `LSD param` button in the bottom right. This will open another window titled `Set LSD parameters` as shown. 
 
 ```{image} ../MaskUI_images/updateLSD2.png
 :alt: updateLSD2
@@ -104,7 +104,7 @@ We can also adjust the input parameters for the test LSD profile by selecting th
 :align: center
 ```
 
-For this example, I will change the starting and stopping velocity to $\pm$ 800 km/s and I will select the `remove closely spaced lines` and `plot profile` boxes. The latter box will actually plot the test LSD every time we press the `update LSD` button. (In a Jupyter Notebook this LSD plot should be visible back in the cell output where we first ran the `cleanMaskUI` function.)
+This example will change the starting and stopping velocity to $\pm$ 800 km/s, and will select the `remove closely spaced lines` and `plot profile` boxes. The latter box will plot the test LSD profile every time the `update LSD` button is pressed. In a Jupyter Notebook this LSD plot should be visible back in the cell output where the `cleanMaskUI` function was executed.
 
 ```{image} ../MaskUI_images/updateLSD3.png
 :alt: updateLSD3
@@ -113,7 +113,7 @@ For this example, I will change the starting and stopping velocity to $\pm$ 800 
 :align: center
 ```
 
-We can now close the `Set LSD parameters` popup window and select `update LSD` to update the model spectrum and create a LSD plot. 
+Close the `Set LSD parameters` popup window and select `update LSD` to update the model spectrum and create an LSD plot. 
 
 ```{image} ../MaskUI_images/updateLSD4.png
 :alt: updateLSD4
@@ -122,7 +122,7 @@ We can now close the `Set LSD parameters` popup window and select `update LSD` t
 :align: center
 ```
 
-Since we only removed one emission line so far, and did not change any other lines, the LSD profile looks quite bad. However, after doing a more thorough pass we can obtain an LSD profile that is much more usable. 
+Since only one emission line was removed, and since no other lines were changed, the LSD profile looks quite bad. However, after doing a more thorough pass, a useful LSD profile can be obtained. 
 
 ```{image} ../MaskUI_images/updateLSD5.png
 :alt: updateLSD5
@@ -130,10 +130,4 @@ Since we only removed one emission line so far, and did not change any other lin
 :width: 400px
 :align: center
 ```
-
-:::{Warning}
-Still under construction.  More details forthcoming...
-:::
-
-<!-- Fit depths (TODO) -->
 
