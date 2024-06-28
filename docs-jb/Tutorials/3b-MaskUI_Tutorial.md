@@ -131,9 +131,3 @@ Since only one emission line was removed, and since no other lines were changed,
 :align: center
 ```
 
-:::{Warning}
-Still under construction.  More details forthcoming...
-:::
-
-<!-- Fit depths (TODO) -->
-
