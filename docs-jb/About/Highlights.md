@@ -14,7 +14,7 @@ Think `SpecpolFlow` is awesome? Check out some of these other projects, too!
 ## SpecpolFlow News
 
 ### Workshops
-[Email us](specpolflow@gmail.com) for more information!
+[Email us](https://folsomcp.github.io/specpolFlow/index.html#) for more information!
 
 SpF 1: with the [MOBSTER](https://mobster-collab.com/) Collaboration; May 13th, 11 am Eastern
 
