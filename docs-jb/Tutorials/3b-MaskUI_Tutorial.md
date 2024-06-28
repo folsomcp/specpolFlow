@@ -8,7 +8,7 @@ This tutorial will introduce you to the interactive mask cleaning tool called `c
 
 From a cell we can call the `cleanMaskUI` function. This function takes in:
 - The file name of your line mask, or the corresponding Mask object
-- The file name of an observed spectrum `.s` file, for comparison and LSD calculations
+- The file name of an observed spectrum '.s' file, for comparison and LSD calculations
 - The file name for saving the new cleaned mask (optional; if not specified it will use the input mask name with '.clean' added)
 - The exclude mask region file, which contains the set of regions to be excluded from the mask (optional)
 
@@ -104,7 +104,7 @@ We can also adjust the input parameters for the test LSD profile by selecting th
 :align: center
 ```
 
-This example will change the starting and stopping velocity to $\pm$ 800 km/s, and will select the `remove closely spaced lines` and `plot profile` boxes. The latter box will plot the test LSD profile every time the `update LSD` button is pressed. In a Jupyter Notebook this LSD plot should be visible back in the cell output where the `cleanMaskUI` function was executed.
+This example will change the starting and stopping velocity to $\pm$ 800 km s$^{-1}$, and will select the `remove closely spaced lines` and `plot profile` boxes. The latter box will plot the test LSD profile every time the `update LSD` button is pressed. In a Jupyter Notebook this LSD plot should be visible back in the cell output where the `cleanMaskUI` function was executed.
 
 ```{image} ../MaskUI_images/updateLSD3.png
 :alt: updateLSD3
