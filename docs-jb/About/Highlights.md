@@ -19,6 +19,6 @@ Think `SpecpolFlow` is awesome? Check out some of these other projects, too!
 SpF 1: with the [MOBSTER](https://mobster-collab.com/) Collaboration; May 13th, 11 am Eastern
 
 ### Publications
-Check out the links below to see papers that have used `SpecpolFlow`!
+Check out the links below to see papers that have used `SpecpolFlow`! If you've used `SpecpolFlow` in a publication, please [let us know!](https://folsomcp.github.io/specpolFlow/index.html#) 
 
 1. [First Observation of the Complete Rotation Period of the Ultra-Slowly Rotating Magnetic O Star HD 54879.](https://ui.adsabs.harvard.edu/abs/2024arXiv240109722E/abstract) Erba, Folsom, et al. (2024) ApJ, submitted.
