@@ -6,12 +6,12 @@ Still under construction.  Some commands and other details may be out of date.
 
 ## Introduction
 
-This tutorial introduces the procedure of normalizing echelle spectra and the use of NormPlot. The interactive normalization GUI is a part of the SpecpolFlow pipeline as steps that proceed the polarimetric analysis. In this introduction to spectra normalization, we will be using ESPADonS observations of the star xi1 CMa. This is the same observation that is used in the example LSD and Mean Longitudinal Field tutorial, so skipping this tutorial will not prevent you from advancing further in the pipeline (If you'd like, you're welcome to use normalized spectrum you create while doing this tutorial and seeing how the magnetic field measurements compare).  
+This tutorial introduces the procedure of normalizing echelle spectra and the use of NormPlot. The interactive normalization GUI is a part of the SpecpolFlow pipeline as steps that proceed the polarimetric analysis. In this introduction to spectra normalization, we will be using ESPADonS observations of the star $\xi^1$ CMa. This is the same observation that is used in the example LSD and Mean Longitudinal Field tutorial, so skipping this tutorial will not prevent you from advancing further in the pipeline (If you'd like, you're welcome to use normalized spectrum you create while doing this tutorial and seeing how the magnetic field measurements compare).  
 
 ## Converting from Fits to text.
-Let's proceed by converting the format for the data files from `.fits` to the `.s` text format. The data file needs to be converted in order to be used in NormPlot. These  processed data files (can also be found on CADC archives) are formatted as: `i.fits` contains spectroscopic data (usually 4 spectra), and `p.fits` contains the polarimetric data. We want to convert the `p.fits` files and use the Stokes I spectrum the normalization code. For this tutorial, we will use the ESPaDOns observation,  `2378200p.fits`.
+Let's proceed by converting the format for the data files from '.fits' to the '.s' text format. The data file needs to be converted in order to be used in NormPlot. These  processed data files (can also be found on CADC archives) are formatted as: 'i.fits' contains spectroscopic data (usually 4 spectra), and `p.fits` contains the polarimetric data. We want to convert the 'p.fits' files and use the Stokes I spectrum the normalization code. For this tutorial, we will use the ESPaDOns observation,  `2378200p.fits`.
 
-ESPaDOns `p.fits` files have 24 columns, and we are going to use the file-conversion script `convert-espadons-fits.py` to extract the first 12 columns. These particular columns are the normalized (0-5) and unnormalized (6-11) polarimetry products with the automatic wavelength correction applied. The columns are `[0] Wavelength`, `[1] Intensity`, `[2] Stokes`, `[3] Null 1`, `[4] Null 2`, `[5] Errorbar`, and the latter 6 follow an identical sequence. 
+ESPaDOns 'p.fits' files have 24 columns, and we are going to use the file-conversion script `convert-espadons-fits.py` to extract the first 12 columns. These particular columns are the normalized (0-5) and unnormalized (6-11) polarimetry products with the automatic wavelength correction applied. The columns are `[0] Wavelength`, `[1] Intensity`, `[2] Stokes`, `[3] Null 1`, `[4] Null 2`, `[5] Errorbar`, and the latter 6 follow an identical sequence. 
 
 In the command line, write the command 
 
@@ -19,9 +19,9 @@ In the command line, write the command
  spf-fitstos-espadons inputfile-p.fits
  ```
 
-where you will replace the inputfile-p.fits with the name of our Espadon file `2378200p.fits`. The script will return `2378200pn.s` (normalized data) and `2378200pu.s` (unnormalized data) in the same directory as the fits file. 
+where you will replace the `inputfile-p.fits` with the name of our Espadon file `2378200p.fits`. The script will return `2378200pn.s` (normalized data) and `2378200pu.s` (unnormalized data) in the same directory as the '.fits' file. 
 
-We want to note that this is a specific example, and the reformatting of .fits files from other polarimeters is necessary in order to use this normalization code. For example, a similar conversion can be applied to SPIRou products, p.fits, t.fits, and  e.fits, using the `convert-spirou-fits-s0.2.py`. 
+We want to note that this is a specific example, and the reformatting of '.fits' files from other polarimeters is necessary in order to use this normalization code. For example, a similar conversion can be applied to SPIRou products, 'p.fits', 't.fits', and  'e.fits', using the `convert-spirou-fits-s0.2.py`. 
 
 
 ## Normalization GUI 
@@ -63,7 +63,7 @@ A few things that ideally will become second nature while doing this tutorial:
 * Python’s default panning, and zoom button get overridden by the include and exclude region functions. Make sure they are not on when you’re exploring the spectra. 
 * To see the outcome of any changes you’ve enacted either panel, you have to click `fit cont.`.
 
-**For now we will keep the default 500 km/s search bin width.** 
+**For now we will keep the default 500 km s$^{-1}$ search bin width.** 
 
 ### Telluric/ Noise Dominated orders: 
 Let’s get through some of the less rigorous things first. In some instances your observations may have have orders that have very low signal to noise ratio or are saturated with telluric lines (sharps lines created from absorption by the atmosphere). It can be difficult to try to apply the full set of fitting procedures on these orders to get them flat. One of the most direct fixes to this is to reduce the order of the polynomial degree.  
