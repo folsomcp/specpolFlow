@@ -2,14 +2,14 @@
 
 ## Introduction
 
-This tutorial will introduce you to the interactive mask cleaning tool called `cleanMaskUI`. This tool allows regions of lines to be easily excluded and included in the LSD line mask. This is particularly useful in the case of stars with lots of emission. Emission lines have a different shape than the typical absorption lines, and thus should not be included in the line averaging since they will distort the resulting LSD. For this tutorial we will use the star HD 164284 to demonstrate the capabilities of this tool. HD 164284 is a Classical Be star and as such its spectrum is contaminated by emission lines from a disk. 
+This tutorial will introduce you to the interactive mask cleaning tool called `cleanMaskUI`. This tool allows regions of lines to be easily excluded and included in the LSD line mask. This is particularly useful in the case of stars with a lot of emission: since emission lines have a different shape than the typical absorption lines, they should not be included in the line averaging since they will distort the resulting LSD profile. For this tutorial we will use the star HD 164284, a Classical Be star with a spectrum that is contaminated by emission lines from a disk. 
 
 `cleanMaskUI` can be run from either a Python file, a cell within a Jupyter Notebook, or from the command line.
 
 From a cell we can call the `cleanMaskUI` function. This function takes in:
 - The file name of your line mask, or the corresponding Mask object
 - The file name of an observed spectrum `.s` file, for comparison and LSD calculations
-- The file name to save the new cleaned mask to (optional; if not specified it will use the input mask name with '.clean' added)
+- The file name for saving the new cleaned mask (optional; if not specified it will use the input mask name with '.clean' added)
 - The exclude mask region file, which contains the set of regions to be excluded from the mask (optional)
 
 For running the tool from the terminal use:
@@ -31,7 +31,7 @@ Running the code opens a new window, with a GUI that will look like this:
 :align: center
 ```
 
-The vertical lines indicate the locations and depths of spectral lines in the input line mask. Lines colored blue indicate that that are being used (with `iuse=1`), and red lines indicate that are not being used (with `iuse=0`). The black line is the observed spectrum, and the purple line is the model LSD spectrum (i.e. the spectrum created by convolving the LSD profile with the line mask). 
+The vertical lines indicate the locations and depths of spectral lines in the input line mask. Lines colored blue indicate that they are being used (with `iuse=1`), and lines colored red indicate that they are not being used (with `iuse=0`). The black line is the observed spectrum, and the purple line is the model LSD spectrum (i.e. the spectrum created by convolving the LSD profile with the line mask). 
 
 ## Navigating
 
