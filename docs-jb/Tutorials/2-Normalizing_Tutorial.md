@@ -28,7 +28,7 @@ We want to note that this is a specific example, and the reformatting of '.fits'
 
 **Our goal in this process is to fit a curve onto the star’s continuum in every order. From there we can normalize the continuum. This creates a ‘common line’ (a flat horizontal line at 1) about which we can consistently measure the properties of spectral lines.** 
 
-Now let’s use the normalization GUI on our data. The main file for executing the normalization is `normPlot2.py`. This normalization code utilizes the text format spectra that would have been produced in the first steps ( it was built around LibreESPRIT reduced data). On the backend it runs off of `fittingFuncs2.py` (has functions for the normalization), and `guiMainWin2.py` and `guiControls2.py` (functions for the UI). You can run the code in the command line by 
+Now let’s use the normalization GUI on our data. The main file for executing the normalization is `normPlot2.py`. This normalization code utilizes the text format spectra that would have been produced in the first steps (it was built around LibreESPRIT reduced data). On the backend, it runs off of `fittingFuncs2.py` (has functions for the normalization), and `guiMainWin2.py` and `guiControls2.py` (functions for the UI). You can run the code in the command line by 
 
 ```normplot <observation_file.s>```
 
@@ -41,8 +41,8 @@ The files you want to execute should be in the same working directory as `normpl
 :align: center
 ```
 
-In the bottom left corner there are the conventional commands that allow you to navigate this python interface (panning, zooming, returning to default, saving). 
-Then they are also added above it. 
+In the bottom left corner, there  are the conventional commands that allow you to navigate this python interface (panning, zooming, returning to default, saving). 
+They are also added above it. 
 
 **The fit points**: Each order is broken down into a set of consecutive search bins with respect to wavelength. They are equal in width (in velocity). The black dots are the median flux in those bins which are placed at the bins’ centers (x-axis wise). Collectively the black dots within an order are the points that a polynomial function maps in order to fit the continuum of that order. The optimal outcome of this process is generating black dots representative of the continuum flux so that when we normalize it is near-uniformly 1. In other words, you want a flat line at f = 1 with various spectra lines added onto it. 
 
@@ -59,7 +59,7 @@ Then they are also added above it.
 A few things that ideally will become second nature while doing this tutorial:
 
 * If you want to see the ranges of orders, you can open the polynomial degree panel. When you hover the mouse over a specific order, a prompt will appear indicating the wavelength range of the order. Also, colors in the panel match the plot-colors of their respective orders. 
-* To capture more of the depth of the line, when they appear small , Use python default zoom to create an enclosed area that is the width of the window, but a much smaller height  about the spectral line. 
+* To capture more of the depth of the line when they appear small, use python default zoom to create an enclosed area that is the width of the window but a much smaller height about the spectral line. 
 * Python’s default panning, and zoom button get overridden by the include and exclude region functions. Make sure they are not on when you’re exploring the spectra. 
 * To see the outcome of any changes you’ve enacted either panel, you have to click `fit cont.`.
 
@@ -73,7 +73,7 @@ Let’s get through some of the less rigorous things first. In some instances yo
 
 
 ### Removing Spectral lines from the fit:
-Remember we essentially make a common line that the spectra lines extend from, so we must do our best to make sure they aren’t contributing to the fits. This means we don’t want any of our fit points resting on spectral lines. Wherever we see fit point on spectral lines us we use the exclude range function to remove those line from being options to place fit points. For example, let’s remove this line at ~383 nm.
+Remember, we essentially make a common line that the spectra lines extend from, so we must do our best to make sure they aren’t contributing to the fitting. This means we don’t want any of our fit points resting on spectral lines. Wherever we see fit point on spectral lines,  we use the exclude range function to remove those line from being options to place fit points. For example, let’s remove this line at ~383 nm.
 If your exclude region is too big, you can use include to regions to bring back portions of the spectrum that you would like back.
 Now there are a few other lines we need to tackle at:  397, 410, 434 (H_gamma) , 438, 486 (H_beta), 646, 656(H_alpha), 850, 860, 866, 875,  810, 901, 905???
 
