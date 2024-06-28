@@ -8,23 +8,23 @@ To begin, install SpecpolFlow with pip, see [Installation](Installation.md).
 
 ## Converting file formats
 
-The SpecpolFlow tool-set uses the text .s file format for spectra. This usually consists of columns of wavelength, Stokes I, Stokes V, Null 1, Null 2, and sigma. (A three column format: wavelength, Stokes I, and sigma is also supported).  Converters for a few more common, instrument specific, .fits formats are provided.
+The SpecpolFlow tool-set uses the text '.s' file format for spectra. This usually consists of columns of wavelength, Stokes I, Stokes V, Null 1, Null 2, and sigma. (A three column format: wavelength, Stokes I, and sigma is also supported).  Converters for a few more common, instrument specific, '.fits' formats are provided.
 
-### ESPaDOnS .fits files
+### ESPaDOnS '.fits' files
 
-For ESPaDOnS .fits spectra from the CADC use:
+For ESPaDOnS '.fits' spectra from the CADC use:
 ```
 spf-fitstos-espadons observation.fits
 ```
 This will generate a set of output files: the unnormalized spectrum (ending in 'u.s', e.g. `observationu.s`), the automatic pipeline normalized spectrum (ending in 'n.s', e.g. `observationn.s`), and a file with header information from the data reduction pipeline (ending in '.out', e.g. `observation.out`).  Multiple files can be processed at once like `spf-fitstos-espadons *p.fits`.
 
-### SPIRou .fits files
+### SPIRou '.fits' files
 
-For SPIRou .fits files from the APERO data reduction pipeline use:
+For SPIRou '.fits' files from the APERO data reduction pipeline use:
 ```
 spf-fitstos-spirou observation.fits
 ```
-This will generate an output spectrum file (`[observation].s`). There is an option to save the header information as a text file (`-o` to generate `[observation].out`).  This program supports the SPIRou p.fits, e.fits and t.fits files.  It will try to infer the type of file from the name, or you can specify the file type with `-t p`, `-t e`, or `-t t`.  Multiple files can be processed at once like `spf-fitstos-spirou *p.fits`.
+This will generate an output spectrum file (`[observation].s`). There is an option to save the header information as a text file (`-o` to generate `[observation].out`).  This program supports the SPIRou 'p.fits', 'e.fits' and 't.fits' files.  It will try to infer the type of file from the name, or you can specify the file type with `-t p`, `-t e`, or `-t t`.  Multiple files can be processed at once like `spf-fitstos-spirou *p.fits`.
 
 The SPIRou .fits files contain nan values for pixels where the telluric correction or spectrum extraction was unreliable. This tool offers three ways to treat these values with the `-n` flag: `-n replace` (replace nan with 0 and set the errors to 100), `-n remove` (remove the nan pixels, and by default also remove some of the small fragments of spectrum nearby), `-n keep` (keep the nan values, which may cause problems for analysis with SpecpolFlow).  For more details see the [tutorial on converters](../Tutorials/1-ConvertToSFiles_Tutorial.ipynb), and for the full list of command line options run `spf-fitstos-spirou -h`.
 
@@ -107,7 +107,7 @@ For calculating longitudinal magnetic fields (Bz) and detection statistics, for 
 ```
 spf-bz -v -20 +30 -g 1.2 -l 500 profile1.dat
 ```
-This example uses a velocity integration range from -20 km/s to +30 km/s, an effective Landé factor of 1.2, and a wavelength of 500 nm, to calculate Bz from profile1.dat.  The False Alarm Probability (FAP) inside the -20 to +30 km/s line is also calculated, and printed to terminal.  
+This example uses a velocity integration range from -20 km s$^{-1}$ to +30 km s$^{-1}$, an effective Landé factor of 1.2, and a wavelength of 500 nm, to calculate Bz from profile1.dat.  The False Alarm Probability (FAP) inside the -20 to +30 km s$^{-1}$ line is also calculated, and printed to terminal.  
 
 To correctly choose the velocity range to use, it can be helpful to plot the LSD profile and integration range with the `-p` option:
 ```
@@ -131,7 +131,7 @@ There is a simple tool for quickly calculating radial velocities from LSD profil
 ```
 spf-rvfit -v -100 +100 profile1.dat
 ```
-This fits a Gaussian to the LSD profile (in this example using the -100 to +100 km/s range), and takes the centroid as the radial velocity.  The fit to the LSD profile can be plotted with the `-p` option.  Multiple files can be processed at once:
+This fits a Gaussian to the LSD profile (in this example using the -100 to +100 km s$^{-1}$ range), and takes the centroid as the radial velocity.  The fit to the LSD profile can be plotted with the `-p` option.  Multiple files can be processed at once:
 ```
 spf-rvfit -v -100 +100 profile1.dat profile2.dat profile3.dat
 ```

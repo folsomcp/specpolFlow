@@ -90,7 +90,7 @@ Here the degree of the individual polynomials can be set for each order. The col
 
 This check box enables a feature for dealing with spectral orders that end in an exclude region.  The algorithm can take a fitting point in the adjacent spectral order and use that to constrain the continuum polynomial.  This can be useful around very broad features like Balmer lines.
 
-**srch. bin (km/s)**
+**srch. bin (km s$^{-1}$)**
 
 This value sets the width of the search bins, in velocity units. The code selects only one point in each bin for actual fitting. It takes the point with the highest flux as (hopefully) being most likely real continuum. As you increase the width of the bins, you decrease the number of fit points for each order and vice versa. The search bin should be set large enough that there is generally some real continuum in the bin.  
 
