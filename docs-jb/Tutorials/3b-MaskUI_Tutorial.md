@@ -203,7 +203,7 @@ The `select lines to fit depth` button remains active until you click it a secon
 
 There are also some lines in this spectrum that are too strong in the mode, and very weak (but still present) in the observation.  Here we select a set of those problem lines
 
-```{image} MaskUI_images/updateLSD-clean-weak-nd.png
+```{image} MaskUI_images/updateLSD-fit-weak-select.png
 :alt: selecting too strong lines to fit
 :class: bg-primary mb-1
 :width: 600px
@@ -212,7 +212,7 @@ There are also some lines in this spectrum that are too strong in the mode, and 
 
 And then fit the depths for them, and update the LSD calculation.
 
-```{image} MaskUI_images/updateLSD-clean-weak-nd.png
+```{image} MaskUI_images/updateLSD-fit-weak-update.png
 :alt: improved depths for too strong lines
 :class: bg-primary mb-1
 :width: 600px
@@ -225,4 +225,60 @@ The line depth fitting routine can struggle with heavily blended lines.  Fitting
 Fitting depths for lines with virtually the same wavelength can be fully degenerate. In this case, the fitting routine will automatically exclude the weaker line from the mask so that fitting can proceed.  
 :::
 
+Here is a strong line where we would like to fit the line depth(s) but it is blended with several other lines.
 
+```{image} MaskUI_images/complex-fit-initial.png
+:alt: a blended line for fitting depths
+:class: bg-primary mb-1
+:width: 600px
+:align: center
+```
+
+We can select the lines in the mask and fit them.  But one of the line depths becomes negative!  The negative line depth is indicated by the light blue line in the plot that goes up from 1, rather than down.  This may be numerically the best fit, but clearly this is a non-physical solution.
+
+```{image} MaskUI_images/complex-fit-bad.png
+:alt: fit depths getting negative depths
+:class: bg-primary mb-1
+:width: 600px
+:align: center
+```
+
+First we need to undo the fit, by pressing the `undo fit` button.  Then we want to remove some lines from the fit using the `unselect lines to fit depth` button.  The lines should turn a darker blue when unselected.  
+
+```{image} MaskUI_images/complex-fit-one-select.png
+:alt: fit depth unselect weak components
+:class: bg-primary mb-1
+:width: 600px
+:align: center
+```
+
+If we just fit the depth of the one strongest line, and then update the LSD calculation, we get something pretty close to the observation.
+
+```{image} MaskUI_images/complex-fit-one-fit.png
+:alt: fit depth only the strongest component
+:class: bg-primary mb-1
+:width: 600px
+:align: center
+```
+
+Although the model is a little too deep for the observation now.  That is because the lines not selected for fitting are completely ignored when fitting line depths. So the weak lines' contribution to the blend is is not accounted for when fitting the stronger line.  
+
+In this case, the line is dominated by the strong component, so we can simply exclude the weak components from the mask.  This slightly improves the fit to the observation.
+
+```{image} MaskUI_images/complex-fit-excluded-fit.png
+:alt: fit depth after excluding weak components
+:class: bg-primary mb-1
+:width: 600px
+:align: center
+```
+
+In other complex cases it may be optimal to fit the depths of multiple strong components of a blend, but exclude weaker components from the mask.
+
+After tweaking the depths of several more lines across the spectrum, we get an improved LSD profile.  Because a lot of the signal in the observation was in a few He lines with poor depths, the S/N in Stokes V is improved some.  And because this improves the fit to Stokes I, the errorbars for Stokes I are much smaller.
+
+```{image} MaskUI_images/updateLSD-prof-clean-tweak-full.png
+:alt: LSD profile after fully fitting line depths
+:class: bg-primary mb-1
+:width: 400px
+:align: center
+```
