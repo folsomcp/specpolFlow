@@ -154,7 +154,7 @@ We also remove some lines where the line depths are wrong and the lines aren't c
 After going through the entire spectrum, removing more problem regions, we get a much better LSD profile.
 
 ```{image} MaskUI_images/updateLSD-clean-full.png
-:alt: updateLSD-clean-full
+:alt: LSD profile for the fully cleaned mask
 :class: bg-primary mb-1
 :width: 400px
 :align: center
