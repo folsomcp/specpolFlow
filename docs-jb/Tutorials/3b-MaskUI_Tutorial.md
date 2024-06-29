@@ -138,7 +138,7 @@ Since the lines are relatively shallow in this star, we remove more lines blende
 ```{image} MaskUI_images/updateLSD-clean-telluric.png
 :alt: updateLSD-clean-telluric
 :class: bg-primary mb-1
-:width: 400px
+:width: 600px
 :align: center
 ```
 
@@ -147,7 +147,7 @@ We also remove some lines where the line depths are wrong and the lines aren't c
 ```{image} MaskUI_images/updateLSD-clean-weak-nd.png
 :alt: updateLSD-clean-weak-nd
 :class: bg-primary mb-1
-:width: 400px
+:width: 600px
 :align: center
 ```
 
