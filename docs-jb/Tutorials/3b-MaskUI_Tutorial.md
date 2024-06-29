@@ -24,7 +24,7 @@ pol.cleanMaskUI('input_mask_file', 'reference_observation.s', 'cleaned_mask_file
 ```
 
 Running the code opens a new window, with a GUI that will look like this:
-```{image} ../MaskUI_images/openUI.png
+```{image} MaskUI_images/openUI.png
 :alt: openUI
 :class: bg-primary mb-1
 :width: 600px
@@ -45,7 +45,7 @@ There are keyboard shortcuts for many of these buttons (arrow keys to pan, `a` t
 
 The figure below shows a zoomed-in view of a region including a line with emission present. 
 
-```{image} ../MaskUI_images/zoomIn.png
+```{image} MaskUI_images/zoomIn.png
 :alt: zoomIn
 :class: bg-primary mb-1
 :width: 600px
@@ -57,7 +57,7 @@ We can also click the `Zin` and `Zout` buttons to quickly zoom in or out by a sm
 
 Lets now manually exclude a region around that emission line. On the bottom right, click the `exclude lines` button. The button should now have a dotted box around it indicating that it is active, as shown below. 
 
-```{image} ../MaskUI_images/excludelinesButton.png
+```{image} MaskUI_images/excludelinesButton.png
 :alt: excludelinesButton
 :class: bg-primary mb-1
 :width: 300px
@@ -66,7 +66,7 @@ Lets now manually exclude a region around that emission line. On the bottom righ
 
 Click on the plot to create a vertical dotted line indicating one edge of the region. Then, click on another part of the plot to finish selecting the region. The region selection is shown below.
 
-```{image} ../MaskUI_images/excludingRegions1.png
+```{image} MaskUI_images/excludingRegions1.png
 :alt: excludingRegions1
 :class: bg-primary mb-1
 :width: 600px
@@ -75,7 +75,7 @@ Click on the plot to create a vertical dotted line indicating one edge of the re
 
 After the second click to close the region, all spectral lines within the selected region should now turn red. (You can also right click during the selection, after the first click, to cancel.)
 
-```{image} ../MaskUI_images/excludingRegions2.png
+```{image} MaskUI_images/excludingRegions2.png
 :alt: excludingRegions2
 :class: bg-primary mb-1
 :width: 600px
@@ -92,7 +92,7 @@ By default, lines in some commonly problematic regions (around telluric lines an
 
 Once we have selected the regions to exclude, we can update the test LSD profile by clicking the `update LSD` button in the bottom right. This will update the purple model spectrum line as shown below and update the output cleaned mask. 
 
-```{image} ../MaskUI_images/updateLSD1.png
+```{image} MaskUI_images/updateLSD1.png
 :alt: updateLSD1
 :class: bg-primary mb-1
 :width: 600px
@@ -101,7 +101,7 @@ Once we have selected the regions to exclude, we can update the test LSD profile
 
 We can also adjust the input parameters for the test LSD profile by selecting the `LSD param` button in the bottom right. This will open another window titled `Set LSD parameters` as shown. 
 
-```{image} ../MaskUI_images/updateLSD2.png
+```{image} MaskUI_images/updateLSD2.png
 :alt: updateLSD2
 :class: bg-primary mb-1
 :width: 200px
@@ -115,7 +115,7 @@ In the `Set LSD parameters` window, the `remove closely spaced lines` option onl
 ::::
 In this example we will change the starting and stopping velocity to $\pm$ 800 km s$^{-1}$, since this Be star has an extremely high $v\sin i$.  We also select the `remove closely spaced lines` and `plot profile` boxes. The latter box will plot the test LSD profile every time the `update LSD` button is pressed. In a Jupyter Notebook this LSD plot should be visible back in the cell output where the `cleanMaskUI` function was executed.
 
-```{image} ../MaskUI_images/updateLSD3.png
+```{image} MaskUI_images/updateLSD3.png
 :alt: updateLSD3
 :class: bg-primary mb-1
 :width: 200px
@@ -124,7 +124,7 @@ In this example we will change the starting and stopping velocity to $\pm$ 800 k
 
 Close the `Set LSD parameters` popup window and select `update LSD` to update the model spectrum and create an LSD plot. 
 
-```{image} ../MaskUI_images/updateLSD-clean1.png
+```{image} MaskUI_images/updateLSD-clean1.png
 :alt: updateLSD-clean1
 :class: bg-primary mb-1
 :width: 400px
@@ -135,7 +135,7 @@ Since only one emission line was removed, and since no other lines were changed,
 
 Since the lines are relatively shallow in this star, we remove more lines blended with weaker telluric lines.
 
-```{image} ../MaskUI_images/updateLSD-clean-telluric.png
+```{image} MaskUI_images/updateLSD-clean-telluric.png
 :alt: updateLSD-clean-telluric
 :class: bg-primary mb-1
 :width: 400px
@@ -144,7 +144,7 @@ Since the lines are relatively shallow in this star, we remove more lines blende
 
 We also remove some lines where the line depths are wrong and the lines aren't clearly seen in the observation.  In this star, that is partly due to the very high $v\sin i$.
 
-```{image} ../MaskUI_images/updateLSD-clean-weak-nd.png
+```{image} MaskUI_images/updateLSD-clean-weak-nd.png
 :alt: updateLSD-clean-weak-nd
 :class: bg-primary mb-1
 :width: 400px
@@ -153,7 +153,7 @@ We also remove some lines where the line depths are wrong and the lines aren't c
 
 After going through the entire spectrum, removing more problem regions, we get a much better LSD profile.
 
-```{image} ../MaskUI_images/updateLSD-clean-full.png
+```{image} MaskUI_images/updateLSD-clean-full.png
 :alt: updateLSD-clean-full
 :class: bg-primary mb-1
 :width: 400px
