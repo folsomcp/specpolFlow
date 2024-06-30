@@ -162,11 +162,11 @@ After going through the entire spectrum, removing more problem regions, we get a
 
 ## Automatically Adjusting Line Depths 
 
-Sometimes it can be helpful to use empirical estimates of line depths for some lines in the mask.  The theoretical line depths could be wrong due to NLTE effects, errors in the atomic line data, or denaturation/broadening effects that weren't accounted for.  
+Sometimes it can be helpful to use empirical estimates of line depths for some lines in the mask.  The theoretical line depths could be wrong due to NLTE effects, errors in the atomic line data, or desaturation/broadening effects that weren't accounted for.  
 
 In cases where many lines in the mask have depth problems, it is usually better to improve the theoretical depths going into the mask.  It is important to have the correct effective temperature and $\log g$ for the mask.  If the star has chemical peculiarities it is important to account for those too.  This can be done within a VALD extract stellar request.  You may also wish to consider more elaborate spectrum synthesis calculations for the line depths, particularly if NLTE effects are very important.
 
-In generally empirical line depth estimates should be used with caution. There is a good reason for your choice of theoretical line depths (or there should be!).  Furthermore, there is an intrinsic degeneracy between the depths of the lines in the mask and the amplitude of the LSD profile.  In `cleanMaskUI` this is resolved by simply assuming the current LSD profile is an adequate approximation when trying to fit line depths.  This means that if your initial LSD profile (from the initial line mask) is too poor quality the depth fitting will produce poor results.  This also means that one should only fit carefully selected problem lines, not all the lines in the mask.
+In generally empirical line depth estimates should be used with caution. There is a good reason for your choice of theoretical line depths (or there should be!).  Furthermore, there is an intrinsic degeneracy between the depths of the lines in the mask and the amplitude of the LSD profile.  In `cleanMaskUI` this is resolved by simply assuming the current LSD profile is an adequate approximation when fitting line depths.  This means that if your initial LSD profile (from the initial line mask) is too poor quality then depth fitting will produce poor results.  This also means that one should only fit carefully selected problem lines, not all the lines in the mask.
 
 In our example Be star, fitting depths of some lines can be quite helpful.  Since $v\sin i$ is quite large there are relatively few well detected lines in the spectrum, so depth errors in some of those lines can have a large impact.
 
@@ -175,7 +175,7 @@ To automatically fit line depths, click the `select lines to fit depth` button, 
 ```{image} MaskUI_images/buttons-fit-depths.png
 :alt: the fit depths buttons
 :class: bg-primary mb-1
-:width: 200px
+:width: 400px
 :align: center
 ```
 
@@ -272,9 +272,11 @@ In this case, the line is dominated by the strong component, so we can simply ex
 :align: center
 ```
 
-In other complex cases it may be optimal to fit the depths of multiple strong components of a blend, but exclude weaker components from the mask.
+In other complex cases it may be optimal to fit the depths of multiple stronger components of a blend, but exclude weaker components from the mask.
 
-After tweaking the depths of several more lines across the spectrum, we get an improved LSD profile.  Because a lot of the signal in the observation was in a few He lines with poor depths, the S/N in Stokes V is improved some.  And because this improves the fit to Stokes I, the errorbars for Stokes I are much smaller.
+After tweaking the depths of several more lines across the spectrum, we get an improved LSD profile.  
+Because the better depths improves the fit to the observed Stokes I spectrum, the errorbars for Stokes I LSD profile are much smaller.
+Also, because a lot of the signal in the observation was in a few He lines with poor depths, the S/N in Stokes V is noticeably better.
 
 ```{image} MaskUI_images/updateLSD-prof-clean-tweak-full.png
 :alt: LSD profile after fully fitting line depths
@@ -282,3 +284,5 @@ After tweaking the depths of several more lines across the spectrum, we get an i
 :width: 400px
 :align: center
 ```
+
+When you are done, closing the window automatically saves modified mask with the fit depths.  The output mask is saved using either the output name you provide, or using original mask name with '.clean' added to the end.
