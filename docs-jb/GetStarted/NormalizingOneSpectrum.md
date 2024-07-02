@@ -104,15 +104,15 @@ You can select specific ranges of wavelength to be excluded from the fitting pro
 
 **include range**
 
-This provides a way to reverse the exclusion function. You can selected ranges with in excluded regions to be un-excluded when the normalization is updated. 
+This provides a way to reverse the exclusion function. You can selected ranges within excluded regions to be un-excluded when the normalization is updated. 
 
 **hide norm**
 
-You have the option to remove the lower panel (or return it) at your leisure. The upper panel will expand to the width of the full window. This feature can be useful for doing normalization with a small computer screen.
+You have the option to remove the lower panel (or return it) at your leisure. The upper panel will expand to the height of the full window. This feature can be useful for doing normalization with a small computer screen.
 
 **save params**
 
-The chosen parameters (post fitting) can be saved to the files:  `exclude.dat`, `poly-deg.dat`, and `params.dat`.  These files can later be loaded to start from where you left off, or for a good initial guess if you are normalizing similar spectra.  Usually it's safest to always click this button before closing the main window, just in case you want to tweak a normalization later.
+The chosen parameters (after fitting) can be saved to the files:  `exclude.dat`, `poly-deg.dat`, and `params.dat`.  These files can later be loaded to start from where you left off, or for a good initial guess if you are normalizing similar spectra.  Usually it's safest to always click this button before closing the main window, just in case you want to tweak a normalization later.  (Closing the main window always automatically saves the normalized spectrum.)
 
 ###  Output files
 Once the main window is closed the program will save the normalized spectrum to `[observation_file].norm`.
@@ -123,7 +123,7 @@ The output will use the normalization and parameters of the last update. It is a
 If you clicked the `save params`, the program will also write out the fitting information in the files, mentioned above. It's is useful to make a copy of these files with a name unique to the data. 
 
 ### Running NormPlot with previous parameters
-When running NormPlot again, it will check for the files and try to read them if they exist.  `exclude.dat`, `poly-deg.dat`, and `params.dat`.  You can run NormPlot with specific copies of those files from the command line:
+When running NormPlot again, it will check for the prameter files and try to read them if they exist: `exclude.dat`, `poly-deg.dat`, and `params.dat`.  Alternatively, you can run NormPlot using copies of those files with specified names from the command line:
 ```
 normplot -e [exclude_file] -d [poly-deg_file] -c [params_file] [observation_file]
 ```
