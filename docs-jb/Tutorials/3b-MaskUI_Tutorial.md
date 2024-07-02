@@ -166,9 +166,9 @@ Sometimes it can be helpful to use empirical estimates of line depths for some l
 
 In cases where many lines in the mask have depth problems, it is usually better to improve the theoretical depths going into the mask.  It is important to have the correct effective temperature and $\log g$ for the mask.  If the star has chemical peculiarities it is important to account for those too.  This can be done within a VALD extract stellar request.  You may also wish to consider more elaborate spectrum synthesis calculations for the line depths, particularly if NLTE effects are very important.
 
-In generally empirical line depth estimates should be used with caution. There is a good reason for your choice of theoretical line depths (or there should be!).  Furthermore, there is an intrinsic degeneracy between the depths of the lines in the mask and the amplitude of the LSD profile.  In `cleanMaskUI` this is resolved by simply assuming the current LSD profile is an adequate approximation when fitting line depths.  This means that if your initial LSD profile (from the initial line mask) is too poor quality then depth fitting will produce poor results.  This also means that one should only fit carefully selected problem lines, not all the lines in the mask.
+In general empirical line depth estimates should be used with caution. There is a good reason for your choice of theoretical line depths (or there should be!).  Furthermore, there is an intrinsic degeneracy between the depths of the lines in the mask and the amplitude of the LSD profile.  In `cleanMaskUI` this is resolved by simply assuming the current LSD profile is an adequate approximation when fitting line depths.  This means that if your initial LSD profile (from the initial line mask) is too poor quality, then depth fitting will produce poor results.  This also means that one should only fit carefully selected problem lines, not all the lines in the mask.
 
-In our example Be star, fitting depths of some lines can be quite helpful.  Since $v\sin i$ is quite large there are relatively few well detected lines in the spectrum, so depth errors in some of those lines can have a large impact.
+In our example Be star, fitting depths of some lines can be quite helpful.  Since $v\sin i$ is quite large there are relatively few clearly detected lines in the spectrum, so depth errors in some of those lines can have a large impact.
 
 To automatically fit line depths, click the `select lines to fit depth` button, then click on the plot to begin selecting a range of lines, then click on the plot a second time to finish selecting lines. The selected lines in the mask should turn light blue. Then click the `fit depths` to fit the depths of all selected lines (light blue) simultaneously.  
 
@@ -188,7 +188,7 @@ Here is a line that is clearly present in the observation but has a depth that i
 :align: center
 ```
 
-Then, after selecting the line we click `fit depths`, then click `update LSD` to see how this new depths match the observation. The updated fit to the observation is pretty good.
+Then, after selecting the line we click `fit depths`, then click `update LSD` to see how these new depths match the observation. The updated fit to the observation is pretty good.
 
 ```{image} MaskUI_images/updateLSD-fit-depth-update.png
 :alt: a line after fitting depth
@@ -201,7 +201,7 @@ Then, after selecting the line we click `fit depths`, then click `update LSD` to
 The `select lines to fit depth` button remains active until you click it a second time to deactivate the mode (or click the `unselect lines to fit depth` to switch modes).  This is similar to the `exclude lines` and `include lines` buttons.
 :::
 
-There are also some lines in this spectrum that are too strong in the mode, and very weak (but still present) in the observation.  Here we select a set of those problem lines
+There are some lines that are too strong in the model, and very weak (but still present) in the observation.  Here we select a set of those problem lines.
 
 ```{image} MaskUI_images/updateLSD-fit-weak-select.png
 :alt: selecting too strong lines to fit
@@ -219,7 +219,7 @@ And then fit the depths for them, and update the LSD calculation.
 :align: center
 ```
 
-The line depth fitting routine can struggle with heavily blended lines.  Fitting blended lines is not a fully degenerate problem, but it can ambiguous how much of the depth to assign to which line.  This can cause the wrong line to be made strong or weak, and it can even cause depths to become negative!
+The line depth fitting routine can struggle with heavily blended lines.  Fitting blended lines is usually not a fully degenerate problem, but it can ambiguous how much of the depth to assign to which line.  This can cause the wrong line to be made strong or weak, and it can even cause depths to become negative!
 
 :::{note}
 Fitting depths for lines with virtually the same wavelength can be fully degenerate. In this case, the fitting routine will automatically exclude the weaker line from the mask so that fitting can proceed.  
@@ -234,7 +234,7 @@ Here is a strong line where we would like to fit the line depth(s) but it is ble
 :align: center
 ```
 
-We can select the lines in the mask and fit them.  But one of the line depths becomes negative!  The negative line depth is indicated by the light blue line in the plot that goes up from 1, rather than down.  This may be numerically the best fit, but clearly this is a non-physical solution.
+We can select the lines in the mask and fit them.  But some of the line depths becomes negative!  The negative line depth is indicated by the light blue line in the plot that goes up from 1, rather than down.  This may be numerically the best fit, but clearly this is a non-physical solution.
 
 ```{image} MaskUI_images/complex-fit-bad.png
 :alt: fit depths getting negative depths
@@ -272,11 +272,9 @@ In this case, the line is dominated by the strong component, so we can simply ex
 :align: center
 ```
 
-In other complex cases it may be optimal to fit the depths of multiple stronger components of a blend, but exclude weaker components from the mask.
+In other complex cases, it may be optimal to fit the depths of multiple stronger components of a blend, but exclude weaker components from the mask.
 
-After tweaking the depths of several more lines across the spectrum, we get an improved LSD profile.  
-Because the better depths improves the fit to the observed Stokes I spectrum, the errorbars for Stokes I LSD profile are much smaller.
-Also, because a lot of the signal in the observation was in a few He lines with poor depths, the S/N in Stokes V is noticeably better.
+After tweaking the depths of several more lines across the spectrum, we get an improved LSD profile. Because the better depths improve the fit to the observed Stokes I spectrum, the errorbars for the Stokes I LSD profile are much smaller. Also, because a lot of the signal in the observation was in a few He lines with poor depths, the S/N in Stokes V is noticeably better.
 
 ```{image} MaskUI_images/updateLSD-prof-clean-tweak-full.png
 :alt: LSD profile after fully fitting line depths
@@ -285,4 +283,4 @@ Also, because a lot of the signal in the observation was in a few He lines with 
 :align: center
 ```
 
-When you are done, closing the window automatically saves modified mask with the fit depths.  The output mask is saved using either the output name you provide, or using original mask name with '.clean' added to the end.
+When you are done, closing the window automatically saves modified mask with the final fit depths.  The output mask is saved using either the output name you provide, or using original mask name with '.clean' added to the end.
