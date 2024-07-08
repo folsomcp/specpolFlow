@@ -760,13 +760,11 @@ class LSD:
             # Check whether it is a numpy array
             if isinstance(bzwidth, list) or isinstance(bzwidth, tuple):
                 if len(bzwidth) == 1:
-                    #print('list with one element')
                     # keeping the actual bz calculation range for plotting later.
                     p_bzwidth = [cog_val-bzwidth, cog_val+bzwidth]
                     lsd_bz = self[ np.logical_and(self.vel >= p_bzwidth[0],
                                                   self.vel <= p_bzwidth[1]) ]
                 elif len(bzwidth) == 2:
-                    #print('list with two elements')
                     p_bzwidth = [cog_val-bzwidth[0], cog_val+bzwidth[1]]
                     lsd_bz = self[ np.logical_and(self.vel >= p_bzwidth[0],
                                                   self.vel <= p_bzwidth[1]) ]
@@ -781,7 +779,7 @@ class LSD:
 
     
         # Dealing with potential order overlaps 
-        # or uneven velocity grid
+        # (an uneven velocity grid should now be treated correctly)
         deltav_array = lsd_bz.vel[1:]-lsd_bz.vel[:-1]
         if np.any(deltav_array < 0.0):
             warnings.warn("\n The velocity array is not monotonically increasing. "
@@ -792,14 +790,6 @@ class LSD:
                           stacklevel=2)
             lsd_bz = lsd_bz._sortvel()
             deltav_array = lsd_bz.vel[1:]-lsd_bz.vel[:-1]
-
-        # check if the spacing is uneven by a lot
-        deltav_min = deltav_array.min()
-        deltav_max = deltav_array.max()
-        if (deltav_max - deltav_min) > 0.1 : # in km/s
-            warnings.warn("The velocity spacing is uneven: "
-                          "min spacing {}km/s, max spacing {}km/s".format(
-                              deltav_min, deltav_max), stacklevel=2)
 
         # Actual calculation of the Bz:
 
