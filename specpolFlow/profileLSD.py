@@ -854,7 +854,7 @@ class LSD:
         :param plotFit: If True, Plot the bisector curve in the LSD profile with matplotlib
         :param fullOutput: If True, Return all the variables used to compute the line bisector 
                            rather than just the velocity span 
-        :return: the velocity span (Float)
+        :return: the velocity span and error (Float)
                  If fullOutput is True then also include average velocity at the 
                  top & bottom part of the bisector (Float) and numpy arrays with the
                  line bisector & associated intensity levels.
@@ -960,8 +960,13 @@ class LSD:
         vt = np.nanmean(bisector[_itop])
         vb = np.nanmean(bisector[_ibot])
 
+        vt_std = np.nanstd(bisector[_itop])
+        vb_std = np.nanstd(bisector[_ibot])
+
         # Get the bisector velocity span as defined in Queloz et al. 2001
         vs = vt - vb
+
+        vs_std = np.sqrt(vt_std**2 + vb_std**2)
 
         # Optionally plot the BIS to the observed LSD profile
         if plotFit == True:
@@ -975,6 +980,10 @@ class LSD:
             plt.axvline(velrange[0], c='k', ls=':', label='biswidth')
             plt.axvline(velrange[1], c='k', ls=':')
             plt.hlines(specI_levels, xmin=velrange[0], xmax=velrange[1], alpha=1/3, color='c', zorder=0)
+            if not emission:
+                plt.hlines([Ic-0.10*deltaI, Ic-0.40*deltaI, Ic-0.60*deltaI, Ic-0.90*deltaI], xmin=velrange[0], xmax=velrange[1], alpha=1/3, color='r', ls=':', zorder=0)
+            else:
+                plt.hlines([Ic+0.10*deltaI, Ic+0.40*deltaI, Ic+0.60*deltaI, Ic+0.90*deltaI], xmin=velrange[0], xmax=velrange[1], alpha=1/3, color='r', ls=':', zorder=0)
             plt.xlabel('Velocity (km/s)')
             plt.ylabel('I')
             plt.legend(loc='lower left')
@@ -982,9 +991,9 @@ class LSD:
 
         #Optionally return all fit parameters
         if fullOutput == True:
-            return (vs, vt, vb, bisector, specI_levels)
+            return (vs, vs_std, vt, vb, bisector, specI_levels)
         else:
-            return vs
+            return (vs, vs_std)
             
     def _sortvel(self):
         n = np.argsort(self.vel)
