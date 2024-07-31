@@ -80,31 +80,29 @@ To find "good" points, each order is broken down into a set of consecutive searc
 ## Normalizing the Individual Orders 
 **From here we will refer to the buttons described in the [Introductory Guide](../GetStarted/NormalizingOneSpectrum.md).** 
 
-### Key Navigation Buttons:
+### Useful Navigation Buttons:
 
 The following buttons will be useful for completing this tutorial:
 
 * To see the wavelength ranges of the orders, you can open the polynomial degree panel using the `set poly. degree...` button. When you hover the mouse over a specific order, a box will appear indicating the wavelength range of the order. Also, colors in the panel match the plot-colors of their respective orders. 
-* Use the Zoom in and Zoom out buttons to adjust the plot so that the individual lines are visible. It is recommended that you also visualize the width of the entire spectral order you are working on.
+* Use the `Zin` (zoom in) and `Zout` (zoom out) buttons to adjust the plot so that the individual lines are visible. It is recommended that you also visualize the width of the entire spectral order you are working on.
 * To view more of the depth of the line when they appear small, use the zoom button and select an enclosed area that is the width of the window but a much smaller height, with the height starting at the continuum and going down to the bottom of the spectral line. 
 * If you have an ok horizontal range, but are too zoomed in or too zoomed out vertically, you can try the `auto-y` button, to automatically scale the vertical axis.
 * Matplotlib's default panning and zooming buttons get overridden by the `include range` and `exclude range` functions. Make sure they are not on when you’re exploring the spectra. However, the custom buttons for zooming, panning, and auto-scaling will still work, as will the keyboard shortcuts.
-* To see the outcome of any changes you’ve enacted, you have to click `fit cont.`.
+* To see the outcome of any changes you’ve enacted, you have to click `fit cont`.
 
 ### Setting global fitting parameters:
 
-Say something about the search bin width and average length for starting values?
-
-**For now we will keep the default 500 km s$^{-1}$ search bin width.** 
+Note that this tutorial uses the default 500 km s$^{-1}$ search bin width.
 
 ### Telluric/ Noise Dominated orders: 
-Let’s get through some of the less rigorous things first. In some instances, your observations may have have orders that have very low signal to noise ratios or are dominated by telluric lines (sharps lines created from absorption by the atmosphere). It can be difficult to try to apply the full set of fitting procedures on these orders to get them flat. Moreover, these orders contain very little useful information about the real spectrum of the star. 
+In some instances, the observations may have have orders that have very low signal to noise ratios or which are dominated by telluric lines (sharps lines created from absorption by Earth's atmosphere). It can be difficult to try to apply the full set of fitting procedures on these orders to get them flat. Moreover, these orders contain very little useful information about the real spectrum of the star. 
 
-In these cases, where you aren't planning to use the order anyway, we mostly just want the continuum polynomial to be reasonably well behaved. One of the most direct fixes to this is to reduce the order of the polynomial degree. In our example, click `set poly. degree...` button, then change orders 1, 2, 38, 39, 40 to have lower values. 1 or 2 might be a good value. 
-
+In these cases, the priority should be to achieve a reasonably well-behaved continuum polynomial fit. You can try reducing the order of the polynomial degree by clicking the `set poly. degree...` button. For our example, change orders 1, 2, 38, 39, 40 to have smaller values (like 1 or 2). 
 
 ### Removing Spectral lines from the fit:
-Remember, we essentially are making a common line that the spectral lines extend down from, so we must do our best to make sure they aren’t contributing to the fitting. This means we don’t want any of our fit points resting on spectral lines. Wherever we see fit point on spectral lines, we use the `exclude range` function to remove those line from being options to place fit points. For example, let’s remove this line at ~486 nm ($H \beta$).
+
+It is important to make sure that spectral lines are not contributing to the polynomial fit. None of the "good" continuum points should appear within spectral lines. Use the `exclude range` function to remove points within spectral lines from the fit. For example, let’s remove the $H \beta$ line at ~486 nm.
 
 ```{image} ../normplot_images/486_a.png
 :alt: 486_a
@@ -112,7 +110,7 @@ Remember, we essentially are making a common line that the spectral lines extend
 :width: 600px
 :align: center
 ```
-Selecting the region using the `exclude range` button: 
+Select the region using the `exclude range` button: 
 
 ```{image} ../normplot_images/486_b.png
 :alt: 486_a
@@ -120,7 +118,7 @@ Selecting the region using the `exclude range` button:
 :width: 600px
 :align: center
 ```
-After pressing `fit cont.`:
+After pressing `fit cont`:
 
 ```{image} ../normplot_images/486_c.png
 :alt: 486_a
@@ -128,17 +126,20 @@ After pressing `fit cont.`:
 :width: 600px
 :align: center
 ```
-See how the wings of the $H \beta$ line are no longer arching above the continuum since we exluded the problem-points from the fitting routine!
+The wings of the $H \beta$ line should no longer be arching above the continuum since we exluded the problem points from the fitting routine!
 
-If your exclude region is too big, you can use `include range` to regions to bring back portions of the spectrum that you would like back.
-Now, there are a few other lines that we need to tackle at: 383, 397, 410, 434 ($H \gamma$) , 438, 646, 656($H \alpha$), 850, 860, 866, 875, 810, 901, and 905nm.
+If your exclude region is too big, you can use the `include range` button to bring useful portions of the spectrum back into the fit.
 
-One advantage of this is that if we adjust the width of the search bins later, then you will not have to worry about new points appearing on the same line. 
-In some instances, you will have spectral lines that exist on the overlapping edge of two orders like H_alpha and H_beta. For some lines, this can be managed by having the `fill order edge gaps` on. Then for that excluded region, the program will try to complete the fit using the nearest fit point from the neighboring order.
+Now, try removing the spectral lines at the following wavelengths: 
+383 nm, 397 nm, 410 nm, 434 nm ($H \gamma$), 438 nm, 646 nm, 656 nm ($H \alpha$), 850 nm, 860 nm, 866 nm, 875 nm, 810 nm, 901 nm, and 905 nm.
+
+If we adjust the width of the search bins later, we will not have to worry about new points appearing on the same line. 
+
+In some instances, we will have spectral lines that exist on the overlapping edge of two orders like $H \alpha$ and $H \beta$. For some lines, this can be managed by having the `fill order edge gaps` option turned on. Then, for that excluded region, the program will try to complete the fit using the nearest fit point from the neighboring order.
 
 
 ### Fit Points in Telluric Lines:
-You may occasionally find some fit points being placed on telluric lines. This usually only happens in places where a lot of tellric lines blend together, so that there is no good continuum in a region of spectrum. We exclude those regions in an order, again with `exclude range` (especially useful if you choose to adjust the bin widths later on). For example let’s exclude the region about 759 nm. 
+You may occasionally find some fit points being placed on telluric lines. This usually only happens in places where a lot of tellric lines blend together, so that there is no good continuum in a region of spectrum. We exclude those regions in an order, again with the `exclude range` button (which is especially useful if you choose to adjust the bin widths later on). For example let’s exclude the region around 759 nm. 
 
 ```{image} ../normplot_images/telluric_a.png
 :alt: 486_a
@@ -146,7 +147,7 @@ You may occasionally find some fit points being placed on telluric lines. This u
 :width: 600px
 :align: center
 ```
-Selecting the region using the `exclude range` button: 
+Select the region using the `exclude range` button: 
 
 ```{image} ../normplot_images/telluric_b.png
 :alt: 486_a
@@ -154,7 +155,7 @@ Selecting the region using the `exclude range` button:
 :width: 600px
 :align: center
 ```
-After pressing `fit cont.`:
+After pressing `fit cont`:
 
 ```{image} ../normplot_images/telluric_d.png
 :alt: 486_a
@@ -165,16 +166,48 @@ After pressing `fit cont.`:
 The wings of the telluric region around 759 nm are no longer arched and there are no fit points within the blended region.
 
 ### Fit Points on Noise: 
-You may occasionally find a fit point resting in the noise level on the continuum. To try to correct this, we can adjust the **average length** and increase it to a slightly larger number. What’s happening here is that there’s a small window of width that we specify that is moving across the spectrum one data point at a time and averaging the flux at each step about the center of that window. This essentially smoothens the spectrum contained in that bin, but this does not directly affect the actual data we use. It will lessens the impact of the noise on where the fit point is placed. 
-
+You may occasionally find a fit point resting in the noise level on the continuum. To correct this, adjust the **average length** and increase it to a slightly larger number. There is a small window of width that we specify that is moving across the spectrum one data point at a time and averaging the flux at each step about the center of that window. Adjusting the average length essentially smooths the spectrum contained in that bin, but does not directly affect the data. In effect, this will decrease the impact of the noise on where the fit point is placed. 
 
 ## Saving Normalized Spectra 
 
-You can use merge the product so it keeps the spectrum of the upper order, or you can keep it unmerged and use your own discretion in how you use the overlapping regions. 
+The chosen parameters (after fitting) can be saved to the files:  `exclude.dat`, `poly-deg.dat`, and `params.dat`.  These files can later be loaded to start from where you left off, or for a good initial guess if you are normalizing similar spectra.  Usually it's safest to always click this button before closing the main window, just in case you want to tweak a normalization later.  (Closing the main window always automatically saves the normalized spectrum.)
 
-Finally save in output and make a copy of the file should you need to revisit the normalization later. 
+###  Output files
+Once the main window is closed the program will save the normalized spectrum to `[observation_file].norm`.
+```{note}
+The output will use the normalization and parameters of the last update. It is advised that you use the `fit cont.` button before closing the window.
+```
 
-You can also use saved input parameters from the command line. Run the code with `python normPlot2.py -h` for some extra information about that. 
+If you clicked the `save params`, the program will also write out the fitting information in the files, mentioned above. It's is useful to make a copy of these files with a name unique to the data. 
+
+### Running normPlot with previous parameters
+When running normPlot again, it will check for the prameter files and try to read them if they exist: `exclude.dat`, `poly-deg.dat`, and `params.dat`.  Alternatively, you can run normPlot using copies of those files with specified names from the command line:
+```
+normplot -e [exclude_file] -d [poly-deg_file] -c [params_file] [observation_file]
+```
+or within Python:
+```
+import normPlot
+normPlot.normplot('[observation_file]',
+                  excludeRegionName='[exclude_file]', 
+                  polynomialsName='[poly-deg_file]', 
+                  paramsName='[params_file]')
+```
+
+You can also take the parameter files and apply them to spectra without having the reopen the interface.  This uses the `-b` flag from the command line:
+```
+normplot -b -e [exclude_file] -d [poly-deg_file] -c [params_file] [observation_file]
+```
+or the `batchMode=True` argument in Python:
+```
+normPlot.normplot('[observation_file]',
+                  excludeRegionName='[exclude_file]', 
+                  polynomialsName='[poly-deg_file]', 
+                  paramsName='[params_file]',
+                  batchMode=True)
+```
+This useful for normalizing a large number of observations of the same object. 
+
 
 
 
