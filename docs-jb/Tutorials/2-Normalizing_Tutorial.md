@@ -16,7 +16,7 @@ This current version of the tutorial focuses on executing NormPlot from the comm
 
 
 ## Converting from Fits to text
-Let's proceed by converting the format for the data files from '.fits' to the '.s' text format. The data file needs to be converted in order to be used in NormPlot. These processed data files (which can be found in CADC archives) are formatted as follows: `i.fits` contains spectroscopic data (usually 4 spectra for each polarimetric observation), and `p.fits` contains the spectopolarimetric data. We want to convert the `p.fits` files and use the Stokes I spectrum in the normalization code. For this tutorial, we will use the ESPaDOns observation, `2378200p.fits`.
+Let's proceed by converting the format for the data files from '.fits' to the '.s' text format. The data file needs to be converted in order to be used in NormPlot. These processed data files (which can be found in CADC archives) are formatted as follows: `i.fits` contains spectroscopic data (usually 4 spectra for each polarimetric observation), and `p.fits` contains the spectopolarimetric data. We want to convert the `p.fits` files and use the Stokes I spectrum in the normalization code. For this tutorial, we will use the ESPaDOns observation, `2378196p.fits`.
 
 ::::{margin}
 :::{note}
@@ -30,7 +30,7 @@ In the command line, write the command:
  spf-fitstos-espadons inputfile-p.fits
  ```
 
-but replace the `inputfile-p.fits` with the name of our ESPaDOnS file `2378200p.fits`. The script will return `2378200pn.s` (normalized data) and `2378200pu.s` (unnormalized data) in the same directory as the '.fits' file. 
+but replace the `inputfile-p.fits` with the name of our ESPaDOnS file `2378196p.fits`. The script will return `2378196pn.s` (normalized data) and `2378196pu.s` (unnormalized data) in the same directory as the '.fits' file. 
 
 This example is specific to ESPaDOnS observations from the standard Upena/LibreESPRIT pipeline at CFHT. For observations from other instruments or other data reduction pipelines, you will need a different script to convert FITS files to the `.s` format. In some cases you may need to write your own conversion script; converters for a few instruments are discussed in [this Tutorial](1-ConvertToSFiles_Tutorial.ipynb), and documented in the [API](https://folsomcp.github.io/specpolFlow/API/Converters_API.html).
 
@@ -87,11 +87,28 @@ In these cases, where you aren't planning to use the order anyway, we mostly jus
 
 
 ### Removing Spectral lines from the fit:
-Remember, we essentially are making a common line that the spectral lines extend down from, so we must do our best to make sure they aren’t contributing to the fitting. This means we don’t want any of our fit points resting on spectral lines. Wherever we see fit point on spectral lines, we use the `exclude range` function to remove those line from being options to place fit points. For example, let’s remove this line at ~383 nm.
+Remember, we essentially are making a common line that the spectral lines extend down from, so we must do our best to make sure they aren’t contributing to the fitting. This means we don’t want any of our fit points resting on spectral lines. Wherever we see fit point on spectral lines, we use the `exclude range` function to remove those line from being options to place fit points. For example, let’s remove this line at ~486 nm ($H \beta$).
 If your exclude region is too big, you can use `include range` to regions to bring back portions of the spectrum that you would like back.
-Now, there are a few other lines that we need to tackle at: 397, 410, 434 ($H \gamma$) , 438, 486 ($H \beta$), 646, 656($H \alpha$), 850, 860, 866, 875, 810, 901, and 905nm.
+Now, there are a few other lines that we need to tackle at: 383, 397, 410, 434 ($H \gamma$) , 438, 646, 656($H \alpha$), 850, 860, 866, 875, 810, 901, and 905nm.
 
-**figure?**
+```{image} ../normplot_images/486_a.png
+:alt: 486_a
+:class: bg-primary mb-1
+:width: 600px
+:align: center
+```
+```{image} ../normplot_images/486_b.png
+:alt: 486_a
+:class: bg-primary mb-1
+:width: 600px
+:align: center
+```
+```{image} ../normplot_images/486_c.png
+:alt: 486_a
+:class: bg-primary mb-1
+:width: 600px
+:align: center
+```
 
 One advantage of this is that if we adjust the width of the search bins later, then you will not have to worry about new points appearing on the same line. 
 In some instances, you will have spectral lines that exist on the overlapping edge of two orders like H_alpha and H_beta. For some lines, this can be managed by having the `fill order edge gaps` on. Then for that excluded region, the program will try to complete the fit using the nearest fit point from the neighboring order.
@@ -100,7 +117,30 @@ In some instances, you will have spectral lines that exist on the overlapping ed
 ### Fit Points in Telluric Lines:
 You may occasionally find some fit points being placed on telluric lines. This usually only happens in places where a lot of tellric lines blend together, so that there is no good continuum in a region of spectrum. We exclude those regions in an order, again with `exclude range` (especially useful if you choose to adjust the bin widths later on). For example let’s exclude the region about 759 nm. 
 
-**figure?**
+```{image} ../normplot_images/telluric_a.png
+:alt: 486_a
+:class: bg-primary mb-1
+:width: 600px
+:align: center
+```
+```{image} ../normplot_images/telluric_b.png
+:alt: 486_a
+:class: bg-primary mb-1
+:width: 600px
+:align: center
+```
+```{image} ../normplot_images/telluric_c.png
+:alt: 486_a
+:class: bg-primary mb-1
+:width: 600px
+:align: center
+```
+```{image} ../normplot_images/telluric_d.png
+:alt: 486_a
+:class: bg-primary mb-1
+:width: 600px
+:align: center
+```
 
 ### Fit Points on Noise: 
 You may occasionally find a fit point resting in the noise level on the continuum. To try to correct this, we can adjust the **average length** and increase it to a slightly larger number. What’s happening here is that there’s a small window of width that we specify that is moving across the spectrum one data point at a time and averaging the flux at each step about the center of that window. This essentially smoothens the spectrum contained in that bin, but this does not directly affect the actual data we use. It will lessens the impact of the noise on where the fit point is placed. 
