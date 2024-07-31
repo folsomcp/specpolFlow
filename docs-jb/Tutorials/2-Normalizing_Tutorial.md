@@ -8,7 +8,6 @@ Still under construction. Some commands and other details may be out of date.
 
 This tutorial introduces the procedure of normalizing echelle spectra and the use of normPlot. The interactive normalization GUI is a part of the SpecpolFlow pipeline as a step that proceeds the polarimetric analysis. In this introduction to spectra normalization, we will be using ESPaDOnS observations of the star $\xi^1$ CMa. These are the same data that are used in the LSD and Mean Longitudinal Field tutorials, so skipping this tutorial will not prevent you from advancing further in the pipeline (if you'd like, you're welcome to use normalized spectra you create while completing this tutorial and see how the magnetic field measurements compare). 
 
-::::{margin}
 :::{note}
 The current version of this tutorial focuses on executing normPlot from the command line.
 You can also run normPlot from within a Jupyter Notebook or other Python script with
@@ -17,7 +16,6 @@ import normPlot
 normPlot.normplot('[observation_file]')
 ```
 :::
-::::
 
 
 ## Converting from the .fits format to the .s text file
@@ -62,7 +60,7 @@ Open the normalization GUI from the command line with
 normplot <observation_file.s>
 ```
 
-Once executed, a window will pop up and you will see the spectrum separated into orders, indicated by different colors. There are polynomial curves plotted, which are fits to the continuum for each order, colored differently for each order. There are also black points plotted, which are the points the used for the polynomial fit.
+This generates a separate window with the spectrum separated into orders, which are indicated by different colors. The polynomial curves are fits to the continuum for each order, colored differently for each order. The black points are the points the used to generate the polynomial fit.
 
 ```{image} ../normplot_images/gui_open.png
 :alt: gui_open
@@ -71,11 +69,12 @@ Once executed, a window will pop up and you will see the spectrum separated into
 :align: center
 ```
 
-In the bottom left corner, there is a toolbar with commands from matplotlib (panning, zooming, returning to default, saving a figure). Above that are a set of buttons with some custom commands for automatically scaling both axes, auto-scaling just the y-axis, zooming, and panning. There are keyboard shortcuts for these commands (arrow keys for panning, 'a' for auto-scaling, 'A' for auto-scaling the y-axis, 'z' for zooming on a selected region, 'i' and 'o' for zooming in and out).
+The bottom left corner of the window contains a toolbar with commands from matplotlib (panning, zooming, returning to default, saving a figure). Above that are a set of buttons with some custom commands for automatically scaling both axes, auto-scaling just the y-axis, zooming, and panning. There are keyboard shortcuts for these commands (arrow keys for panning, 'a' for auto-scaling, 'A' for auto-scaling the y-axis, 'z' for zooming on a selected region, 'i' and 'o' for zooming in and out).
 
-**The fit points**: The idea here is to select a relatively small number of 'good' continuum points, and use those to fit a polynomial describing the continuum of the observation. These 'good' points are shown as black dots on the plot. To find those 'good' points, each order is broken down into a set of consecutive search bins with respect to wavelength. The bins are equal in width (in velocity). In each bin, the highest flux point is selected as being most likely in the continuum (i.e. not in an absorption line). However, to deal with noise in the observation, a running average is applied to the spectrum before selecting the highest point in the search bin. This averaging helps ensure that the selected highest point in a bin is not highest because of a peak in the noise, but instead highest because of real features in the spectrum.
-Collectively, the black dots within an order are the points that are used to fit a polynomial function for the continuum of that order. The goal of this process is selecting black dots representative of the continuum flux so that when we normalize, the continuum is near-uniformly 1. In other words, you want a flat line at f = 1 with various spectra lines added onto it. 
+### The fit points
+We want to select a relatively small number of "good" continuum points which can be used to generate a polynomial fit describing the continuum of the observation. These "good" points, which appear as black dots on the plot, are selected within an order and are used to fit a polynomial function for the continuum for that order. Ideally, the resulting normalized continuum will be equal to 1.
 
+To find "good" points, each order is broken down into a set of consecutive search bins with respect to wavelength. The bins are equal in width (in velocity). In each bin, the highest flux point is selected as being most likely in the continuum (i.e. not in an absorption line). However, to deal with noise in the observation, a running average is applied to the spectrum before selecting the highest point in the search bin. This averaging helps ensure that the selected highest point in a bin is not highest because of a peak in the noise, but instead highest because of real features in the spectrum. 
 
 ## Normalizing the Individual Orders 
 **From here we will refer to the buttons described in the [Introductory Guide](../GetStarted/NormalizingOneSpectrum.md). This guide addresses items that need attention in the normalization process.** 
