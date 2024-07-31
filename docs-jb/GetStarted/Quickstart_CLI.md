@@ -83,7 +83,13 @@ It is strongly recommended to clean the line mask before using it: removing line
 ```
 spf-cleanmask line_mask.dat observationu-n.s line_mask_clean.dat
 ```
-This displays the line mask, a reference observation, and the LSD model fit to the observation. Lines can be selected to remove from the mask (red) or include (blue).  The tool also allows for fitting line depths, assuming the current LSD profile is correct.  Line depth fitting should be treated with some caution, since there is an intrinsic degeneracy between LSD profile amplitude and line mask depths. For more details on using the program see [How to clean masks with the interactive tool](../Tutorials/3b-MaskUI_Tutorial.md).
+::::{margin}
+:::{note}
+For more details on using the program see [How to clean masks with the interactive tool](../Tutorials/3b-MaskUI_Tutorial.md).
+:::
+::::
+
+This displays the line mask, a reference observation, and the LSD model fit to the observation. Lines can be selected to remove from the mask (red) or include in the mask (blue). The tool also allows for fitting line depths, assuming the current LSD profile is correct. Line depth fitting should be treated with some caution, since there is an intrinsic degeneracy between LSD profile amplitude and line mask depths.
 
 Mask cleaning can also be run in a non-interactive batch mode, using a file of exclude regions, like:
 ```
@@ -102,7 +108,7 @@ LSDpy will try to read a set of additional input parameters from a file `inlsd.d
 
 If the `inlsd.dat` file does not yet exist, LSDpy will generate a template file and halt.  You can then edit the template for parameters specifically for your observations, and re-run the code.
 
-In the `inlsd.dat` file, pay particular attention to the values of "start and end velocity", "pixel size in velocity", and "mask/profile normalization parameters".  It can also be helpful to set "Save LSD model spectrum?" to "`1  outModelSpec.dat`", to generate the LSD best fit model spectrum for direct comparison with an observation.
+In the `inlsd.dat` file, pay particular attention to the values of "start and end velocity", "pixel size in velocity", and "mask/profile normalization parameters".  It can also be helpful to set "Save LSD model spectrum?" to `1  outModelSpec.dat`, to generate the LSD best fit model spectrum for direct comparison with an observation.
 
 The information printed to the terminal can be useful, and includes information about the line mask, information about the treatment of error bars, and information about detection statistics in Stokes V and the null.
 
