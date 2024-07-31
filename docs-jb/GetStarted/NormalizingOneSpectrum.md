@@ -1,18 +1,18 @@
 # Normalizing a spectrum with normPlot
 
-Before analysis observed spectra should be continuum normalized.  There are several approaches to this.  Here we present the normPlot tool, which can process spectropolarimetric data and has a graphical UI.
+Before performing an LSD analysis, the observed spectra should be continuum normalized. There are several approaches to this. Here we present the normPlot tool, which can process spectropolarimetric data and has a graphical UI.
 
-## About NormPlot
+## About normPlot
 
- NormPlot is an interactive graphical tool for normalizing spectroscopic and spectropolarimetric observations, written in Python 3. NormPlot can be used as a first step in the `SpecpolFlow` pipeline, to normalize the continuum of reduced 1D stellar spectra. It is designed to work well with echelle spectra, although it can also work on singe-order spectra. NormPlot was built to work on one spectral order at a time, essentially establish "good" continuum points, and fit a low order polynomial through those points.
+ normPlot is an interactive graphical tool for normalizing spectroscopic and spectropolarimetric observations, written in Python 3. normPlot can be used as a first step in the `SpecpolFlow` pipeline, to normalize the continuum of reduced 1D stellar spectra. It is designed to work well with echelle spectra, although it can also work on singe-order spectra. normPlot was built to work on one spectral order at a time, essentially establish "good" continuum points, and fit a low order polynomial through those points.
 
 ::::{margin}
 :::{note}
-NormPlot uses Python 3, version 3.8 or later recommended.  Its major decencies are **tkinter** and **matplotlib**  If you installed with pip they will likely be installed, but if they missing Python will issue an error. 
+normPlot uses Python 3, version 3.8 or later recommended. Its major dependencies are **tkinter** and **matplotlib**. If you installed normPlot with pip, they will likely also be installed, but if they are missing Python will issue an error. 
 :::
 ::::
 
-NormPlot is an optional add-on for SpecpolFlow, and is not installed by default.  You may need to install it with
+normPlot is an optional add-on for SpecpolFlow, and is not installed by default.  You may need to install it with
 ```
 pip install normPlot
 ```
@@ -20,25 +20,27 @@ pip install normPlot
 ## Using the GUI
 
 ```{note}
- Prior to using the normalization GUI, the file containing the spectrum should be converted from fits to .s format (following the LibreESPRIT format). Please see the [tutorial on converting to .s files](../Tutorials/1-ConvertToSFiles_Tutorial.ipynb), tools have been provided for a few commonly used spectropolarimeters.  
+ Prior to using the normalization GUI, the file containing the spectrum should be converted from `.fits` to `.s` format (following the LibreESPRIT format). Please see the [tutorial on converting to .s files](../Tutorials/1-ConvertToSFiles_Tutorial.ipynb). Tools have been provided for a few commonly used spectropolarimeters.  
 ```
 
 Assuming you have installed the program via pip, the interactive normalization UI can be started from the terminal with the command 
 ```
 normplot [observation_file]
 ```
-You can also run NormPlot from within a Jupyter Notebook or other Python script
+
+::::{margin}
+:::{admonition} Command line alternative (if normPlot is not installed with pip)
+:class: tip 
+You can also run the main Python file for normPlot directly, like:
+`python normPlot2.py [observation_file]`
+:::
+::::
+
+You can also run normPlot from within a Jupyter Notebook or other Python script
 ```
 import normPlot
 normPlot.normplot('[observation_file]')
 ```
-
-:::::{admonition} Command line alternative (if NormPlot is not installed with pip)
-:class: tip 
-You can also run the main Python file for NormPlot directly, like:
-`python normPlot2.py [observation_file]`
-:::::
-
 Once executed, you should see the following window appear
 
 ```{image} ../normplot_images/user_guide_gui.png
@@ -122,8 +124,8 @@ The output will use the normalization and parameters of the last update. It is a
 
 If you clicked the `save params`, the program will also write out the fitting information in the files, mentioned above. It's is useful to make a copy of these files with a name unique to the data. 
 
-### Running NormPlot with previous parameters
-When running NormPlot again, it will check for the prameter files and try to read them if they exist: `exclude.dat`, `poly-deg.dat`, and `params.dat`.  Alternatively, you can run NormPlot using copies of those files with specified names from the command line:
+### Running normPlot with previous parameters
+When running normPlot again, it will check for the prameter files and try to read them if they exist: `exclude.dat`, `poly-deg.dat`, and `params.dat`.  Alternatively, you can run normPlot using copies of those files with specified names from the command line:
 ```
 normplot -e [exclude_file] -d [poly-deg_file] -c [params_file] [observation_file]
 ```
