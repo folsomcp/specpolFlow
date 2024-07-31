@@ -53,13 +53,11 @@ More details about the difference between `n.s` and `u.s` files can be found in 
 :::
 ::::
 
-
 ## Normalization GUI 
 
-**Our goal in this process is to fit a curve through the star’s continuum in every spectral order. With that, we can normalize the continuum by dividing the observation by the fit curve. This creates a ‘common line’ (a flat horizontal line at y = 1) about which we can consistently measure the properties of spectral lines.** 
+**Our goal is to fit a low order polynomial through "good" continuum points in every spectral order. The continuum can then be normalized by dividing the observation by the fit. This creates a ‘common line’ (a flat horizontal line at y = 1) which can be used to consistently measure the properties of the spectral lines.** 
 
-Now let’s use the normalization GUI on our data. This normalization code utilizes the text format spectrum that would have been produced in the first steps (it was built around LibreESPRIT reduced data). You can run the code in the command line with: 
-
+Open the normalization GUI from the command line with
 ```
 normplot <observation_file.s>
 ```
