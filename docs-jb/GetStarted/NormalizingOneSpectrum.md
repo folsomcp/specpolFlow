@@ -1,4 +1,4 @@
-# Normalizing a spectrum with NormPlot
+# Normalizing a spectrum with normPlot
 
 Before analysis observed spectra should be continuum normalized.  There are several approaches to this.  Here we present the normPlot tool, which can process spectropolarimetric data and has a graphical UI.
 

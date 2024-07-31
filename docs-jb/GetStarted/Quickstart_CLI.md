@@ -1,14 +1,25 @@
 # Using the command line
 
-The main functions of SpecpolFlow can be run using command line programs, presented here.  The more detailed tutorials discuss the Python interface of SpecpolFlow, since those provide more options and are more complex.  
+The main functions of SpecpolFlow can be run using command line programs, presented here. 
 
- This guide is aimed at people who are already familiar with spectropolarimetric data analysis and LSD. For more in-depth guides see [Normalizing one spectrum with the interactive tool](NormalizingOneSpectrum.md), [From normalized spectrum to Bz measurement](OneObservationFlow_Tutorial.ipynb).
+:::{admonition} See also...
+:class: seealso
+The more detailed tutorials, which can be found under the "Tutorials" header on the webpage, discuss the Python interface of SpecpolFlow, since those provide more options and are more complex.  
+:::
+
+This guide is aimed at people who are already familiar with spectropolarimetric data analysis and LSD calculations. For more in-depth guides see [Normalizing a spectrum with normPlot](NormalizingOneSpectrum.md) and [From normalized spectrum to Bz measurement](OneObservationFlow_Tutorial.ipynb).
 
 To begin, install SpecpolFlow with pip, see [Installation](Installation.md).
 
 ## Converting file formats
 
-The SpecpolFlow tool-set uses the text '.s' file format for spectra. This usually consists of columns of wavelength, Stokes I, Stokes V, Null 1, Null 2, and sigma. (A three column format: wavelength, Stokes I, and sigma is also supported).  Converters for a few more common, instrument specific, '.fits' formats are provided.
+The SpecpolFlow tool set uses the text '.s' file format for spectra. This usually consists of columns of wavelength, Stokes I, Stokes V, Null 1, Null 2, and sigma. (A three column format: wavelength, Stokes I, and sigma is also supported). Converters for a few more common, instrument specific, '.fits' formats are provided. 
+
+::::{margin}
+:::{note}
+See the [How to convert telescope-provided files to the standardized .s format](1-ConvertToSFiles_Tutorial.ipynb) tutorial for more details.
+:::
+::::
 
 ### ESPaDOnS '.fits' files
 
@@ -30,7 +41,12 @@ The SPIRou .fits files contain nan values for pixels where the telluric correcti
 
 ## Normalizing spectra
 
-Reliable continuum normalization is needed before running LSD. Several normalization tools can do this.  SpecpolFlow includes the optional tool normPlot, which can handle the .s format with polarimetric information. **Before running this, make sure you used the option to install normPlot!** (`pip install normPlot`)
+Reliable continuum normalization is needed before running LSD. Several normalization tools can do this.  SpecpolFlow includes the optional tool normPlot, which can handle the .s format with polarimetric information. 
+
+:::{admonition} 
+:class: attention Before running this, make sure you used the option to install normPlot!
+`pip install normPlot`
+:::
 
 Run the interactive tool on an input observation like:
 ```

@@ -1,4 +1,4 @@
-# How to Normalize echelle spectra with NormPlot
+# How to Normalize echelle spectra with normPlot
 
 :::{Warning}
 Still under construction. Some commands and other details may be out of date.
@@ -6,17 +6,19 @@ Still under construction. Some commands and other details may be out of date.
 
 ## Introduction
 
-This tutorial introduces the procedure of normalizing echelle spectra and the use of NormPlot. The interactive normalization GUI is a part of the SpecpolFlow pipeline as a step that proceeds the polarimetric analysis. In this introduction to spectra normalization, we will be using ESPADonS observations of the star $\xi^1$ CMa. This is the same observation that is used in the LSD and Mean Longitudinal Field tutorials, so skipping this tutorial will not prevent you from advancing further in the pipeline (If you'd like, you're welcome to use normalized spectrum you create while doing this tutorial and see how the magnetic field measurements compare). 
+This tutorial introduces the procedure of normalizing echelle spectra and the use of normPlot. The interactive normalization GUI is a part of the SpecpolFlow pipeline as a step that proceeds the polarimetric analysis. In this introduction to spectra normalization, we will be using ESPaDOnS observations of the star $\xi^1$ CMa. These are the same data that are used in the LSD and Mean Longitudinal Field tutorials, so skipping this tutorial will not prevent you from advancing further in the pipeline (if you'd like, you're welcome to use normalized spectra you create while completing this tutorial and see how the magnetic field measurements compare). 
 
 ::::{margin}
 :::{note}
-This current version of the tutorial focuses on executing NormPlot from the command line. Refer to the user guide for executing the same commands from a Jupyter Notebook or python script. 
+The current version of this tutorial focuses on executing normPlot from the command line. Please refer to 
+
+the user guide for executing the same commands from a Jupyter Notebook or Python script. 
 :::
 ::::
 
 
 ## Converting from Fits to text
-Let's proceed by converting the format for the data files from '.fits' to the '.s' text format. The data file needs to be converted in order to be used in NormPlot. These processed data files (which can be found in CADC archives) are formatted as follows: `i.fits` contains spectroscopic data (usually 4 spectra for each polarimetric observation), and `p.fits` contains the spectopolarimetric data. We want to convert the `p.fits` files and use the Stokes I spectrum in the normalization code. For this tutorial, we will use the ESPaDOns observation, `2378196p.fits`.
+Data files downloaded from the CADC archive are distributed in a '.fits' format. To use normPlot, these will need to be converted to the standard '.s' text format Please note that file names ending in `i.fits` contain spectroscopic data (usually 4 spectra for each polarimetric observation), and file names ending in `p.fits` contain the spectopolarimetric data. We want to convert the `p.fits` files. For this tutorial, we will use the ESPaDOns observation `2378196p.fits`.
 
 ::::{margin}
 :::{note}
@@ -30,7 +32,13 @@ In the command line, write the command:
  spf-fitstos-espadons inputfile-p.fits
  ```
 
-but replace the `inputfile-p.fits` with the name of our ESPaDOnS file `2378196p.fits`. The script will return `2378196pn.s` (normalized data) and `2378196pu.s` (unnormalized data) in the same directory as the '.fits' file. 
+replacing the `inputfile-p.fits` with the name of our ESPaDOnS file `2378196p.fits`. The script will return `2378196pn.s` (normalized data) and `2378196pu.s` (unnormalized data) in the same directory as the '.fits' file.
+
+::::{margin}
+:::{note}
+ESPaDOns `p.fits` files contain a main data table with 24 columns. Here we are mostly interested in columns 19-24, which contain the unnormalized spectrum (without a telluric velocity correction), and have columns for wavelength, intensity, polarization, null 1, null 2, and errorbars.
+:::
+::::
 
 This example is specific to ESPaDOnS observations from the standard Upena/LibreESPRIT pipeline at CFHT. For observations from other instruments or other data reduction pipelines, you will need a different script to convert FITS files to the `.s` format. In some cases you may need to write your own conversion script; converters for a few instruments are discussed in [this Tutorial](1-ConvertToSFiles_Tutorial.ipynb), and documented in the [API](https://folsomcp.github.io/specpolFlow/API/Converters_API.html).
 
