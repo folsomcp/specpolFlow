@@ -1,4 +1,4 @@
-# How to Normalize echelle spectra with normPlot
+# How to Normalize Echelle Spectra with normPlot
 
 :::{Warning}
 Still under construction. Some commands and other details may be out of date.
@@ -10,19 +10,31 @@ This tutorial introduces the procedure of normalizing echelle spectra and the us
 
 ::::{margin}
 :::{note}
-The current version of this tutorial focuses on executing normPlot from the command line. Please refer to 
-
-the user guide for executing the same commands from a Jupyter Notebook or Python script. 
+The current version of this tutorial focuses on executing normPlot from the command line.
+You can also run normPlot from within a Jupyter Notebook or other Python script with
+```
+import normPlot
+normPlot.normplot('[observation_file]')
+```
 :::
 ::::
 
 
-## Converting from Fits to text
-Data files downloaded from the CADC archive are distributed in a '.fits' format. To use normPlot, these will need to be converted to the standard '.s' text format Please note that file names ending in `i.fits` contain spectroscopic data (usually 4 spectra for each polarimetric observation), and file names ending in `p.fits` contain the spectopolarimetric data. We want to convert the `p.fits` files. For this tutorial, we will use the ESPaDOns observation `2378196p.fits`.
+## Converting from the .fits format to the .s text file
+Data files downloaded from the CADC archive are distributed in a '.fits' format. To use normPlot, these will need to be converted to the standard '.s' text file. Note that file names ending in `i.fits` contain spectroscopic data (usually 4 spectra for each polarimetric observation), and file names ending in `p.fits` contain the spectopolarimetric data. We want to convert the `p.fits` files. 
 
 ::::{margin}
 :::{note}
 ESPaDOns `p.fits` files contain a main data table with 24 columns. Here we are mostly interested in columns 19-24, which contain the unnormalized spectrum (without a telluric velocity correction), and have columns for wavelength, intensity, polarization, null 1, null 2, and errorbars.
+:::
+:::: 
+
+For this tutorial, we will use the ESPaDOns observation `2378196p.fits`, so the example is specific to ESPaDOnS observations from the standard Upena/LibreESPRIT pipeline at CFHT. For observations from other instruments or other data reduction pipelines, you will need a different script to convert FITS files to the `.s` format. 
+
+::::{margin}
+:::{admonition} Converting File Formats
+:class: attention
+See also the [tutorial on converting to .s files](../Tutorials/1-ConvertToSFiles_Tutorial.ipynb) for more information. Tools have been provided for a few commonly used spectropolarimeters (documented in the [API](https://folsomcp.github.io/specpolFlow/API/Converters_API.html)), but in some cases, you may need to write your own conversion script.
 :::
 ::::
 
@@ -35,12 +47,11 @@ In the command line, write the command:
 replacing the `inputfile-p.fits` with the name of our ESPaDOnS file `2378196p.fits`. The script will return `2378196pn.s` (normalized data) and `2378196pu.s` (unnormalized data) in the same directory as the '.fits' file.
 
 ::::{margin}
-:::{note}
-ESPaDOns `p.fits` files contain a main data table with 24 columns. Here we are mostly interested in columns 19-24, which contain the unnormalized spectrum (without a telluric velocity correction), and have columns for wavelength, intensity, polarization, null 1, null 2, and errorbars.
+:::{admonition} For more details...
+:class: seealso
+More details about the difference between `n.s` and `u.s` files can be found in [this tutorial](../Tutorials/1-ConvertToSFiles_Tutorial.ipynb) and in the [API](https://folsomcp.github.io/specpolFlow/API/Converters_API.html).
 :::
 ::::
-
-This example is specific to ESPaDOnS observations from the standard Upena/LibreESPRIT pipeline at CFHT. For observations from other instruments or other data reduction pipelines, you will need a different script to convert FITS files to the `.s` format. In some cases you may need to write your own conversion script; converters for a few instruments are discussed in [this Tutorial](1-ConvertToSFiles_Tutorial.ipynb), and documented in the [API](https://folsomcp.github.io/specpolFlow/API/Converters_API.html).
 
 
 ## Normalization GUI 
