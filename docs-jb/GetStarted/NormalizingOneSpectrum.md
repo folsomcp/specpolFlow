@@ -23,11 +23,6 @@ pip install normPlot
  Prior to using the normalization GUI, the file containing the spectrum should be converted from `.fits` to `.s` format (following the LibreESPRIT format). Please see the [tutorial on converting to .s files](../Tutorials/1-ConvertToSFiles_Tutorial.ipynb). Tools have been provided for a few commonly used spectropolarimeters.  
 ```
 
-Assuming you have installed the program via pip, the interactive normalization UI can be started from the terminal with the command 
-```
-normplot [observation_file]
-```
-
 ::::{margin}
 :::{admonition} Command line alternative (if normPlot is not installed with pip)
 :class: tip 
@@ -35,6 +30,11 @@ You can also run the main Python file for normPlot directly, like:
 `python normPlot2.py [observation_file]`
 :::
 ::::
+
+Assuming you have installed the program via pip, the interactive normalization UI can be started from the terminal with the command 
+```
+normplot [observation_file]
+```
 
 You can also run normPlot from within a Jupyter Notebook or other Python script
 ```
@@ -50,7 +50,7 @@ Once executed, you should see the following window appear
 :align: center
 ```
 
-The top panel of this window displays the observed spectral orders (in different colors), black points used for actual fitting, and polynomial fits for each order. The black fitting points are computed by dividing an order into consecutive search bins of equal width and extracting the maximum flux within each bin. The panel below is a preview of the normalized spectrum that would be output by the code. The axes are synced and allow the user to compare the unnormalized and normalized spectrum in the same range of wavelength. The lower panel updates anytime the new fit is explicitly computed. Wavelengths are in the units of the input observation (in this case nanometers).
+The top panel of this window displays the observed spectral orders (in different colors), the black points used for actual fitting, and polynomial fits for each order. The black fitting points are computed by dividing an order into consecutive search bins of equal width and extracting the maximum flux within each bin. The panel below is a preview of the normalized spectrum that would be output by the code. The axes are synced and allow the user to compare the unnormalized and normalized spectrum in the same range of wavelength. The lower panel updates anytime the new fit is explicitly computed. Wavelengths are in the units of the input observation (in this case nanometers).
 
 ### Buttons in the interactive UI
 
