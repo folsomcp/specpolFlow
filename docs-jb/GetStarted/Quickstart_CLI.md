@@ -17,7 +17,7 @@ The SpecpolFlow tool set uses the text '.s' file format for spectra. This usuall
 
 ::::{margin}
 :::{note}
-See the [How to convert telescope-provided files to the standardized .s format](1-ConvertToSFiles_Tutorial.ipynb) tutorial for more details.
+See the [How to convert telescope-provided files to the standardized .s format](../Tutorials/1-ConvertToSFiles_Tutorial.ipynb) tutorial for more details.
 :::
 ::::
 
