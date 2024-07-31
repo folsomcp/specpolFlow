@@ -88,8 +88,6 @@ In these cases, where you aren't planning to use the order anyway, we mostly jus
 
 ### Removing Spectral lines from the fit:
 Remember, we essentially are making a common line that the spectral lines extend down from, so we must do our best to make sure they aren’t contributing to the fitting. This means we don’t want any of our fit points resting on spectral lines. Wherever we see fit point on spectral lines, we use the `exclude range` function to remove those line from being options to place fit points. For example, let’s remove this line at ~486 nm ($H \beta$).
-If your exclude region is too big, you can use `include range` to regions to bring back portions of the spectrum that you would like back.
-Now, there are a few other lines that we need to tackle at: 383, 397, 410, 434 ($H \gamma$) , 438, 646, 656($H \alpha$), 850, 860, 866, 875, 810, 901, and 905nm.
 
 ```{image} ../normplot_images/486_a.png
 :alt: 486_a
@@ -97,18 +95,26 @@ Now, there are a few other lines that we need to tackle at: 383, 397, 410, 434 (
 :width: 600px
 :align: center
 ```
+Selecting the region using the `exclude range` button: 
+
 ```{image} ../normplot_images/486_b.png
 :alt: 486_a
 :class: bg-primary mb-1
 :width: 600px
 :align: center
 ```
+After pressing `fit cont.`:
+
 ```{image} ../normplot_images/486_c.png
 :alt: 486_a
 :class: bg-primary mb-1
 :width: 600px
 :align: center
 ```
+See how the wings of the $H \beta$ line are no longer arching above the continuum since we exluded the problem-points from the fitting routine!
+
+If your exclude region is too big, you can use `include range` to regions to bring back portions of the spectrum that you would like back.
+Now, there are a few other lines that we need to tackle at: 383, 397, 410, 434 ($H \gamma$) , 438, 646, 656($H \alpha$), 850, 860, 866, 875, 810, 901, and 905nm.
 
 One advantage of this is that if we adjust the width of the search bins later, then you will not have to worry about new points appearing on the same line. 
 In some instances, you will have spectral lines that exist on the overlapping edge of two orders like H_alpha and H_beta. For some lines, this can be managed by having the `fill order edge gaps` on. Then for that excluded region, the program will try to complete the fit using the nearest fit point from the neighboring order.
@@ -123,24 +129,23 @@ You may occasionally find some fit points being placed on telluric lines. This u
 :width: 600px
 :align: center
 ```
+Selecting the region using the `exclude range` button: 
+
 ```{image} ../normplot_images/telluric_b.png
 :alt: 486_a
 :class: bg-primary mb-1
 :width: 600px
 :align: center
 ```
-```{image} ../normplot_images/telluric_c.png
-:alt: 486_a
-:class: bg-primary mb-1
-:width: 600px
-:align: center
-```
+After pressing `fit cont.`:
+
 ```{image} ../normplot_images/telluric_d.png
 :alt: 486_a
 :class: bg-primary mb-1
 :width: 600px
 :align: center
 ```
+The wings of the telluric region around 759 nm are no longer arched and there are no fit points within the blended region.
 
 ### Fit Points on Noise: 
 You may occasionally find a fit point resting in the noise level on the continuum. To try to correct this, we can adjust the **average length** and increase it to a slightly larger number. What’s happening here is that there’s a small window of width that we specify that is moving across the spectrum one data point at a time and averaging the flux at each step about the center of that window. This essentially smoothens the spectrum contained in that bin, but this does not directly affect the actual data we use. It will lessens the impact of the noise on where the fit point is placed. 
