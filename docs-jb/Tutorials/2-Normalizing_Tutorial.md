@@ -19,13 +19,14 @@ normPlot.normplot('[observation_file]')
 
 
 ## Converting from the .fits format to the .s text file
-Data files downloaded from the CADC archive are distributed in a '.fits' format. To use normPlot, these will need to be converted to the standard '.s' text file. Note that file names ending in `i.fits` contain spectroscopic data (usually 4 spectra for each polarimetric observation), and file names ending in `p.fits` contain the spectopolarimetric data. We want to convert the `p.fits` files. 
 
 ::::{margin}
 :::{note}
 ESPaDOns `p.fits` files contain a main data table with 24 columns. Here we are mostly interested in columns 19-24, which contain the unnormalized spectrum (without a telluric velocity correction), and have columns for wavelength, intensity, polarization, null 1, null 2, and errorbars.
 :::
 :::: 
+
+Data files downloaded from the CADC archive are distributed in a '.fits' format. To use normPlot, these will need to be converted to the standard '.s' text file. Note that file names ending in `i.fits` contain spectroscopic data (usually 4 spectra for each polarimetric observation), and file names ending in `p.fits` contain the spectopolarimetric data. We want to convert the `p.fits` files. 
 
 For this tutorial, we will use the ESPaDOns observation `2378196p.fits`, so the example is specific to ESPaDOnS observations from the standard Upena/LibreESPRIT pipeline at CFHT. For observations from other instruments or other data reduction pipelines, you will need a different script to convert FITS files to the `.s` format. 
 
@@ -77,14 +78,14 @@ We want to select a relatively small number of "good" continuum points which can
 To find "good" points, each order is broken down into a set of consecutive search bins with respect to wavelength. The bins are equal in width (in velocity). In each bin, the highest flux point is selected as being most likely in the continuum (i.e. not in an absorption line). However, to deal with noise in the observation, a running average is applied to the spectrum before selecting the highest point in the search bin. This averaging helps ensure that the selected highest point in a bin is not highest because of a peak in the noise, but instead highest because of real features in the spectrum. 
 
 ## Normalizing the Individual Orders 
-**From here we will refer to the buttons described in the [Introductory Guide](../GetStarted/NormalizingOneSpectrum.md). This guide addresses items that need attention in the normalization process.** 
+**From here we will refer to the buttons described in the [Introductory Guide](../GetStarted/NormalizingOneSpectrum.md).** 
 
-### Navigation items to remember:
+### Key Navigation Buttons:
 
-A few things that will be useful when doing this tutorial:
+The following buttons will be useful for completing this tutorial:
 
-* If you want to see the wavelength ranges of orders, you can open the polynomial degree panel (with the `set poly. degree...` button). When you hover the mouse over a specific order, a box will appear indicating the wavelength range of the order. Also, colors in the panel match the plot-colors of their respective orders. 
-* It is useful to zoom in enough that you can see individual lines, but keep the plot wide enough that you can see the width of the entire order you are working on.
+* To see the wavelength ranges of the orders, you can open the polynomial degree panel using the `set poly. degree...` button. When you hover the mouse over a specific order, a box will appear indicating the wavelength range of the order. Also, colors in the panel match the plot-colors of their respective orders. 
+* Use the Zoom in and Zoom out buttons to adjust the plot so that the individual lines are visible. It is recommended that you also visualize the width of the entire spectral order you are working on.
 * To view more of the depth of the line when they appear small, use the zoom button and select an enclosed area that is the width of the window but a much smaller height, with the height starting at the continuum and going down to the bottom of the spectral line. 
 * If you have an ok horizontal range, but are too zoomed in or too zoomed out vertically, you can try the `auto-y` button, to automatically scale the vertical axis.
 * Matplotlib's default panning and zooming buttons get overridden by the `include range` and `exclude range` functions. Make sure they are not on when you’re exploring the spectra. However, the custom buttons for zooming, panning, and auto-scaling will still work, as will the keyboard shortcuts.
