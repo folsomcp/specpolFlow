@@ -3,7 +3,6 @@
 The main functions of SpecpolFlow can be run using command line programs, presented here. 
 
 :::{admonition} See also...
-:class: seealso
 The more detailed tutorials, which can be found under the "Tutorials" header on the webpage, discuss the Python interface of SpecpolFlow, since those provide more options and are more complex.  
 :::
 
@@ -43,9 +42,9 @@ The SPIRou .fits files contain nan values for pixels where the telluric correcti
 
 Reliable continuum normalization is needed before running LSD. Several normalization tools can do this.  SpecpolFlow includes the optional tool normPlot, which can handle the .s format with polarimetric information. 
 
-:::{admonition} 
-:class: attention Before running this, make sure you used the option to install normPlot!
-`pip install normPlot`
+:::{attention} 
+Before running this, make sure you used the option to install normPlot!  
+Or install it now with `pip install normPlot`
 :::
 
 Run the interactive tool on an input observation like:
