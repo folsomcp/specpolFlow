@@ -100,7 +100,7 @@ Some buttons that will be particularly useful for completing this tutorial:
 * Matplotlib's default panning and zooming buttons get overridden by the `include range` and `exclude range` functions. Make sure they are not on when you’re exploring the spectra. However, the custom buttons for zooming, panning, and auto-scaling will still work, as will the keyboard shortcuts.
 * To see the outcome of any changes you’ve enacted, you have to click `fit cont`.
 
-### Setting global fitting parameters:
+### Setting global fitting parameters
 
 There are two parameters that apply to all the spectral orders: the `srch. bin (km/s)` value and the `average length` value.  
 
@@ -114,13 +114,13 @@ The `average length` value controls the running average used before finding the 
 
 In this tutorial we use the default 11 pixel average length, since the S/N of the observation is quite good.
 
-### Telluric or noise dominated orders: 
+### Telluric or noise dominated orders
 
 In some instances, the observations may have orders that have very low signal to noise ratios, or which are dominated by telluric lines (sharps lines created from absorption by Earth's atmosphere). It can be difficult to try to apply the full set of fitting procedures on these orders to get them flat. Moreover, these orders contain very little useful information about the real spectrum of the star. 
 
 In these cases, it can be more expedient to simply achieve a reasonably well-behaved continuum polynomial fit, rather than doing a detailed normalization for the problem order. You can try reducing the order of the polynomial degree by clicking the `set poly. degree...` button. For our example, change orders 1, 2, 38, 39, 40 to have smaller values (like 1 or 2). 
 
-### Removing spectral lines from the fit:
+### Removing spectral lines from the fit
 
 It is important to make sure that spectral lines are not contributing to the polynomial fit. None of the "good" continuum points should appear within spectral lines. Use the `exclude range` function to remove points within spectral lines from the fit. For example, let’s remove the $H \beta$ line at ~486 nm.
 
@@ -177,7 +177,7 @@ The solution is usually to decrease the degree of the polynomial, click `set pol
 That is a bit more reasonable.  If this were an A-type star with even broader Balmer lines you might want to reduce the degree to 2 or even 1!
 
 
-### Fit points in telluric lines:
+### Fit points in telluric lines
 You may occasionally find some fit points being placed inside telluric lines. This usually only happens in places where a lot of telluric lines blend together, so that there is no good continuum in a region of spectrum. We exclude those regions in an order, again with the `exclude range` button (which is especially useful if you choose to adjust the bin widths later on). For example let’s exclude the region around 759 nm. 
 
 ```{image} normplot_images/telluric_a.png
@@ -196,7 +196,7 @@ Select the region using the `exclude range` button, then after pressing `fit con
 ```
 The continuum near the telluric region around 759 nm is no longer arched and there are no fit points within the blended region.
 
-### Removing emission lines:
+### Removing emission lines
 
 There are a few weak emission lines in this spectrum.  In the case of $\xi^1$ CMa, the emission lines are pretty weak and could almost be ignored.  But in a star with more emission, this will cause problems.  Emission lines don't work with the algorithm normPlot uses for selecting "good" points: If the emission line makes the highest point in a bin it will be selected, even though it is definitely not continuum!  To solve this you need to remove emission lines using the `exclude range` button.  Really strong cosmic ray hits may cause a similar problem, so if they are being selected as "good" points they should also be removed.
 
@@ -221,11 +221,11 @@ In this case it is causing some extra trouble, because it is at the very edge of
 That solves the problem nicely.  Some other weak emission features that should be removed in this observation are at 646, 746, 810, and 990 nm.
 
 
-### Fit Points on Noise:
+### Fit Points on Noise
 
 You may occasionally find a fit point resting in the noise level on the continuum. To correct this, adjust the `average length` and increase it to a slightly larger number. There is a small window of width that we specify that is moving across the spectrum one data point at a time and averaging the flux at each step about the center of that window. Adjusting the average length essentially smooths the spectrum contained in that bin, but does not directly affect the data. In effect, this will decrease the impact of the noise on where the fit point is placed. 
 
-## Saving Normalized Spectra 
+## Saving normalized spectra 
 
 The chosen parameters (after fitting) can be saved to the files:  `exclude.dat`, `poly-deg.dat`, and `params.dat`.  These files can later be loaded to start from where you left off, or for a good initial guess if you are normalizing similar spectra.  Usually it's safest to always click this button before closing the main window, just in case you want to tweak a normalization later.  **Closing the main window always automatically saves the normalized spectrum.**
 
