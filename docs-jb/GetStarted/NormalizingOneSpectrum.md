@@ -43,8 +43,8 @@ normPlot.normplot('[observation_file]')
 ```
 Once executed, you should see the following window appear
 
-```{image} ../normplot_images/user_guide_gui.png
-:alt: gui_snapshot
+```{image} normplot_images/user_guide_gui.png
+:alt: normPlot main window
 :class: bg-primary mb-1
 :width: 800px
 :align: center
@@ -68,8 +68,8 @@ Clicking this button will apply any parameter changes made and update the contin
 
 **set output params**
 
-```{image} ../normplot_images/user_guide_set_output.png
-:alt: gui_set_output
+```{image} normplot_images/user_guide_set_output.png
+:alt: set output params widow
 :class: bg-primary mb-1
 :width: 400px
 :align: center
@@ -79,8 +79,8 @@ Here you can determine the structure of the spectrum in the output file. If you 
 
 **set poly. degree**
 
-```{image} ../normplot_images/user_guide_polyfit_params.png
-:alt: gui_set_output
+```{image} normplot_images/user_guide_polyfit_params.png
+:alt: set poly. degree window
 :class: bg-primary mb-1
 :width: 200px
 :align: center
