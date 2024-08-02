@@ -56,6 +56,13 @@ More details about the difference between `n.s` and `u.s` files can be found in 
 
 **Our goal is to fit a low order polynomial through "good" continuum points in every spectral order. The continuum can then be normalized by dividing the observation by the fit. This creates a ‘common line’ (a flat horizontal line at y = 1) which can be used to consistently measure the properties of the spectral lines.** 
 
+:::{note}
+normPlot is an optional extra, and is not installed by default with specpolFlow.  If you have not used the option to install it, you can install it now with
+```
+pip install normPlot
+```
+:::
+
 Open the normalization GUI from the command line with
 ```
 normplot <observation_file.s>
