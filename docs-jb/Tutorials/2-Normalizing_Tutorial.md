@@ -88,7 +88,7 @@ To find "good" points, each order is broken down into a set of consecutive searc
 
 normPlot normalizes each spectral order individually. It calculates a separate best fit polynomial for each order, and divides each observed order by that order's polynomial.  Because of this, it is useful to look through the fit to the observation, paying attention to one order at a time, when trying to optimize the normalization.
 
-### Useful navigation buttons:
+### Useful navigation buttons
 **From here we will refer to the buttons described in the [Introductory Guide](../GetStarted/NormalizingOneSpectrum.md).** 
 
 Some buttons that will be particularly useful for completing this tutorial:
@@ -223,11 +223,15 @@ That solves the problem nicely.  Some other weak emission features that should b
 
 ### Fit Points on Noise
 
-You may occasionally find a fit point resting in the noise level on the continuum. To correct this, adjust the `average length` and increase it to a slightly larger number. There is a small window of width that we specify that is moving across the spectrum one data point at a time and averaging the flux at each step about the center of that window. Adjusting the average length essentially smooths the spectrum contained in that bin, but does not directly affect the data. In effect, this will decrease the impact of the noise on where the fit point is placed. 
+You may occasionally find a "good" fit point resting too high in the noise on the continuum. This is mostly a problem for spectra with more noise. To correct this, adjust the `average length` and increase it to a slightly larger number. (In situations where noise is very important you may need to double or triple the value.) 
+
+For computing the "good" points, there is a small window of width that we specify (in pixels). For each data point in the spectrum, an average flux is calculated using the pixels within that window, centered on the data point we care about. This creates a moving average, which moves across the spectrum one data point at a time. Adjusting the average length essentially smooths the spectrum contained in that bin.  This applies to the selected "good" points for the polynomial fit, but does not directly affect the data in the normalized spectrum. In effect, this will decrease the impact of the noise on where the fit points are placed. 
 
 ## Saving normalized spectra 
 
-The chosen parameters (after fitting) can be saved to the files:  `exclude.dat`, `poly-deg.dat`, and `params.dat`.  These files can later be loaded to start from where you left off, or for a good initial guess if you are normalizing similar spectra.  Usually it's safest to always click this button before closing the main window, just in case you want to tweak a normalization later.  **Closing the main window always automatically saves the normalized spectrum.**
+**Closing the main window always automatically saves the normalized spectrum.**  However, it is a good idea to push the `fit cont.` button before closing the program.  The program uses the current polynomials without updating them for any changes when it is close, so it is a good idea to make sure they are up to date with your final parameters.
+
+The chosen parameters (after fitting) can be saved using the `save params` button, to the files:  `exclude.dat`, `poly-deg.dat`, and `params.dat`.  These files can later be loaded to start from where you left off, or for a good initial guess if you are normalizing similar spectra.  Usually it's safest to always click this button before closing the main window, just in case you want to tweak a normalization later.  
 
 ###  Output files
 Once the main window is closed the program will save the normalized spectrum to `[observation_file].norm`.
