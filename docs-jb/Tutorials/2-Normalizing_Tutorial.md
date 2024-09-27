@@ -6,7 +6,7 @@ Still under construction. Some commands and other details may be out of date.
 
 ## Introduction
 
-This tutorial introduces the procedure of normalizing echelle spectra and the use of normPlot. The interactive normalization GUI is a part of the SpecpolFlow pipeline as a step that proceeds the spectroscopic or polarimetric analysis. In this introduction to spectra normalization, we will be using ESPaDOnS observations of the star $\xi^1$ CMa. 
+This tutorial introduces the procedure of normalizing echelle spectra with normPlot. The interactive normalization GUI is a part of the SpecpolFlow pipeline as a step that proceeds the spectroscopic or polarimetric analysis. In this introduction to spectra normalization, we will be using ESPaDOnS observations of the star $\xi^1$ CMa. 
 
 :::{note}
 The current version of this tutorial focuses on executing normPlot from the command line.
@@ -54,7 +54,7 @@ More details about the difference between `n.s` and `u.s` files can be found in 
 
 ## Normalization GUI 
 
-**Our goal is to fit a low order polynomial through "good" continuum points in every spectral order. The continuum can then be normalized by dividing the observation by the fit. This creates a ‘common line’ (a flat horizontal line at y = 1) which can be used to consistently measure the properties of the spectral lines.** 
+**Our goal is to fit a low order polynomial through "good" continuum points in every spectral order. The continuum can then be normalized by dividing the observation by the fit. This creates a "common line" (a flat horizontal line at y = 1) which can be used to consistently measure the properties of the spectral lines.** 
 
 :::{note}
 normPlot is an optional extra, and is not installed by default with specpolFlow.  If you have not used the option to install it, you can install it now with
@@ -93,7 +93,7 @@ normPlot normalizes each spectral order individually. It calculates a separate b
 
 Some buttons that will be particularly useful for completing this tutorial:
 
-* To see the wavelength ranges of the orders, you can open the polynomial degree panel using the `set poly. degree...` button. When you hover the mouse over a specific order, a box will appear indicating the wavelength range of the order. Also, colors in the panel match the plot-colors of their respective orders. 
+* To see the wavelength ranges of the orders, you can open the polynomial degree panel using the `set poly. degree...` button. When you hover the mouse over a specific order, a box will appear indicating the wavelength range of the order. Also, colors in the panel match the plot colors of their respective orders. 
 * Use the `Zin` (zoom in) and `Zout` (zoom out) buttons to adjust the plot so that the individual lines are visible. It is recommended that you also visualize the width of the entire spectral order you are working on.
 * To view more of the depth of the line when they appear small, use the `zoom` button and select an enclosed area that is the width of the window but a much smaller height, with the height starting at the continuum and going down to the bottom of the spectral line. 
 * If you have an ok horizontal range, but are too zoomed in or too zoomed out vertically, you can try the `auto-y` button, to automatically scale the vertical axis.
@@ -110,9 +110,7 @@ If normPlot is selecting points (black circles in the plot) inside lines, that i
 
 In this tutorial we use the default 500 km s$^{-1}$ search bin width.  The example $\xi^1$ CMa is a B-type star and so line blending isn't too bad.
 
-The `average length` value controls the running average used before finding the "best" (highest) point in a bin.  This is used to reduce the impact of noise on the selected "good" points.  The default value is ok for observations with quite high S/N, but for noisier observations a larger value is better.  If the selected  "good" points are sitting a little above the center of the noise distribution (in continuum regions), that's usually a sign you should increase the `average length`.
-
-In this tutorial we use the default 11 pixel average length, since the S/N of the observation is quite good.
+The `average length` value controls the running average used before finding the "best" (highest) point in a bin.  This is used to reduce the impact of noise on the selected "good" points.  The default value is ok for observations with quite high S/N, but for noisier observations a larger value is better.  If the selected  "good" points are sitting a little above the center of the noise distribution (in continuum regions), that's usually a sign you should increase the `average length`. In this tutorial we use the default 11 pixel average length, since the S/N of the observation is quite good.
 
 ### Telluric or noise dominated orders
 
@@ -166,7 +164,7 @@ When you have removed a large part of an order from the fit, the polynomial may 
 :align: center
 ```
 
-The solution is usually to decrease the degree of the polynomial, click `set poly. degree...`, go to order 7 (in for this example), and change the polynomial degree to 3.  Then after pressing `fit cont` we get:
+The solution is usually to decrease the degree of the polynomial, click `set poly. degree...`, go to order 7 (in for this example), and change the polynomial degree to 3. Then after pressing `fit cont` we get:
 
 ```{image} normplot_images/hdelta-degree-3.png
 :alt: Hdelta line with lower degree polynomial
@@ -200,7 +198,7 @@ The continuum near the telluric region around 759 nm is no longer arched and the
 
 There are a few weak emission lines in this spectrum.  In the case of $\xi^1$ CMa, the emission lines are pretty weak and could almost be ignored.  But in a star with more emission, this will cause problems.  Emission lines don't work with the algorithm normPlot uses for selecting "good" points: If the emission line makes the highest point in a bin it will be selected, even though it is definitely not continuum!  To solve this you need to remove emission lines using the `exclude range` button.  Really strong cosmic ray hits may cause a similar problem, so if they are being selected as "good" points they should also be removed.
 
-Here is an example of a weak emission feature ar about 672 nm that is throwing of a polynomial fit.  
+Here is an example of a weak emission feature at about 672 nm that is throwing off a polynomial fit:  
 
 ```{image} normplot_images/emission-line-problem.png
 :alt: Emission line causing a problem
@@ -209,7 +207,7 @@ Here is an example of a weak emission feature ar about 672 nm that is throwing o
 :align: center
 ```
 
-In this case it is causing some extra trouble, because it is at the very edge of one spectral order (you can see the overlapping orders here).  When we remove this line using the the `exclude range` button, then use `fit cont` we get:
+In this case, it is causing some extra trouble because it is at the very edge of one spectral order (you can see the overlapping orders here).  When we remove this line using the the `exclude range` button, then use `fit cont`, we get:
 
 ```{image} normplot_images/emission-line-fixed.png
 :alt: Emission line excluded and fixed
@@ -218,7 +216,7 @@ In this case it is causing some extra trouble, because it is at the very edge of
 :align: center
 ```
 
-That solves the problem nicely.  Some other weak emission features that should be removed in this observation are at 646, 746, 810, and 990 nm.
+That solves the problem nicely. Some other weak emission features that should be removed in this observation are at 646, 746, 810, and 990 nm.
 
 
 ### Fit Points on Noise
@@ -229,9 +227,9 @@ For computing the "good" points, there is a small window of width that we specif
 
 ## Saving normalized spectra 
 
-**Closing the main window always automatically saves the normalized spectrum.**  However, it is a good idea to push the `fit cont.` button before closing the program.  The program uses the current polynomials without updating them for any changes when it is close, so it is a good idea to make sure they are up to date with your final parameters.
+**Closing the main window always automatically saves the normalized spectrum.**  However, it is a good idea to push the `fit cont.` button before closing the program.  The program uses the current polynomials without updating them for any changes when it is closed, so it is a good idea to make sure they are up to date with your final parameters.
 
-The chosen parameters (after fitting) can be saved using the `save params` button, to the files:  `exclude.dat`, `poly-deg.dat`, and `params.dat`.  These files can later be loaded to start from where you left off, or for a good initial guess if you are normalizing similar spectra.  Usually it's safest to always click this button before closing the main window, just in case you want to tweak a normalization later.  
+The chosen parameters (after fitting) can be saved using the `save params` button to the files:  `exclude.dat`, `poly-deg.dat`, and `params.dat`.  These files can later be loaded to start from where you left off, or for a good initial guess if you are normalizing similar spectra.  Usually it's safest to always click this button before closing the main window, just in case you want to tweak a normalization later.  
 
 ###  Output files
 Once the main window is closed the program will save the normalized spectrum to `[observation_file].norm`.
@@ -239,7 +237,7 @@ Once the main window is closed the program will save the normalized spectrum to 
 The output will use the normalization and parameters of the last update. It is advised that you use the `fit cont.` button before closing the window.
 ```
 
-If you clicked the `save params`, the program will also write out the fitting information in the files, mentioned above. It's is useful to make a copy of these files with a name unique to the data. 
+If you clicked the `save params`, the program will also write out the fitting information in the files mentioned above. It is useful to make a copy of these files with a name unique to the data. 
 
 ### Running normPlot with previous parameters
 When running normPlot again, it will check for the parameter files and try to read them if they exist: `exclude.dat`, `poly-deg.dat`, and `params.dat`.  Alternatively, you can run normPlot using copies of those files with specified names from the command line:
@@ -255,7 +253,7 @@ normPlot.normplot('[observation_file]',
                   paramsName='[params_file]')
 ```
 
-You can also take the parameter files and apply them to spectra without having the reopen the interface.  This uses the `-b` flag from the command line:
+You can also take the parameter files and apply them to spectra without having the reopen the interface. This uses the `-b` flag from the command line:
 ```
 normplot -b -e [exclude_file] -d [poly-deg_file] -c [params_file] [observation_file]
 ```
