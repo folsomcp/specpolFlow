@@ -4,7 +4,7 @@ Before performing an LSD analysis, the observed spectra should be continuum norm
 
 ## About normPlot
 
- normPlot is an interactive graphical tool for normalizing spectroscopic and spectropolarimetric observations, written in Python 3. normPlot can be used as a first step in the `SpecpolFlow` pipeline, to normalize the continuum of reduced 1D stellar spectra. It is designed to work well with echelle spectra, although it can also work on singe-order spectra. normPlot was built to work on one spectral order at a time, essentially establish "good" continuum points, and fit a low order polynomial through those points.
+ normPlot is an interactive graphical tool for normalizing spectroscopic and spectropolarimetric observations, written in Python 3. normPlot can be used as a first step in the `SpecpolFlow` pipeline, to normalize the continuum of reduced 1D stellar spectra. It is designed to work well with echelle spectra, although it can also work on single-order spectra. normPlot was built to work on one spectral order at a time, essentially establish "good" continuum points, and fit a low order polynomial through those points.
 
 ::::{margin}
 :::{note}
@@ -50,7 +50,7 @@ Once executed, you should see the following window appear
 :align: center
 ```
 
-The top panel of this window displays the observed spectral orders (in different colors), the black points used for actual fitting, and polynomial fits for each order. The black fitting points are computed by dividing an order into consecutive search bins of equal width and extracting the maximum flux within each bin. The panel below is a preview of the normalized spectrum that would be output by the code. The axes are synced and allow the user to compare the unnormalized and normalized spectrum in the same range of wavelength. The lower panel updates anytime the new fit is explicitly computed. Wavelengths are in the units of the input observation (in this case nanometers).
+The top panel of this window displays the observed spectral orders (in different colors), the black points used for actual fitting, and polynomial fits for each order. The black fitting points are computed by dividing an order into consecutive search bins of equal width and extracting the maximum flux within each bin. The panel below is a preview of the normalized spectrum that would be output by the code. The axes are synced and allow the user to compare the unnormalized and normalized spectrum in the same range of wavelengths. The lower panel updates anytime the new fit is explicitly computed. Wavelengths are in the units of the input observation (in this case nanometers).
 
 ### Buttons in the interactive UI
 
@@ -90,7 +90,7 @@ Here the degree of the individual polynomials can be set for each order. The col
 
 **fill edge order gaps**
 
-This check box enables a feature for dealing with spectral orders that end in an exclude region.  The algorithm can take a fitting point in the adjacent spectral order and use that to constrain the continuum polynomial.  This can be useful around very broad features like Balmer lines.
+This check box enables a feature for dealing with spectral orders that end in an exclude region. The algorithm can take a fitting point in the adjacent spectral order and use that to constrain the continuum polynomial. This can be useful around very broad features like Balmer lines.
 
 **srch. bin (km s$^{-1}$)**
 
