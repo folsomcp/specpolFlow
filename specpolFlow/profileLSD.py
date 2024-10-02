@@ -13,6 +13,13 @@ from scipy.optimize import curve_fit
 
 from .obsSpec import Spectrum, read_spectrum
 
+# use a version dependent name for trapezoidal integration,
+# since Numpy 2.0 changed names (this could also be a try except)
+if np.lib.NumpyVersion(np.__version__) >= '2.0.0':
+    from numpy import trapezoid as _trapezoid
+else:
+    from numpy import trapz as _trapezoid
+
 ###################################
 ###################################
 class LSD:
@@ -562,8 +569,8 @@ class LSD:
         :return: the velocity of the center of gravity, optionally also its error
         '''
         # Computes the velocity of the center of gravity
-        numerator = np.trapz(self.vel * (Ic - self.specI), x=self.vel)
-        denominator = np.trapz(Ic - self.specI, x=self.vel)
+        numerator = _trapezoid(self.vel * (Ic - self.specI), x=self.vel)
+        denominator = _trapezoid(Ic - self.specI, x=self.vel)
         rv = numerator/denominator
         
         if fullOutput == True:
@@ -593,10 +600,10 @@ class LSD:
                    (float, default=1.0)
         :return: the velocity of the center of gravity
         '''
-        numerator = np.trapz(self.vel * np.abs( self.specV * (Ic-self.specI) ),
-                             x=self.vel )
-        denominator = np.trapz(np.abs( self.specV * (Ic-self.specI) ),
-                               x=self.vel )
+        numerator = _trapezoid(self.vel * np.abs(self.specV * (Ic-self.specI)),
+                             x=self.vel)
+        denominator = _trapezoid(np.abs(self.specV * (Ic-self.specI)),
+                               x=self.vel)
         return numerator/denominator
 
     def cog_V(self):
@@ -606,8 +613,8 @@ class LSD:
         
         :return: the velocity of the center of gravity
         '''
-        numerator = np.trapz(self.vel * np.abs(self.specV), x=self.vel )
-        denominator = np.trapz( np.abs(self.specV), x=self.vel )
+        numerator = _trapezoid(self.vel * np.abs(self.specV), x=self.vel)
+        denominator = _trapezoid(np.abs(self.specV), x=self.vel)
         return(numerator/denominator)        
 
     def cog_min(self):
@@ -1145,7 +1152,7 @@ def _integrate_bz(vel, spec, specSig, geff, lambda0, cog_val,
 
     # Calculation of the integral in the numerator of the Bz function
     # with a trapezoidal numerical integral
-    fnum = np.trapz((vel - cog_val) * spec, x=vel-cog_val) #in (km/s)^2
+    fnum = _trapezoid((vel - cog_val) * spec, x=vel-cog_val) #in (km/s)^2
     sfnum = np.sqrt(np.sum(((vel - cog_val) * specSig * err_scale)**2))
     # for a constant pixel spacing deltav (with the end points treated exactly)
     #sfnumConst = np.sqrt((0.5*(vel[0] - cog_val)*specSig[0]*deltav)**2
@@ -1156,7 +1163,7 @@ def _integrate_bz(vel, spec, specSig, geff, lambda0, cog_val,
     # with a trapezoidal numerical integral
     # For the square error calculation, we propagate like we would for
     # summation in a numerical integral.
-    ri0v = np.trapz(norm_val - specI, x=vel) # in km/s
+    ri0v = _trapezoid(norm_val - specI, x=vel) # in km/s
     si0v = np.sqrt(np.sum((specSigI * err_scale)**2)) # in km/s
     # for a constant pixel spacing deltav (with the end points treated exactly)
     #si0vConst = np.sqrt((0.5*specSigI[0]*deltav)**2
