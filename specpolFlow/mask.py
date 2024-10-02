@@ -164,7 +164,7 @@ def read_mask(fname):
     tmpMask = np.loadtxt(fname, skiprows=1, unpack=True)
     
     #Sort the line mask so wavelength is always increasing
-    ind = np.argsort(tmpMask[0,:])
+    ind = np.argsort(tmpMask[0,:], kind='stable')
     
     wl = tmpMask[0, ind]
     element = tmpMask[1, ind]

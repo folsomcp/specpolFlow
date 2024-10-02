@@ -1296,7 +1296,7 @@ def removePoorLines(mask, pixVel, fracPix = 1.0, sumDepths=True):
                                                 mask.depth[iClose[deepestLine]])
                 nTrimmed += np.count_nonzero(iClose) - 1
     if nTrimmed > 0:
-        print('Modified line mask, removed {:n} too closely spaced lines'.format(nTrimmed))
+        print('Modified line mask, removed {:d} too closely spaced lines'.format(nTrimmed))
 
     ##If one wanted a shorter mask
     #mask = mask.prune()

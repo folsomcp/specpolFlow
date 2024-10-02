@@ -240,7 +240,7 @@ class Spectrum:
                     f.write(self.header)
                     #Make sure there is a line break after the first header text
                     if self.header[-1] != '\n': f.write('\n')
-                f.write('{:7n} {:1n}\n'.format(int(self.wl.size), ncols))
+                f.write('{:7d} {:1d}\n'.format(int(self.wl.size), ncols))
             
             if ncols == 5:
                 for i in range(self.wl.size):
