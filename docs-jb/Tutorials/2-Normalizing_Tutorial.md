@@ -1,12 +1,8 @@
 # How to Normalize Echelle Spectra with normPlot
 
-:::{Warning}
-Still under construction. Some commands and other details may be out of date.
-:::
-
 ## Introduction
 
-This tutorial introduces the procedure of normalizing echelle spectra with normPlot. The interactive normalization GUI is a part of the SpecpolFlow pipeline as a step that proceeds the spectroscopic or polarimetric analysis. In this introduction to spectra normalization, we will be using ESPaDOnS observations of the star $\xi^1$ CMa. 
+This tutorial introduces the procedure of normalizing echelle spectra with normPlot. The interactive normalization GUI is a part of the SpecpolFlow pipeline, as a step that proceeds the spectroscopic or polarimetric analysis. In this introduction to spectra normalization, we will be using ESPaDOnS observations of the star $\xi^1$ CMa. 
 
 :::{note}
 The current version of this tutorial focuses on executing normPlot from the command line.
@@ -82,7 +78,7 @@ The bottom left corner of the window contains a toolbar with commands from matpl
 ### The fit points
 We want to select a relatively small number of "good" continuum points that can be used for a polynomial fit describing the continuum of the observation. These "good" points, which appear as black dots on the plot, are selected within an order and are used to fit a polynomial function for the continuum for that order. Ideally, the resulting normalized continuum will be equal to 1.
 
-To find "good" points, each order is broken down into a set of consecutive search bins with respect to wavelength. The bins are equal in width (in velocity). In each bin, the highest flux point is selected as being most likely in the continuum (i.e. not in an absorption line). However, to deal with noise in the observation, a running average is applied to the spectrum before selecting the highest point in the search bin. This averaging helps ensure that the selected highest point in a bin is not highest because of a peak in the noise, but instead highest because of real features in the spectrum. 
+To find "good" points, each order is broken down into a set of consecutive search bins in wavelength. The bins are equal in width (in velocity). In each bin, the highest flux point is selected as being most likely in the continuum (i.e. not in an absorption line). However, to deal with noise in the observation, a running average is applied to the spectrum before selecting the highest point in the search bin. This averaging helps ensure that the selected highest point in a bin is not highest because of a peak in the noise, but instead highest because of real features in the spectrum. 
 
 ## Normalizing the individual orders 
 
@@ -95,8 +91,8 @@ Some buttons that will be particularly useful for completing this tutorial:
 
 * To see the wavelength ranges of the orders, you can open the polynomial degree panel using the `set poly. degree...` button. When you hover the mouse over a specific order, a box will appear indicating the wavelength range of the order. Also, colors in the panel match the plot colors of their respective orders. 
 * Use the `Zin` (zoom in) and `Zout` (zoom out) buttons to adjust the plot so that the individual lines are visible. It is recommended that you also visualize the width of the entire spectral order you are working on.
-* To view more of the depth of the line when they appear small, use the `zoom` button and select an enclosed area that is the width of the window but a much smaller height, with the height starting at the continuum and going down to the bottom of the spectral line. 
 * If you have an ok horizontal range, but are too zoomed in or too zoomed out vertically, you can try the `auto-y` button, to automatically scale the vertical axis.
+* To view more of the depth of the line when they appear small, use the `zoom` button and select an enclosed area that is the width of the window but a much smaller height, with the height starting at the continuum and going down to the bottom of the spectral line. 
 * Matplotlib's default panning and zooming buttons get overridden by the `include range` and `exclude range` functions. Make sure they are not on when you’re exploring the spectra. However, the custom buttons for zooming, panning, and auto-scaling will still work, as will the keyboard shortcuts.
 * To see the outcome of any changes you’ve enacted, you have to click `fit cont`.
 
@@ -151,9 +147,9 @@ If your exclude region is too big, you can use the `include range` button to bri
 Now, try removing the big broad spectral lines at the following wavelengths: 
 383, 397, 410 ($H \delta$), 434 ($H \gamma$), 438, 447, 656 ($H \alpha$), 855, 860, 866, 875, 886, 901, and 905 nm.
 
-If we adjust the width of the search bins later, we will not have to worry about new points appearing on the same line. 
+If we adjust the width of the search bins later, we will not have to worry about new points appearing inside these lines, since we have removed them. 
 
-In some instances, we will have spectral lines that exist on the overlapping edge of two orders like $H \alpha$ and $H \beta$. For some lines, this can be managed by having the `fill order edge gaps` option turned on (it defaults to on). Then, for that excluded region, the program use the nearest "good" fit point from the neighboring order to constrain the polynomial from this order.  If the fluxes from different orders agree well (the flat fielding and blaze correction are good) this is helpful.  If the blaze correction is particularly bad you may want to turn this off.
+In some instances, we will have spectral lines that exist on the overlapping edge of two orders like $H \alpha$ and $H \beta$. For some lines, this can be managed by having the `fill order edge gaps` option turned on (it defaults to on). Then, for that excluded region, the program use the nearest "good" fit point from the neighboring order to constrain the polynomial for this order.  If the fluxes from different orders agree well (the flat fielding and blaze correction are good) this is helpful.  If the blaze correction is particularly bad you may want to turn this off.
 
 When you have removed a large part of an order from the fit, the polynomial may have too high a degree for the remaining part of the order.  This problem is most common in Balmer lines and other very wide features.  It mostly shows up as the fit polynomial curving too much inside the region that has been excluded.  Here is an example of that around $H\delta$:
 
@@ -164,7 +160,7 @@ When you have removed a large part of an order from the fit, the polynomial may 
 :align: center
 ```
 
-The solution is usually to decrease the degree of the polynomial, click `set poly. degree...`, go to order 7 (in for this example), and change the polynomial degree to 3. Then after pressing `fit cont` we get:
+The solution is usually to decrease the degree of the polynomial, click `set poly. degree...`, go to order 7 (for this example), and change the polynomial degree to 3. Then after pressing `fit cont` we get:
 
 ```{image} normplot_images/hdelta-degree-3.png
 :alt: Hdelta line with lower degree polynomial
@@ -172,11 +168,11 @@ The solution is usually to decrease the degree of the polynomial, click `set pol
 :width: 600px
 :align: center
 ```
-That is a bit more reasonable.  If this were an A-type star with even broader Balmer lines you might want to reduce the degree to 2 or even 1!
+That is a bit more reasonable.  If this were an A-type star with even broader Balmer lines you might need to reduce the degree to 2 or even 1!
 
 
 ### Fit points in telluric lines
-You may occasionally find some fit points being placed inside telluric lines. This usually only happens in places where a lot of telluric lines blend together, so that there is no good continuum in a region of spectrum. We exclude those regions in an order, again with the `exclude range` button (which is especially useful if you choose to adjust the bin widths later on). For example let’s exclude the region around 759 nm. 
+You may occasionally find some fit points being placed inside telluric lines. This usually only happens in places where a lot of telluric lines blend together, so that there is no good continuum in a region of spectrum. We exclude those regions, again with the `exclude range` button. For example let’s exclude the region around 759 nm. 
 
 ```{image} normplot_images/telluric_a.png
 :alt: Telluric band causing a problem
@@ -192,7 +188,7 @@ Select the region using the `exclude range` button, then after pressing `fit con
 :width: 600px
 :align: center
 ```
-The continuum near the telluric region around 759 nm is no longer arched and there are no fit points within the blended region.
+The continuum near the telluric region around 759 nm is no longer arched, and there are no fit points within the blended region.
 
 ### Removing emission lines
 
@@ -229,7 +225,7 @@ For computing the "good" points, there is a small window of width that we specif
 
 **Closing the main window always automatically saves the normalized spectrum.**  However, it is a good idea to push the `fit cont.` button before closing the program.  The program uses the current polynomials without updating them for any changes when it is closed, so it is a good idea to make sure they are up to date with your final parameters.
 
-The chosen parameters (after fitting) can be saved using the `save params` button to the files:  `exclude.dat`, `poly-deg.dat`, and `params.dat`.  These files can later be loaded to start from where you left off, or for a good initial guess if you are normalizing similar spectra.  Usually it's safest to always click this button before closing the main window, just in case you want to tweak a normalization later.  
+The chosen fitting parameters (after fitting) can be saved using the `save params` button to the files:  `exclude.dat`, `poly-deg.dat`, and `params.dat`.  These files can later be loaded to start from where you left off, or for a good initial guess if you are normalizing similar spectra.  Usually it's safest to always click this button before closing the main window, just in case you want to tweak a normalization later.  
 
 ###  Output files
 Once the main window is closed the program will save the normalized spectrum to `[observation_file].norm`.
@@ -237,7 +233,7 @@ Once the main window is closed the program will save the normalized spectrum to 
 The output will use the normalization and parameters of the last update. It is advised that you use the `fit cont.` button before closing the window.
 ```
 
-If you clicked the `save params`, the program will also write out the fitting information in the files mentioned above. It is useful to make a copy of these files with a name unique to the data. 
+If you clicked the `save params`, the program will also write out the fitting information in the files `exclude.dat`, `poly-deg.dat`, and `params.dat`. When you are satisfied with the normalization, it is useful to make a copy of these files with a name unique to the data. 
 
 ### Running normPlot with previous parameters
 When running normPlot again, it will check for the parameter files and try to read them if they exist: `exclude.dat`, `poly-deg.dat`, and `params.dat`.  Alternatively, you can run normPlot using copies of those files with specified names from the command line:
@@ -265,7 +261,7 @@ normPlot.normplot('[observation_file]',
                   paramsName='[params_file]',
                   batchMode=True)
 ```
-This useful for normalizing a large number of observations of the same object. 
+This useful for normalizing a large number of observations of the same star. 
 
 
 
