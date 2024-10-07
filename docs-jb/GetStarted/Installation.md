@@ -48,6 +48,13 @@ SpecpolFlow provides a several command line tools for analysis. After installing
 * `spf-rvfit` calculate a radial velocity from an LSD profile
 * `lsdpy` calculate LSD profiles
 
+If you are using Python in virtual environments (e.g. with [venv](https://docs.python.org/3/library/venv.html)), then you may wish to consider also installing SpecpolFlow with [pipx](https://pipx.pypa.io/stable/).  pipx will install the command line tools so that they run in their own separate virtual environment.  
+```
+pipx install LSDpy
+pipx install specpolFlow
+pipx install normPlot
+```
+
 
 ## Accessing the classes and function
 
