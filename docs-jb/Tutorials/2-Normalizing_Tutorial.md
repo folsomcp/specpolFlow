@@ -24,7 +24,7 @@ ESPaDOns `p.fits` files contain a main data table with 24 columns. Here we are m
 
 Data files downloaded from the CADC archive are distributed in a '.fits' format. To use normPlot, these will need to be converted to the standard '.s' text file. Note that file names ending in `i.fits` contain spectroscopic data (usually 4 spectra for each polarimetric observation), and file names ending in `p.fits` contain the spectopolarimetric data. We want to convert the `p.fits` files. 
 
-For this tutorial, we will use the ESPaDOns observation [`2378196p.fits`](https://github.com/folsomcp/specpolFlow/blob/main/docs-jb/Tutorials/ConvertToSFiles_tutorialfiles/2378196p.fits), so the example is specific to ESPaDOnS observations from the standard Upena/LibreESPRIT pipeline at CFHT. For observations from other instruments or other data reduction pipelines, you will need a different script to convert FITS files to the `.s` format. 
+For this tutorial, we will use the ESPaDOns observation [`2378196p.fits`](https://github.com/folsomcp/specpolFlow/blob/main/docs-jb/Tutorials/ConvertToSFiles_tutorialfiles/2378196p.fits), so the example is specific to ESPaDOnS observations from the standard Upena/LibreESPRIT pipeline at CFHT. For observations from other instruments or other data reduction pipelines, you will need a different script to convert the FITS files to the `.s` format. 
 
 ::::{margin}
 :::{admonition} Converting File Formats
@@ -100,17 +100,17 @@ Some buttons that will be particularly useful for completing this tutorial:
 
 There are two parameters that apply to all the spectral orders: the `srch. bin (km/s)` value and the `average length` value.  
 
-The `srch. bin (km/s)` value controls the size of the bin used to find a "good" continuum point.  This should be set large enough so that there is some real continuum inside most bins.  This should be at least several times larger than the $v\sin i$ of the star.  If $v\sin i$ is very high, or if line blending is severe in the observation you may want a larger `srch. bin` than the default value.  On the other hand if $v\sin i$ is low and there is not much blending you can use a lower value than the default.  
+The `srch. bin (km/s)` value controls the size of the bin used to find a "good" continuum point.  This should be set large enough so that there is some real continuum inside most bins.  This should be at least several times larger than the $v\sin i$ of the star. If $v\sin i$ is very high, or if line blending is severe in the observation you may want a larger `srch. bin` than the default value. On the other hand if $v\sin i$ is low and there is not much blending you can use a lower value than the default.  
 
 If normPlot is selecting points (black circles in the plot) inside lines, that is usually a sign that you should increase the `srch. bin` value.  This is usually a problem on the blue end of an observation where the line density is highest.
 
-In this tutorial we use the default 500 km s$^{-1}$ search bin width.  The example $\xi^1$ CMa is a B-type star and so line blending isn't too bad.
+In this tutorial we use the default 500 km s$^{-1}$ search bin width. The example $\xi^1$ CMa is a B-type star and so line blending isn't too bad.
 
 The `average length` value controls the running average used before finding the "best" (highest) point in a bin.  This is used to reduce the impact of noise on the selected "good" points.  The default value is ok for observations with quite high S/N, but for noisier observations a larger value is better.  If the selected  "good" points are sitting a little above the center of the noise distribution (in continuum regions), that's usually a sign you should increase the `average length`. In this tutorial we use the default 11 pixel average length, since the S/N of the observation is quite good.
 
 ### Telluric or noise dominated orders
 
-In some instances, the observations may have orders that have very low signal to noise ratios, or which are dominated by telluric lines (sharps lines created from absorption by Earth's atmosphere). It can be difficult to try to apply the full set of fitting procedures on these orders to get them flat. Moreover, these orders contain very little useful information about the real spectrum of the star. 
+In some instances, the observations may have orders that have very low signal to noise ratios, or which are dominated by telluric lines (sharp lines created from absorption by Earth's atmosphere). It can be difficult to try to apply the full set of fitting procedures on these orders to get them flat. Moreover, these orders contain very little useful information about the real spectrum of the star. 
 
 In these cases, it can be more expedient to simply achieve a reasonably well-behaved continuum polynomial fit, rather than doing a detailed normalization for the problem order. You can try reducing the order of the polynomial degree by clicking the `set poly. degree...` button. For our example, change orders 1, 2, 38, 39, 40 to have smaller values (like 1 or 2). 
 
@@ -149,9 +149,9 @@ Now, try removing the big broad spectral lines at the following wavelengths:
 
 If we adjust the width of the search bins later, we will not have to worry about new points appearing inside these lines, since we have removed them. 
 
-In some instances, we will have spectral lines that exist on the overlapping edge of two orders like $H \alpha$ and $H \beta$. For some lines, this can be managed by having the `fill order edge gaps` option turned on (it defaults to on). Then, for that excluded region, the program use the nearest "good" fit point from the neighboring order to constrain the polynomial for this order.  If the fluxes from different orders agree well (the flat fielding and blaze correction are good) this is helpful.  If the blaze correction is particularly bad you may want to turn this off.
+In some instances, we will have spectral lines that exist on the overlapping edge of two orders like $H \alpha$ and $H \beta$. For some lines, this can be managed by having the `fill order edge gaps` option turned on (it defaults to on). Then, for that excluded region, the program use the nearest "good" fit point from the neighboring order to constrain the polynomial for this order. If the fluxes from different orders agree well (the flat fielding and blaze correction are good) this is helpful. If the blaze correction is particularly bad you may want to turn this off.
 
-When you have removed a large part of an order from the fit, the polynomial may have too high a degree for the remaining part of the order.  This problem is most common in Balmer lines and other very wide features.  It mostly shows up as the fit polynomial curving too much inside the region that has been excluded.  Here is an example of that around $H\delta$:
+When you have removed a large part of an order from the fit, the polynomial may have too high a degree for the remaining part of the order. This problem is most common in Balmer lines and other very wide features. It mostly shows up as the fit polynomial curving too much inside the region that has been excluded. Here is an example of that around $H\delta$:
 
 ```{image} normplot_images/hdelta-too-high-degree.png
 :alt: Hdelta line with high degree polynomial
@@ -192,7 +192,7 @@ The continuum near the telluric region around 759 nm is no longer arched, and th
 
 ### Removing emission lines
 
-There are a few weak emission lines in this spectrum.  In the case of $\xi^1$ CMa, the emission lines are pretty weak and could almost be ignored.  But in a star with more emission, this will cause problems.  Emission lines don't work with the algorithm normPlot uses for selecting "good" points: If the emission line makes the highest point in a bin it will be selected, even though it is definitely not continuum!  To solve this you need to remove emission lines using the `exclude range` button.  Really strong cosmic ray hits may cause a similar problem, so if they are being selected as "good" points they should also be removed.
+There are a few weak emission lines in this spectrum.  In the case of $\xi^1$ CMa, the emission lines are pretty weak and could almost be ignored.  But in a star with more emission, this will cause problems.  Emission lines don't work with the algorithm normPlot uses for selecting "good" points: if the emission line makes the highest point in a bin, it will be selected, even though it is definitely not continuum! To solve this you need to remove emission lines using the `exclude range` button. Really strong cosmic ray hits may cause a similar problem, so if they are being selected as "good" points they should also be removed.
 
 Here is an example of a weak emission feature at about 672 nm that is throwing off a polynomial fit:  
 
@@ -219,13 +219,13 @@ That solves the problem nicely. Some other weak emission features that should be
 
 You may occasionally find a "good" fit point resting too high in the noise on the continuum. This is mostly a problem for spectra with more noise. To correct this, adjust the `average length` and increase it to a slightly larger number. (In situations where noise is very important you may need to double or triple the value.) 
 
-For computing the "good" points, there is a small window of width that we specify (in pixels). For each data point in the spectrum, an average flux is calculated using the pixels within that window, centered on the data point we care about. This creates a moving average, which moves across the spectrum one data point at a time. Adjusting the average length essentially smooths the spectrum contained in that bin.  This applies to the selected "good" points for the polynomial fit, but does not directly affect the data in the normalized spectrum. In effect, this will decrease the impact of the noise on where the fit points are placed. 
+For computing the "good" points, there is a small window of width that we specify (in pixels). For each data point in the spectrum, an average flux is calculated using the pixels within that window, centered on the data point we care about. This creates a moving average, which moves across the spectrum one data point at a time. Adjusting the average length essentially smooths the spectrum contained in that bin. This applies to the selected "good" points for the polynomial fit, but does not directly affect the data in the normalized spectrum. In effect, this will decrease the impact of the noise on where the fit points are placed. 
 
 ## Saving normalized spectra 
 
 **Closing the main window always automatically saves the normalized spectrum.**  However, it is a good idea to push the `fit cont.` button before closing the program.  The program uses the current polynomials without updating them for any changes when it is closed, so it is a good idea to make sure they are up to date with your final parameters.
 
-The chosen fitting parameters (after fitting) can be saved using the `save params` button to the files:  `exclude.dat`, `poly-deg.dat`, and `params.dat`.  These files can later be loaded to start from where you left off, or for a good initial guess if you are normalizing similar spectra.  Usually it's safest to always click this button before closing the main window, just in case you want to tweak a normalization later.  
+The chosen fitting parameters (after fitting) can be saved using the `save params` button to the files:  `exclude.dat`, `poly-deg.dat`, and `params.dat`. These files can later be loaded to start from where you left off, or for a good initial guess if you are normalizing similar spectra. Usually it's safest to always click this button before closing the main window, just in case you want to tweak a normalization later.  
 
 ###  Output files
 Once the main window is closed the program will save the normalized spectrum to `[observation_file].norm`.

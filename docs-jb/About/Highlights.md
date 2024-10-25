@@ -21,5 +21,6 @@ SpF 1: with the [MOBSTER](https://mobster-collab.com/) Collaboration; May 13th, 
 ### Publications
 Check out the links below to see papers that have used `SpecpolFlow`! If you've used `SpecpolFlow` in a publication, please [let us know!](https://folsomcp.github.io/specpolFlow/index.html#) 
 
-1. [First Observation of the Complete Rotation Period of the Ultra-Slowly Rotating Magnetic O Star HD 54879.](https://ui.adsabs.harvard.edu/abs/2024arXiv240109722E/abstract) Erba, Folsom, et al. (2024) ApJ, submitted.
-2. Magnetic field, magnetospheric accretion and candidate planet of the young star GM Aurigae observed with SPIRou. Zaire, Donati, et al. (2024) MNRAS, submitted.
+1. [Magnetic field, magnetospheric accretion and candidate planet of the young star GM Aurigae observed with SPIRou.](https://ui.adsabs.harvard.edu/abs/2024MNRAS.533.2893Z/abstract) Zaire, Donati, et al. (2024) MNRAS, 533.3, 2893. 
+2. [First Observation of the Complete Rotation Period of the Ultra-Slowly Rotating Magnetic O Star HD 54879.](https://ui.adsabs.harvard.edu/abs/2024arXiv240109722E/abstract) Erba, Folsom, et al. (2024) ApJ, accepted, in press.
+ 
