@@ -143,9 +143,8 @@ def makeWin(fig, ax, mask, obs, lsdp, lsdProf, pltMaskU, pltMaskN,
                              command=unselectFitDepth.runSpanSelect)
     ToolTip(butUnselRange, 'Unselect lines to fit for depth in the mask')
     butUnselRange.grid(row=0, column=1, sticky=tk.W, padx=2, pady=2)
-    #Link the select and unselect buttons so they can turn each other off
-    selectFitDepth.linkButton(butSelRange, unselectFitDepth)
-    unselectFitDepth.linkButton(butUnselRange, selectFitDepth)
+    #Link the select and unselect buttons so they can turn each other off,
+    #done after creating the include & exclude buttons so they all can be linked
     #Apply the depth fitting
     fitDepthsM = fitDepths(mask, obs, lsdp, lsdProf, fitDepthFlags, root,
                            canvas, pltMaskU, pltMaskN, pltMaskF)
@@ -178,9 +177,8 @@ def makeWin(fig, ax, mask, obs, lsdp, lsdProf, pltMaskU, pltMaskN,
                              command=excRangeM.runSpanSelect)
     ToolTip(butExcRange, 'Exclude selected lines from the mask')
     butExcRange.grid(row=0, column=8, sticky=tk.E, padx=2, pady=2)
-    #Link the include and exclude buttons so they can turn each other off
-    incRangeM.linkButton(butIncRange, excRangeM)
-    excRangeM.linkButton(butExcRange, incRangeM)
+    #Link the include and exclude buttons so they can turn each other off,
+    #done in the next block where all related buttons are linked
     #Save the exclude ranges to a text file
     saveRangesM = saveRanges(outExcludeName, excludeRanges)
     butSaveRanges = ttk.Button(master=tools, text='save\nranges',
@@ -188,6 +186,13 @@ def makeWin(fig, ax, mask, obs, lsdp, lsdProf, pltMaskU, pltMaskN,
     ToolTip(butSaveRanges, 'Save the excluded wavelength ranges to the {:} file'.format(outExcludeName))
     butSaveRanges.grid(row=0, column=9, sticky=tk.E, padx=2, pady=2)
 
+    #Link the select, unselect, include, and exclude buttons
+    #so they can all turn each other off, and have only one mode active
+    selectFitDepth.linkButton(butSelRange, [unselectFitDepth, incRangeM, excRangeM])
+    unselectFitDepth.linkButton(butUnselRange, [selectFitDepth, incRangeM, excRangeM])
+    incRangeM.linkButton(butIncRange, [excRangeM, selectFitDepth, unselectFitDepth])
+    excRangeM.linkButton(butExcRange, [incRangeM, selectFitDepth, unselectFitDepth])
+    
     #Modify LSD control parameters
     modifyLSDparM = modifyLSDpar(root, lsdp)
     butModLSD = ttk.Button(master=tools, text='LSD param.',
@@ -539,22 +544,22 @@ class uiRangeBase:
         #not any of the special states (only not a specific state)
         self.style = ttk.Style()
         self.style.configure('ActRange.TButton', relief='sunken',
-                        background='#fbfbfb')
+                        background='#80ccff')
         self.style.map('ActRange.TButton',
                   relief=[('active','sunken')],
-                  background=[('pressed','#eeeeee'),('active','#fbfbfb')])
+                  background=[('pressed','#eeeeee'),('active','#80ccff')])
         #note: order matters for map here, 
         #when the button is 'active' (mouse over) and also being pressed
         #The scope of the style names seems to be pretty wide...
 
-    def linkButton(self, button, otherRange):
+    def linkButton(self, button, otherRangeList):
         self.button = button
-        self.otherRange = otherRange
+        self.otherRangeList = otherRangeList
     def runSpanSelect(self):
-        #First turn off the other button (only include or exclude not both!)
-        bOtherActive = self.otherRange.active
-        if (bOtherActive == True): 
-            self.otherRange.deactivate()
+        #First turn off the other linked buttons (only one mode active!)
+        for otherRange in self.otherRangeList:
+            if (otherRange.active == True):
+                otherRange.deactivate()
         self.active = not self.active
         if self.active:
             self.button.configure(style='ActRange.TButton')
