@@ -32,7 +32,7 @@ authors:
   - name: Mary E. Oksala
     orcid: 0000-0003-2580-1464
     affiliation: "5, 6"
-  - name: Federico Villadiego-Forero
+  - name: Federico Villadiego Forero
     #orcid: 0000-0000-0000-0000
     affiliation: 3
   - name: Robin Moore
