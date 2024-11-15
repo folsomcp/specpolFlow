@@ -14,7 +14,7 @@ include = ["specpolFlow*"]  # ["*"] by default
 
 [project]
 name = "specpolFlow"
-version = "0.4.2"
+version = "0.4.3"
 authors = [ {name="SpecpolFlow Team", email="specpolflow@gmail.com"},
 ]
 description = "Tools for the analysis of stellar spectropolarimetric data"
