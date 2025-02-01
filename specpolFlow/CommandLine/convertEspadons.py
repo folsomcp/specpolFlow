@@ -26,7 +26,8 @@ def espadons_cli():
             'from the ESPaDOnS CADC archive format to text .s files. Output '
             'files as [filename]n.s for the pipeline normalized spectra, '
             '[filename]u.s for unnormalized spectra, and [filename].out for '
-            'header information.')
+            'header information. Supports i.fits (intensity spectrum) '
+            'and p.fits (polarization & intensity spectrum) files.')
     parser.add_argument("observation", nargs='*',
                         help='a list of FITS files to process.')
     args = parser.parse_args()
