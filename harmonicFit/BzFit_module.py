@@ -77,6 +77,47 @@ class dipole_model:
         self.Bpole=Bpole
         self.u=u
 
+        const = self.Bpole/20*(15+u)/(3-u)
+        A = const*np.sin(self.i)*np.sin(self.beta)
+        mean = const*np.cos(self.i)*np.cos(self.beta)
+        self.cos_model = cos_model(A, mean, 0.0)
+        
+    def get_model(self, phi):
+        '''
+        Function to return the Bz value for a given phi for this dipolar model
+
+        :param phi: The rotational phase in radiants
+        '''
+        Bz = self.Bpole/20*(15+self.u)/(3-self.u) \
+                * (np.cos(self.beta)*np.cos(self.i)
+                   +np.sin(self.i)*np.sin(self.beta)*np.cos(phi))
+        return Bz
+
+    def to_array(self):
+        '''
+        Helper function to return an array of parameters
+        to use with minimizing functions
+        '''
+        return [self.i, self.beta, self.Bpole, self.u]
+    
+    def to_dict(self):
+        d = {
+            'i':self.i,
+            'beta':self.beta,
+            'Bpole':self.Bpole,
+            'u':self.u,
+        }
+        return d
+    
+def dipole_model_from_df(df):
+    '''
+    Create a dipole_model object from a dictionary
+     or from a single row of a pandas dataframe. 
+
+    :param 
+    '''
+    return dipole_model(df["i"], df["beta"], df["Bpole"], df["u"])
+
 class cos_model:
     '''
     Helper function to define a cos model for Bz:
@@ -139,7 +180,8 @@ class cos_model:
     
 def cos_model_from_df(df):
     '''
-    Create a cos_model object from a single row of a dataframe.
+    Create a cos_model object from a dictionary object or
+    from a single row of a pandas dataframe.
     Note: only A, mean, and phi0 are used, because min, max, and r are computed 
     at the object initialization. 
     '''
@@ -159,10 +201,10 @@ def get_logLH(model, data, P, jd0, b=1):
     logLH = np.sum( np.log(b/(data.val_err*(2*np.pi)**0.5)) - 0.5*b**2/data.val_err**2 * (data.val-model_values)**2 )
     return logLH
 
-def minimize(data, P, jd0, theta0=[2, 2, 0]):
+def minimize(data, P, jd0, model_func, theta0=[2, 2, 0]):
 
     def function_to_minimize(theta, data, P, jd0):
-        model = cos_model(*theta)
+        model = model_func(*theta)
         return -1*get_logLH(model, data, P, jd0)
     
     #theta0 = [2, 2, 0]
@@ -178,7 +220,7 @@ def minimize(data, P, jd0, theta0=[2, 2, 0]):
 
     print(result.message)
 
-    return cos_model(*result.x)
+    return model_func(*result.x)
 
 
 def log_prior_flat(theta, bounds):
