@@ -81,17 +81,6 @@ class dipole_model:
         A = const*np.sin(self.i)*np.sin(self.beta)
         mean = const*np.cos(self.i)*np.cos(self.beta)
         self.cos_model = cos_model(A, mean, 0.0)
-        
-    def get_model(self, phi):
-        '''
-        Function to return the Bz value for a given phi for this dipolar model
-
-        :param phi: The rotational phase in radiants
-        '''
-        Bz = self.Bpole/20*(15+self.u)/(3-self.u) \
-                * (np.cos(self.beta)*np.cos(self.i)
-                   +np.sin(self.i)*np.sin(self.beta)*np.cos(phi))
-        return Bz
 
     def to_array(self):
         '''
@@ -108,6 +97,25 @@ class dipole_model:
             'u':self.u,
         }
         return d
+
+    def get_model(self, phi):
+        '''
+        Function to return the Bz value for a given phi for this dipolar model
+
+        :param phi: The rotational phase in radiants
+        '''
+        Bz = self.cos_model.get_model(phi)
+        return Bz
+
+    def get_cosalpha(self, phi):
+        '''
+        Function to return cos(alpha), where alpha is the angle between the magnetic axis and the line of sight.
+        cos(alpha) = cos(beta)cos(i) + sin(beta)sin(i)cos(phi)
+
+        :param phi: The rotational phase in radiants
+        '''
+        cos_alpha = np.cos(self.i)*np.cos(self.beta) + np.sin(self.i)*np.sin(self.beta)*np.cos(phi)
+        return cos_alpha
     
 def dipole_model_from_df(df):
     '''
