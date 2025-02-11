@@ -129,7 +129,7 @@ def dipole_model_from_df(df):
 class cos_model:
     '''
     Helper function to define a cos model for Bz:
-    Bz = A*cos(phi+phi0) + mean
+    Model = A*cos(phi+phi0) + mean
     '''
 
     def __init__(self, A, mean, phi0):
@@ -161,7 +161,7 @@ class cos_model:
 
     def get_model(self, phi):
         '''
-        Function to return the Bz value for a given phi for this cos model
+        Function to return value of the cos_model for a given phi
         '''
         return self.A*np.cos(phi+self.phi0) + self.mean
 
@@ -194,6 +194,41 @@ def cos_model_from_df(df):
     at the object initialization. 
     '''
     return cos_model(df["A"], df["mean"], df["phi0"])
+
+class harmonic_model:
+    '''
+    Helper function to define a hamonics model:
+    Model = a0 + a1cos(phi) + b1sin(phi) + a2 cos(2phi) + b2sin(2phi) + ...
+    '''
+
+    def __init__(self, coeff):
+        '''
+        Constructor for the harmonic_model. 
+
+        :param coeff: an array with the coefficients, in this order: a0, a1, b1, a2, b2, ...
+        '''
+        self.coeff = coeff
+
+        self.n_coeff = len(coeff)
+        self.order = int(self.n_coeff / 2)
+        ia = [0] + list(range(1,self.n_coeff,2))
+        self.a = self.coeff[ia]
+        self.b = self.coeff[range(2,self.n_coeff,2)]
+
+    def get_model_test(self,phi):
+        '''
+        Function to return value of the harmonic_model for a given phi
+        This is a testing funciton written for clarity instead of efficiency
+        to check the matrix construction for the inversion. 
+        '''
+        model = 0.0
+        for i,a in enumerate(self.a):
+            model = model + a*np.cos(i*phi)
+        for i,b in enumerate(self.b):
+            model = model + b*np.sin((i+1)*phi)
+        return model
+
+    
 
 def get_logLH(model, data, P, jd0, b=1):
     '''
