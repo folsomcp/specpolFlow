@@ -796,7 +796,7 @@ class LSD:
                           "you want -- merge orders before running calc_bz()!",
                           stacklevel=2)
             lsd_bz = lsd_bz._sortvel()
-            deltav_array = lsd_bz.vel[1:]-lsd_bz.vel[:-1]
+            #deltav_array = lsd_bz.vel[1:]-lsd_bz.vel[:-1]
 
         # Actual calculation of the Bz:
 
