@@ -215,20 +215,117 @@ class harmonic_model:
         self.a = self.coeff[ia]
         self.b = self.coeff[range(2,self.n_coeff,2)]
 
-    def get_model_test(self,phi):
+    def get_model_loop(self,phi):
         '''
         Function to return value of the harmonic_model for a given phi
         This is a testing funciton written for clarity instead of efficiency
         to check the matrix construction for the inversion. 
         '''
-        model = 0.0
+        model = np.zeros(phi.size)
         for i,a in enumerate(self.a):
             model = model + a*np.cos(i*phi)
         for i,b in enumerate(self.b):
             model = model + b*np.sin((i+1)*phi)
         return model
+    
+    def get_model_matrix(self,phi):
+        '''
+        Funciton to get the model for a given phi array
+        '''
+
+        MM = self.get_phi_matrix(phi)
+        model = MM @ self.coeff
+
+        return model
 
     
+    def get_phi_matrix(self, phi_arr):
+        '''
+        Helper function to get the matrix that is used to fit the harmonics model
+
+        :param phi_arr: Array of phases for the data (in radians)
+        '''
+
+        ia_orders = np.arange(1, self.a.size)
+        ib_orders = np.arange(1, self.b.size+1)
+        #print('ia: ',ia_orders)
+        #print('ib: ',ib_orders)
+        
+        MM = np.zeros((phi_arr.size, self.n_coeff))
+        MM[:,0] = 1.0
+        
+        #phi_arr = np.ones(phi_arr.size) # debugging
+
+        #MM[:,range(1,self.n_coeff,2)] = 99 # debugging
+        #MM[:,range(1,self.n_coeff,2)] = np.outer(phi_arr, ia_orders) # debugging
+        MM[:,range(1,self.n_coeff,2)] = np.cos(np.outer(phi_arr, ia_orders))
+        
+        #MM[:,range(2,self.n_coeff,2)] = 55 # debugging
+        #MM[:,range(2,self.n_coeff,2)] = np.outer(phi_arr, ib_orders) # debugging
+        MM[:,range(2,self.n_coeff,2)] = np.sin(np.outer(phi_arr, ib_orders))
+        
+        return MM
+
+def harmonic_fit(data, P, jd0, n):
+    '''
+    Compute the coefficient of a harmonics fit 
+    using least-square fitting. 
+
+    :param data: A time_series object.
+    :param P: rotation period to fold the data
+    :param jd0: the zeroth of the ephemeris
+    :param n: the number of coefficients to use [a0,a1,b1,a2,b2,...]
+    '''
+    ####
+    # The solution 
+    # Val = a0 + a1 cos(phi) + b1 sin(phi) + a2 cos(2phi) + b2 sin(2phi)+..
+    #
+    # We can change this to a matrix problem:
+    # |val1|   | 1  cos(phi1) sin(phi1) cos(2*phi1) sin(2*phi1) ...| |a0|
+    # |val2| = | 1  cos(phi2) sin(phi2) cos(2*phi2) sin(2*phi2) ...| |a1|
+    # |val3|   | 1  cos(phi3) sin(phi3) cos(2*phi3) sin(2*phi3) ...| |b1|
+    #
+    # V = MM * C
+    #
+    # The least-square solution is 
+    # (M^T S^2 M)^-1 (M^T S^2 V)
+    # where S is a diagonal matrix with 1/val_err
+    # We can save some memory by splitting the S^2 into two:
+    # (M^T S) (S M).
+    # With a diagonal matrix, 
+    # a1 = np.array([1,2,3])
+    # a2 = np.array([[1,0,0],[0,2,0],[0,0,3]])
+    # np.dot(a2,b) gives the same results as b*a1[:, np.newaxis]
+
+    # get the phase of the observations
+    # and change into radians
+    phi = data.foldphase(P, jd0) * 2*np.pi
+
+    # Create a harmonic_model object with zero coefficients
+    empty_model = harmonic_model(np.zeros(n))
+
+    # Use the class functions to get the design matrix
+    # (doesn't depends on the coefficients)
+    MM = empty_model.get_phi_matrix(phi)
+    #print(MM)
+
+    MM /= data.val_err[:, np.newaxis]
+    #print(MM)
+    #Evaluate the solution to the linear least squares problem
+    valsOverSig = data.val/data.val_err
+    #fitCoeff = np.linalg.inv(MM.T @ MM) @ (MM.T @ valsOverSig)
+    covar = np.linalg.inv(MM.T @ MM)
+    auto = (MM.T @ valsOverSig)
+    fitCoeff = covar @ auto
+    fitErr = np.sqrt(np.diag(covar))
+
+    #Get the reduced chi^2 for this optimal fit
+    chi2 = (valsOverSig - MM@fitCoeff).T @ (valsOverSig - MM@fitCoeff)
+    chi2nu = chi2/(data.val.size - fitCoeff.size)
+    
+    return harmonic_model(fitCoeff), fitErr, chi2, chi2nu    
+
+
 
 def get_logLH(model, data, P, jd0, b=1):
     '''
