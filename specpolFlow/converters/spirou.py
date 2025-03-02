@@ -230,6 +230,14 @@ def spirou_p(fname, outname=None, nanTreatment='replace',
     for i in range(nOrd):
         # save this order into a Spectrum object (trimming nans off the edges)
         nuse = np.nonzero(np.isfinite(specI2D[i,:]))[0]
+        # deal with orders that are entirely nan
+        # this should be rare (e.g. telluric correction issues, very low S/N)
+        if nuse.size < 1:
+            if nanTreatment == 'keep':
+                nuse = np.arange(nPix, dtype=int)
+            else:
+                continue
+        
         ord = spf.Spectrum(wl2D[i,:][nuse[0]:nuse[-1]+1],
                            specI2D[i,:][nuse[0]:nuse[-1]+1],
                            polar2D[i,:][nuse[0]:nuse[-1]+1],
@@ -392,6 +400,15 @@ def spirou_e(fname, outname=None, nanTreatment='replace',
     for i in range(nOrd):
         # save this order into a Spectrum object (trimming nans off the edges)
         nuse = np.nonzero(np.isfinite(specI2D[i,:]))[0]
+        # deal with orders that are entirely nan
+        # this should be rare (e.g. telluric correction issues, very low S/N)
+        if nuse.size < 1:
+            if nanTreatment == 'keep' or nanTreatment == 'replace':
+                nuse = np.nonzero(np.isfinite(wl2D[i,:]))[0]
+                if nuse.size < 1: nuse = np.arange(nPix, dtype=int)
+            else:
+                continue
+
         ord = spf.Spectrum(wl2D[i,:][nuse[0]:nuse[-1]+1],
                            specI2D[i,:][nuse[0]:nuse[-1]+1],
                            np.zeros(nuse[-1] - nuse[0] + 1),
@@ -412,8 +429,12 @@ def spirou_e(fname, outname=None, nanTreatment='replace',
         ord.specI = ord.specI/ordBlaze
         ord.specSig = ord.specSig/ordBlaze
         # and set uncertainty estimates for pixels with negative flux to be large
-        #ord.specSig[np.logical_not(iok)] = np.percentile(ord.specSig[iok], 99.9)
-        ord.specSig[np.logical_not(iok)] = 0.2*np.percentile(ord.specI[iok], 99.0)
+        if nanTreatment == 'keep':
+            ord.specSig[np.logical_not(iok)] = np.nan
+        else:
+            if np.count_nonzero(iok) > 10:
+                #ord.specSig[np.logical_not(iok)] = np.percentile(ord.specSig[iok], 99.9)
+                ord.specSig[np.logical_not(iok)] = 0.2*np.percentile(ord.specI[iok], 99.0)
 
         if nanTreatment == 'replace':
             # replace NaNs with zeros (for the normalization routine)
@@ -569,6 +590,15 @@ def spirou_t(fname, outname=None, nanTreatment='replace',
     for i in range(nOrd):
         # save this order into a Spectrum object (trimming nans off the edges)
         nuse = np.nonzero(np.isfinite(specI2D[i,:]))[0]
+        # deal with orders that are entirely nan
+        # this should be rare (e.g. telluric correction issues, very low S/N)
+        if nuse.size < 1:
+            if nanTreatment == 'keep' or nanTreatment == 'replace':
+                nuse = np.nonzero(np.isfinite(wl2D[i,:]))[0]
+                if nuse.size < 1: nuse = np.arange(nPix, dtype=int)
+            else:
+                continue
+
         ord = spf.Spectrum(wl2D[i,:][nuse[0]:nuse[-1]+1],
                            specI2D[i,:][nuse[0]:nuse[-1]+1],
                            np.zeros(nuse[-1] - nuse[0] + 1),
@@ -595,8 +625,12 @@ def spirou_t(fname, outname=None, nanTreatment='replace',
         ord.specI = ord.specI/ordBlaze
         ord.specSig = ord.specSig/ordBlaze
         # and set uncertainty estimates for pixels with negative flux to be large
-        #ord.specSig[np.logical_not(iok)] = np.percentile(ord.specSig[iok], 99.9)
-        ord.specSig[np.logical_not(iok)] = 0.2*np.percentile(ord.specI[iok], 99.0)
+        if nanTreatment == 'keep':
+            ord.specSig[np.logical_not(iok)] = np.nan
+        else:
+            if np.count_nonzero(iok) > 10:
+                #ord.specSig[np.logical_not(iok)] = np.percentile(ord.specSig[iok], 99.9)
+                ord.specSig[np.logical_not(iok)] = 0.2*np.percentile(ord.specI[iok], 99.0)
 
         if nanTreatment == 'replace':
             # replace NaNs with zeros (for the normalization routine)
