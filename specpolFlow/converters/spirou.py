@@ -226,6 +226,7 @@ def spirou_p(fname, outname=None, nanTreatment='replace',
     # trim nans of the start and end of each order
     # (orders are often extracted past the end of the usable flux, and the data
     # are padded with nans so the rows for the orders all have the same length)
+    spec = None
     nOrd, nPix = wl2D.shape
     for i in range(nOrd):
         # save this order into a Spectrum object (trimming nans off the edges)
@@ -284,7 +285,7 @@ def spirou_p(fname, outname=None, nanTreatment='replace',
             ord = ord[nuse]
 
         # add this order to the full spectrum
-        if i == 0:
+        if spec is None:
             spec = ord
         else:
             spec = spec.concatenate(ord)
@@ -396,6 +397,7 @@ def spirou_e(fname, outname=None, nanTreatment='replace',
     # trim nans of the start and end of each order
     # (orders are often extracted past the end of the usable flux, and the data
     # are padded with nans so the rows for the orders all have the same length)
+    spec = None
     nOrd, nPix = wl2D.shape
     for i in range(nOrd):
         # save this order into a Spectrum object (trimming nans off the edges)
@@ -447,7 +449,7 @@ def spirou_e(fname, outname=None, nanTreatment='replace',
             ord = ord[nuse]
 
         # add this order to the full spectrum
-        if i == 0:
+        if spec is None:
             spec = ord
         else:
             spec = spec.concatenate(ord)
@@ -586,6 +588,7 @@ def spirou_t(fname, outname=None, nanTreatment='replace',
     # trim nans of the start and end of each order
     # (orders are often extracted past the end of the usable flux, and the data
     # are padded with nans so the rows for the orders all have the same length)
+    spec = specTell = None
     nOrd, nPix = wl2D.shape
     for i in range(nOrd):
         # save this order into a Spectrum object (trimming nans off the edges)
@@ -645,7 +648,7 @@ def spirou_t(fname, outname=None, nanTreatment='replace',
             ordTell = ordTell[nuse]
 
         # add this order to the full spectrum
-        if i == 0:
+        if spec is None:
             spec = ord
             specTell = ordTell
         else:
