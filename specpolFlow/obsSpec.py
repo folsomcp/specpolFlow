@@ -5,6 +5,13 @@ Tools for manipulating spectra, typically spectropolarimetric observations.
 import numpy as np
 import copy
 
+# use a version dependent name for trapezoidal integration,
+# since Numpy 2.0 changed names (this could also be a try except)
+if np.lib.NumpyVersion(np.__version__) >= '2.0.0':
+    from numpy import trapezoid as _trapezoid
+else:
+    from numpy import trapz as _trapezoid
+
 ###################################
 
 class Spectrum:
@@ -419,7 +426,55 @@ class Spectrum:
         else:
             raise ValueError("in merge_orders unrecognized mode '{:}'!".format(mode))
         return specM
-    
+
+    def convolveR(self, R):
+        """
+        Convolve the spectrum with a Gaussian instrumental profile
+        corresponding to a resolution R.  (R is the FWHM of the Gaussian)
+
+        Note: Uncertainties are not propagated in this routine.
+        The convolution operation introduces strong correlations into
+        the uncertainties for nearby pixels, which is requires careful
+        treatment. This routine should not be used for cases where statistics
+        or uncertainties are important.  
+        
+        :param R: the instrumental resolution, unit-less
+                  (in the form lambda/delta_lambda)
+        :rtype: Spectrum
+        """
+        if np.any(self.wl[1:] - self.wl[:-1] < 0.0):
+            print('Warning: order overlap in spectrum to be convolved!\n'
+                  'This will cause incorrect results around overlap regions.\n'
+                  'Consider using merge_orders before running convolveR.')
+
+        # check if the polarization spectrum exists
+        doPol = (np.any(self.specV != 0.0) | np.any(self.specN1 != 0.0)
+                 | np.any(self.specN2 != 0.0))
+        
+        spec = copy.deepcopy(self) #output a copy (not self!)
+        
+        sigmaIntRange = 4.0
+        # loop over the spectrum
+        for i in range(len(spec)):
+            # generate the instrumental profile in wavelength units for this central wavelength
+            fwhm = self.wl[i]/R
+            sigma = fwhm/2.3548200450309493 # FWHM/(2*sqrt(2*log(2)))
+            intRange = ((self.wl >= self.wl[i] - sigmaIntRange*sigma)
+                        & (self.wl <= self.wl[i] + sigmaIntRange*sigma))
+            wlG = self.wl[intRange]
+            specG = 1./(sigma*np.sqrt(2.*np.pi))*np.exp(-(wlG - self.wl[i])**2/(2.*sigma**2))
+            normG = _trapezoid(specG, spec.wl[intRange])
+            specG /= normG
+            
+            # evaluate the convolution for this point
+            spec.specI[i] = _trapezoid(self.specI[intRange]*specG, self.wl[intRange])
+            if doPol:
+                spec.specV[i] = _trapezoid(self.specV[intRange]*specG, self.wl[intRange])
+                spec.specN1[i] = _trapezoid(self.specN1[intRange]*specG, self.wl[intRange])
+                spec.specN2[i] = _trapezoid(self.specN2[intRange]*specG, self.wl[intRange])
+
+        return spec
+
 
 def read_spectrum(fname, trimBadPix=False, sortByWavelength=False):
     """
