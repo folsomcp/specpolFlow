@@ -171,7 +171,19 @@ class Spectrum:
         spec.specN2 /= totalWeight
         spec.specSig = np.sqrt(1/totalWeight)
         return spec
-            
+
+    def doppler_shift(self, velocity):
+        '''
+        Doppler shift the spectrum according to an input radial velocity.
+
+        :param velocity: the radial velocity in km/s
+        :rtype: Spectrum
+        '''
+        c = 299792.458  #speed of light in km/s
+        spec = copy.deepcopy(self) #work on a copy (not self!)
+        spec.wl = spec.wl + spec.wl*vel/c
+        return spec
+
     def individual_line(self, lambda0, lwidth):
         '''
         Select an individual line in the spectrum and return it
