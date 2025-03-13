@@ -442,38 +442,53 @@ class Spectrum:
                   (in the form lambda/delta_lambda)
         :rtype: Spectrum
         """
-        if np.any(self.wl[1:] - self.wl[:-1] < 0.0):
+        if np.all(self.wl[1:] >= self.wl[:-1]):
+            specS = self
+        else:
             print('Warning: order overlap in spectrum to be convolved!\n'
                   'This will cause incorrect results around overlap regions.\n'
+                  '(Sorting pixels by wavelength before convolving.)\n'
                   'Consider using merge_orders before running convolveR.')
+            indSort = np.argsort(self.wl)
+            specS = self[indSort]
 
         # check if the polarization spectrum exists
         doPol = (np.any(self.specV != 0.0) | np.any(self.specN1 != 0.0)
                  | np.any(self.specN2 != 0.0))
         
-        spec = copy.deepcopy(self) #output a copy (not self!)
+        specC = copy.deepcopy(specS) #output a copy (not self!)
         
         sigmaIntRange = 4.0
         # loop over the spectrum
-        for i in range(len(spec)):
-            # generate the instrumental profile in wavelength units for this central wavelength
-            fwhm = self.wl[i]/R
+        for i in range(len(specS)):
+            # generate the instrumental profile in wavelength units,
+            # for this pixel's wavelength
+            fwhm = specS.wl[i]/R
             sigma = fwhm/2.3548200450309493 # FWHM/(2*sqrt(2*log(2)))
-            intRange = ((self.wl >= self.wl[i] - sigmaIntRange*sigma)
-                        & (self.wl <= self.wl[i] + sigmaIntRange*sigma))
-            wlG = self.wl[intRange]
-            specG = 1./(sigma*np.sqrt(2.*np.pi))*np.exp(-(wlG - self.wl[i])**2/(2.*sigma**2))
-            normG = _trapezoid(specG, spec.wl[intRange])
+            # get the portion of the spectrum relevant for convolution
+            # for this pixel, i.e. within n*sigma of this pixel
+            ind0, ind1 = np.searchsorted(specS.wl,
+                                         [specS.wl[i] - sigmaIntRange*sigma,
+                                          specS.wl[i] + sigmaIntRange*sigma])
+            specT = specS[ind0:ind1]
+            specG = 1./(sigma*np.sqrt(2.*np.pi))*np.exp(-(specT.wl - specS.wl[i])**2/(2.*sigma**2))
+            #normG = _trapezoid(specG, wlG)
+            #in benchmarking this seems to be ~25% faster than numpy's trapz function
+            normG = np.sum((specG[:-1] + specG[1:])*0.5*(specT.wl[1:] - specT.wl[:-1]))
             specG /= normG
             
             # evaluate the convolution for this point
-            spec.specI[i] = _trapezoid(self.specI[intRange]*specG, self.wl[intRange])
+            #specC.specI[i] = _trapezoid(specT.specI*specG, specT.wl)
+            prod = specT.specI*specG
+            specC.specI[i] = np.sum((prod[:-1] + prod[1:])*0.5*(specT.wl[1:] - specT.wl[:-1]))
             if doPol:
-                spec.specV[i] = _trapezoid(self.specV[intRange]*specG, self.wl[intRange])
-                spec.specN1[i] = _trapezoid(self.specN1[intRange]*specG, self.wl[intRange])
-                spec.specN2[i] = _trapezoid(self.specN2[intRange]*specG, self.wl[intRange])
-
-        return spec
+                prod = specT.specV*specG
+                specC.specV[i] = np.sum((prod[:-1] + prod[1:])*0.5*(specT.wl[1:] - specT.wl[:-1]))
+                prod = specT.specN1*specG
+                specC.specN1[i] = np.sum((prod[:-1] + prod[1:])*0.5*(specT.wl[1:] - specT.wl[:-1]))
+                prod = specT.specN2*specG
+                specC.specN2[i] = np.sum((prod[:-1] + prod[1:])*0.5*(specT.wl[1:] - specT.wl[:-1]))
+        return specC
 
 
 def read_spectrum(fname, trimBadPix=False, sortByWavelength=False):
