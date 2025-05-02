@@ -38,6 +38,19 @@ pip install "git+https://github.com/folsomcp/specpolFlow"
 This needs a relatively recent version of pip to work properly.  Version 24 or later is recommended (`pip install --upgrade pip`).
 
 
+## Optional additional packages
+
+### Packages used in tutorials
+
+The tutorials and examples on this website largely work without installing anything extra.  However some examples illustrate using SpecpolFlow together with other packages, specifically:
+
+* [pandas](https://pandas.pydata.org/) can be used for data analysis, and structuring or organizing data, and can be [installed with pip or conda](https://pandas.pydata.org/docs/getting_started/install.html).
+* [Astronify](https://astronify.readthedocs.io/) can be used for sonifying astronomical data, and can be [installed through pip](https://astronify.readthedocs.io/en/latest/astronify/install.html), or through [their GitHub](https://github.com/spacetelescope/astronify).  We present an [experimental example](../Tutorials/9-LSDsonification_Tutorial.ipynb) of using Astronify.
+
+### Packages for developers
+
+If you are interested in building a local copy of the documentation for SpecpolFlow, you will need to install the [Jupyter Book](https://jupyterbook.org) package.  Jupyter Book can generate webpages and other documents from Jupyter notebooks, and it can be [installed with pip or conda](https://jupyterbook.org/en/stable/start/overview.html).  Jupyter Book relies on [Sphinx](https://www.sphinx-doc.org/), [MyST](https://myst-parser.readthedocs.io/), and [MyST-NB](https://myst-nb.readthedocs.io/), and these should be installed automatically when you install Jupyter Book.  
+
 ## Using the command line tools
 
 SpecpolFlow provides a several command line tools for analysis. After installing with pip, these tools (starting with `spf-toolname`) should be available in your shell's path. Some more important terminal commands are:
