@@ -5,6 +5,13 @@ Tools for manipulating spectra, typically spectropolarimetric observations.
 import numpy as np
 import copy
 
+# use a version dependent name for trapezoidal integration,
+# since Numpy 2.0 changed names (this could also be a try except)
+if np.lib.NumpyVersion(np.__version__) >= '2.0.0':
+    from numpy import trapezoid as _trapezoid
+else:
+    from numpy import trapz as _trapezoid
+
 ###################################
 
 class Spectrum:
@@ -171,7 +178,19 @@ class Spectrum:
         spec.specN2 /= totalWeight
         spec.specSig = np.sqrt(1/totalWeight)
         return spec
-            
+
+    def doppler_shift(self, velocity):
+        '''
+        Doppler shift the spectrum according to an input radial velocity.
+
+        :param velocity: the radial velocity in km/s
+        :rtype: Spectrum
+        '''
+        c = 299792.458  #speed of light in km/s
+        spec = copy.deepcopy(self) #work on a copy (not self!)
+        spec.wl = spec.wl + spec.wl*vel/c
+        return spec
+
     def individual_line(self, lambda0, lwidth):
         '''
         Select an individual line in the spectrum and return it
@@ -407,7 +426,70 @@ class Spectrum:
         else:
             raise ValueError("in merge_orders unrecognized mode '{:}'!".format(mode))
         return specM
-    
+
+    def convolveR(self, R):
+        """
+        Convolve the spectrum with a Gaussian instrumental profile
+        corresponding to a resolution R.  (R is the FWHM of the Gaussian)
+
+        Note: Uncertainties are not propagated in this routine.
+        The convolution operation introduces strong correlations into
+        the uncertainties for nearby pixels, which is requires careful
+        treatment. This routine should not be used for cases where statistics
+        or uncertainties are important.  
+        
+        :param R: the instrumental resolution, unit-less
+                  (in the form lambda/delta_lambda)
+        :rtype: Spectrum
+        """
+        if np.all(self.wl[1:] >= self.wl[:-1]):
+            specS = self
+        else:
+            print('Warning: order overlap in spectrum to be convolved!\n'
+                  'This will cause incorrect results around overlap regions.\n'
+                  '(Sorting pixels by wavelength before convolving.)\n'
+                  'Consider using merge_orders before running convolveR.')
+            indSort = np.argsort(self.wl)
+            specS = self[indSort]
+
+        # check if the polarization spectrum exists
+        doPol = (np.any(self.specV != 0.0) | np.any(self.specN1 != 0.0)
+                 | np.any(self.specN2 != 0.0))
+        
+        specC = copy.deepcopy(specS) #output a copy (not self!)
+        
+        sigmaIntRange = 4.0
+        # loop over the spectrum
+        for i in range(len(specS)):
+            # generate the instrumental profile in wavelength units,
+            # for this pixel's wavelength
+            fwhm = specS.wl[i]/R
+            sigma = fwhm/2.3548200450309493 # FWHM/(2*sqrt(2*log(2)))
+            # get the portion of the spectrum relevant for convolution
+            # for this pixel, i.e. within n*sigma of this pixel
+            ind0, ind1 = np.searchsorted(specS.wl,
+                                         [specS.wl[i] - sigmaIntRange*sigma,
+                                          specS.wl[i] + sigmaIntRange*sigma])
+            specT = specS[ind0:ind1]
+            specG = 1./(sigma*np.sqrt(2.*np.pi))*np.exp(-(specT.wl - specS.wl[i])**2/(2.*sigma**2))
+            #normG = _trapezoid(specG, wlG)
+            #in benchmarking this seems to be ~25% faster than numpy's trapz function
+            normG = np.sum((specG[:-1] + specG[1:])*0.5*(specT.wl[1:] - specT.wl[:-1]))
+            specG /= normG
+            
+            # evaluate the convolution for this point
+            #specC.specI[i] = _trapezoid(specT.specI*specG, specT.wl)
+            prod = specT.specI*specG
+            specC.specI[i] = np.sum((prod[:-1] + prod[1:])*0.5*(specT.wl[1:] - specT.wl[:-1]))
+            if doPol:
+                prod = specT.specV*specG
+                specC.specV[i] = np.sum((prod[:-1] + prod[1:])*0.5*(specT.wl[1:] - specT.wl[:-1]))
+                prod = specT.specN1*specG
+                specC.specN1[i] = np.sum((prod[:-1] + prod[1:])*0.5*(specT.wl[1:] - specT.wl[:-1]))
+                prod = specT.specN2*specG
+                specC.specN2[i] = np.sum((prod[:-1] + prod[1:])*0.5*(specT.wl[1:] - specT.wl[:-1]))
+        return specC
+
 
 def read_spectrum(fname, trimBadPix=False, sortByWavelength=False):
     """
