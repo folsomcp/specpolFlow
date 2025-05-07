@@ -892,7 +892,7 @@ class LSD:
                                  '{:}'.format(cog))
         else:
             cog_val=copy.copy(cog)
-            cog = 'fixed \; val.'
+            cog = 'fixed val.'
 
         # Get the velocity range
         if biswidth == None:
