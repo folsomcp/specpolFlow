@@ -30,7 +30,7 @@ git clone https://github.com/YOUR-GITHUB-USERNAME/specpolFlow.git
 ```
 That will download the code and documentation files, which you can look at and modify.
 
-If you want to install your local copy of SpecpolFlow, it is a good idea to first make a [virtual environment](https://docs.python.org/3/tutorial/venv.html) to install the code in, using either Python's venv or conda.  For example create a virtual environment called `spf-dev` with venv:
+If you want to install your local copy of SpecpolFlow, it is a good idea to first make a [virtual environment](https://docs.python.org/3/tutorial/venv.html) to install the code in, using either Python's venv or conda.  For example create a virtual environment called `spf-dev-env` with venv:
 ```
 python -m venv spf-dev-env
 ```
