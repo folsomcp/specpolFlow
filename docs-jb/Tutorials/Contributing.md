@@ -30,7 +30,7 @@ git clone https://github.com/YOUR-GITHUB-USERNAME/specpolFlow.git
 ```
 That will download the code and documentation files, which you can look at and modify.
 
-If you want to install your local copy of SpecpolFlow, it is a good idea to first make a [virtual environment](https://docs.python.org/3/tutorial/venv.html) to install the code in, using either Python's venv or conda.  For example create a virtual envornment called `spf-dev` with venv:
+If you want to install your local copy of SpecpolFlow, it is a good idea to first make a [virtual environment](https://docs.python.org/3/tutorial/venv.html) to install the code in, using either Python's venv or conda.  For example create a virtual environment called `spf-dev` with venv:
 ```
 python -m venv spf-dev-env
 ```
@@ -38,7 +38,7 @@ That will create a new folder `spf-dev-env`.  Then activate the virtual environm
 ```
 source spf-dev-env/bin/activate
 ```
-This keeps your development version separate from the regular version of SpecpolFlow.  You can switch versions just by activating or deactivating (just type `deactivate`) this virtual environment.  If you are using an IDE like VSCode, it may be easier to set up this virtual environment from within the that program.  
+This keeps your development version separate from the regular version of SpecpolFlow.  You can switch versions just by activating or deactivating (just type `deactivate`) this virtual environment.  If you are using an IDE like VS Code, it may be easier to set up this virtual environment from within the that program.  
 
 You can make an ['editable' install](https://setuptools.pypa.io/en/latest/userguide/development_mode.html) of your copy of SpecpolFlow with pip.  First go to the folder that has your copy of SpecpolFlow (it should have pyproject.toml and README.md), then run pip with the `-e` flag:
 ```
@@ -70,3 +70,10 @@ The website is built with the [Jupyter Book](https://jupyterbook.org/) package. 
 ```
 pip install jupyter-book
 ```
+
+You can then run Jupyter Book from the main SpecpolFlow folder to [build the book](https://jupyterbook.org/en/stable/start/build.html).  You should see the `docs-jb` folder there, and you can point the `jupyter-book build` command at that folder:
+```
+jupyter-book build docs-jb/
+```
+
+This will generate a folder inside `docs-jb` called `_build`, with the website in `docs-jb/_build/html/`, and the front page of the website should be `docs-jb/_build/html/index.html`.  
