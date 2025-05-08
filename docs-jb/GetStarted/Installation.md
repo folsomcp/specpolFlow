@@ -44,12 +44,13 @@ This needs a relatively recent version of pip to work properly.  Version 24 or l
 
 The tutorials and examples on this website largely work without installing anything extra.  However some examples illustrate using SpecpolFlow together with other packages, specifically:
 
-* [pandas](https://pandas.pydata.org/) can be used for data analysis, and structuring or organizing data, and can be [installed with pip or conda](https://pandas.pydata.org/docs/getting_started/install.html).
+* [pandas](https://pandas.pydata.org/) can be used for data analysis, and structuring or organizing data, and can be [installed with pip or conda](https://pandas.pydata.org/docs/getting_started/install.html).  There are several [optional extras](https://pandas.pydata.org/docs/getting_started/install.html#optional-dependencies) in pandas that depend on additional packages.  To get all the optional extras you can use `pip install "pandas[all]"`.  Some of our tutorials make use of fancy formatting for tables, so we recommend using at least `pip install "pandas[output-formatting]"`.  (If you installed pandas through a large distribution like Anaconda, then you likely already have these optional features.)
+
 * [Astronify](https://astronify.readthedocs.io/) can be used for sonifying astronomical data, and can be [installed through pip](https://astronify.readthedocs.io/en/latest/astronify/install.html), or through [their GitHub](https://github.com/spacetelescope/astronify).  We present an [experimental example](../Tutorials/9-LSDsonification_Tutorial.ipynb) of using Astronify.
 
 ### Packages for developers
 
-If you are interested in building a local copy of the documentation for SpecpolFlow, you will need to install the [Jupyter Book](https://jupyterbook.org) package.  Jupyter Book can generate webpages and other documents from Jupyter notebooks, and it can be [installed with pip or conda](https://jupyterbook.org/en/stable/start/overview.html).  Jupyter Book relies on [Sphinx](https://www.sphinx-doc.org/), [MyST](https://myst-parser.readthedocs.io/), and [MyST-NB](https://myst-nb.readthedocs.io/), and these should be installed automatically when you install Jupyter Book.  
+If you are interested in building a local copy of the documentation for SpecpolFlow, you will need to install the [Jupyter Book](https://jupyterbook.org) package.  Jupyter Book can generate webpages and PDF documents from Jupyter notebooks, and it can be [installed with pip or conda](https://jupyterbook.org/en/stable/start/overview.html).  Jupyter Book relies on [Sphinx](https://www.sphinx-doc.org/), [MyST](https://myst-parser.readthedocs.io/), and [MyST-NB](https://myst-nb.readthedocs.io/), and these should be installed automatically when you install Jupyter Book.  
 
 ## Using the command line tools
 
