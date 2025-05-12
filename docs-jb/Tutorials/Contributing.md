@@ -22,9 +22,9 @@ The documentation for SpecpolFlow is all in the form of Jupyter notebooks and Ma
 
 If you want to make smaller changes, you can just download a copy of the relevant file, edit it, and contact us through email or on the [Issues page](https://github.com/folsomcp/specpolFlow/issues).  If you want to make bigger changes across multiple files, or are just comfortable using Git, you can follow the directions in the 'Contributing code' section below to download all of the code and documentation files.
 
-:::{note}
+```{note}
 The .md and Jupyter files contain some non-standard Markdown notation, using extensions from [MyST Markdown](https://myst-parser.readthedocs.io/).  This is used for rendering some features on the website with [Jupyter Book](https://jupyterbook.org/) (like this [note](https://jupyterbook.org/en/stable/content/content-blocks.html#notes-warnings-and-other-admonitions)!).
-:::
+```
 
 ## Contributing code
 
