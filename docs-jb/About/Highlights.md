@@ -25,6 +25,7 @@ Check out the links below to see papers that have used `SpecpolFlow`! If you've 
 2. [First Observation of the Complete Rotation Period of the Ultra-Slowly Rotating Magnetic O Star HD 54879.](https://ui.adsabs.harvard.edu/abs/2024arXiv240109722E/abstract) Erba, Folsom, et al. (2024) ApJ, 977, 84.
 3. [A multi-kiloGauss magnetic field driving the magnetospheric accretion process in EX Lupi.](https://ui.adsabs.harvard.edu/abs/2024arXiv240903322P/abstract) Pouilly et al. (2024) A&A, 691, A18.
 4. [Magnetic Fields or Overstable Convective Modes in HR 7495: Exploring the Underlying Causes of the Spike in the 'Hump & Spike' Features.](https://ui.adsabs.harvard.edu/abs/2025arXiv250211879A/abstract) Antoci et al. (2025) A&A, 696, A111.
-5. [Dissimilar magnetically driven accretion on the components of V4046 Sagittarii.](https://ui.adsabs.harvard.edu/abs/2025arXiv250410217P/abstract) Pouilly & Audard (2025) A&A, accepted. 
+5. [Dissimilar magnetically driven accretion on the components of V4046 Sagittarii.](https://ui.adsabs.harvard.edu/abs/2025arXiv250410217P/abstract) Pouilly & Audard (2025) A&A, accepted.
+6. [HD 60435: the star that stopped pulsating](https://ui.adsabs.harvard.edu/abs/2025MNRAS.536.2103K/abstract) Kurtz et al. (2025) MNRAS, 536.3, 2103.
  
  
