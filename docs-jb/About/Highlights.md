@@ -20,7 +20,7 @@ SpF 1: with the [MOBSTER](https://mobster-collab.com/) Collaboration; May 13th, 
 ### Publications
 Check out the links below to see papers that have used `SpecpolFlow`! If you've used `SpecpolFlow` in a publication, please [let us know!](https://folsomcp.github.io/specpolFlow/index.html#) 
 
-7.[Dissimilar magnetically driven accretion on the components of V4046 Sagittarii.](https://ui.adsabs.harvard.edu/abs/2025arXiv250410217P/abstract) Pouilly & Audard (2025) A&A, accepted.
+7. [Dissimilar magnetically driven accretion on the components of V4046 Sagittarii.](https://ui.adsabs.harvard.edu/abs/2025arXiv250410217P/abstract) Pouilly & Audard (2025) A&A, accepted.
 
 6. [Magnetic Fields or Overstable Convective Modes in HR 7495: Exploring the Underlying Causes of the Spike in the 'Hump & Spike' Features.](https://ui.adsabs.harvard.edu/abs/2025arXiv250211879A/abstract) Antoci et al. (2025) A&A, 696, A111.
 
