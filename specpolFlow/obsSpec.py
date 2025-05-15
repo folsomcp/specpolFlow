@@ -188,7 +188,7 @@ class Spectrum:
         '''
         c = 299792.458  #speed of light in km/s
         spec = copy.deepcopy(self) #work on a copy (not self!)
-        spec.wl = spec.wl + spec.wl*vel/c
+        spec.wl = spec.wl + spec.wl*velocity/c
         return spec
 
     def individual_line(self, lambda0, lwidth):
