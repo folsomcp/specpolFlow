@@ -18,7 +18,7 @@ Think `SpecpolFlow` is awesome? Check out some of these other projects, too!
 SpF 1: with the [MOBSTER](https://mobster-collab.com/) Collaboration; May 13th, 11 am Eastern
 
 ### Publications
-Check out the links below to see papers that have used `SpecpolFlow`! If you've used `SpecpolFlow` in a publication, please [let us know!](https://folsomcp.github.io/specpolFlow/index.html#) 
+Check out the links below to see papers that have used `SpecpolFlow`! If you've used `SpecpolFlow` in a publication, please [cite the SpecpolFlow paper](https://github.com/folsomcp/specpolFlow/blob/main/docs-jb/index.md#using-specpolflow-in-publications) and [let us know!](https://folsomcp.github.io/specpolFlow/index.html#) 
 
 7\. [Dissimilar magnetically driven accretion on the components of V4046 Sagittarii.](https://ui.adsabs.harvard.edu/abs/2025arXiv250410217P/abstract) Pouilly & Audard (2025) A&A, accepted.    
 
