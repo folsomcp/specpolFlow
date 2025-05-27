@@ -12,8 +12,8 @@ The `SpecpolFlow` team also maintains a series of detailed tutorials with exampl
 You can reach the SpF Development Team with questions or comments at: specpolflow@gmail.com
 
 ## Using `SpecpolFlow` in publications
-If you use the `SpecpolFLow` package in the preparation of any publications, please use the following acknowledgement:  
-&nbsp;&nbsp;&nbsp;The `SpecpolFlow` package is available at https://github.com/folsomcp/specpolFlow.
+To acknowledge the use of `SpecpolFLow` in publications (or talks, research results, etc.), please cite  
+&nbsp;&nbsp;&nbsp;[SpecpolFlow: a new software package for spectropolarimetry using Python.](https://arxiv.org/abs/2505.18476) Folsom, Erba, et al. (2025) Journal of Open Source Software (in review).
 
 Individual components of `SpecpolFLow` can be referenced as follows:  
 &nbsp;&nbsp;&nbsp;LSDpy: The GitHub repository for LSDpy is available at https://github.com/folsomcp/LSDpy.  
