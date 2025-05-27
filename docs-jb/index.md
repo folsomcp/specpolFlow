@@ -15,7 +15,7 @@ You can reach the SpF Development Team with questions or comments at: specpolflo
 To acknowledge the use of `SpecpolFLow` in publications (or talks, research results, etc.), please cite  
 &nbsp;&nbsp;&nbsp;[SpecpolFlow: a new software package for spectropolarimetry using Python.](https://arxiv.org/abs/2505.18476) Folsom, Erba, et al. (2025) Journal of Open Source Software (in review).
 
-Individual components of `SpecpolFLow` can be referenced as follows:  
+Individual components of `SpecpolFLow` should be cited using the paper above, and can also be directly referenced as follows:  
 &nbsp;&nbsp;&nbsp;LSDpy: The GitHub repository for LSDpy is available at https://github.com/folsomcp/LSDpy.  
 &nbsp;&nbsp;&nbsp;normPlot: The GitHub repository for normPlot is available at https://github.com/folsomcp/normPlot.  
 
