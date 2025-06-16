@@ -29,7 +29,6 @@ parts:
     - file: Tutorials/6-CalculateBz_Tutorial.ipynb
     - file: Tutorials/7-IndividualLine_Tutorial.ipynb
     - file: Tutorials/8-CalculateBisector_Tutorial.ipynb
-    - file: Tutorials/9-LSDsonification_Tutorial.ipynb
   - caption: Contributing
     chapters:
     - file: Contributing/Contributing.md

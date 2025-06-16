@@ -46,7 +46,6 @@ The tutorials and examples on this website largely work without installing anyth
 
 * [pandas](https://pandas.pydata.org/) can be used for data analysis, and structuring or organizing data, and can be [installed with pip or conda](https://pandas.pydata.org/docs/getting_started/install.html).  There are several [optional extras](https://pandas.pydata.org/docs/getting_started/install.html#optional-dependencies) in pandas that depend on additional packages.  To get all the optional extras you can use `pip install "pandas[all]"`.  Some of our tutorials make use of fancy formatting for tables, so we recommend using at least `pip install "pandas[output-formatting]"`.  (If you installed pandas through a large distribution like Anaconda, then you likely already have these optional features.)
 
-* [Astronify](https://astronify.readthedocs.io/) can be used for sonifying astronomical data, and can be [installed through pip](https://astronify.readthedocs.io/en/latest/astronify/install.html), or through [their GitHub](https://github.com/spacetelescope/astronify).  We present an [experimental example](../Tutorials/9-LSDsonification_Tutorial.ipynb) of using Astronify.
 
 ### Packages for developers
 
