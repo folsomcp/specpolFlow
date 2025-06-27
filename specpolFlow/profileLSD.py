@@ -191,7 +191,7 @@ class LSD:
         Return a renormalized LSD profile. Divides the I, V, and Null 
         profiles, and their uncertainties, by a value.
         
-        :param normValue: the float value or array with dimension len(lsd) to renormalize (divide) the LSD profile by
+        :param normValue: the float value or array with dimension len(LSD) to renormalize (divide) the LSD profile by
         :rtype: LSD
         """
         new = LSD(self.vel, 
