@@ -1,4 +1,4 @@
-# Welcome to SpecpolFlow !
+# Welcome to SpecpolFlow!
 
 ## NOTICE TO ALL USERS: 
 SpecpolFlow's beta release is live at:
