@@ -1,11 +1,9 @@
 # Welcome to SpecpolFlow!
 
-## NOTICE TO ALL USERS: 
-SpecpolFlow's beta release is live at:
+SpecpolFlow is live on PyPI at:
 ```
 pip install specpolFlow
 ```
-The code is still in active development, while the current modules are well tested, some details may change.
 
 Installing SpecpolFlow will automatically install [LSDpy](https://github.com/folsomcp/LSDpy/).
 
@@ -18,6 +16,7 @@ or NormPlot can be installed separately using:
 pip install normPlot
 ```
 
+Documentation is live on our website at: [folsomcp.github.io/specpolFlow/](https://folsomcp.github.io/specpolFlow/)
 
 ## About SpecpolFlow
 
