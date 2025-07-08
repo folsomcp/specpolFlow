@@ -65,7 +65,7 @@ bibliography: paper.bib
 
 # Summary
 
-Spectropolarimetry, the observation of polarization and intensity as a function of wavelength, is a powerful tool in stellar astrophysics. It is particularly useful for characterizing stars and circumstellar material, and for tracing the influence of magnetic fields on a host star and its environment. Maintaining modern, flexible, and accessible computational tools that enable spectropolarimetric studies is thus essential. The `SpecpolFlow` package is a new, completely Pythonic workflow for analyzing stellar spectropolarimetric observations. Its suite of tools provides a user-friendly interface for working with data from an assortment of instruments and telescopes. `SpecpolFlow` contains tools for spectral normalization and visualization, the extraction of Least-Squares Deconvolution (LSD) profiles, the generation and optimization of line masks for LSD analyses, and the calculation of longitudinal magnetic field measurements from the LSD profiles. It also provides Python classes for the manipulation of spectropolarimetric products. The `SpecpolFlow` website includes an array of tutorials that guide users through common analysis procedures using the software. `SpecpolFlow` is distributed as a free, open-source package, with fully documented tools (via an API and command line interface) which are actively maintained by a team of contributors.
+Spectropolarimetry, the observation of polarization and intensity as a function of wavelength, is a powerful tool in stellar astrophysics. It is particularly useful for characterizing stars and circumstellar material, and for tracing the influence of magnetic fields on a host star and its environment. Maintaining modern, flexible, and accessible computational tools that enable spectropolarimetric studies is thus essential. The SpecpolFlow package is a new, completely Pythonic workflow for analyzing stellar spectropolarimetric observations. Its suite of tools provides a user-friendly interface for working with data from an assortment of instruments and telescopes. SpecpolFlow contains tools for spectral normalization and visualization, the extraction of Least-Squares Deconvolution (LSD) profiles, the generation and optimization of line masks for LSD analyses, and the calculation of longitudinal magnetic field measurements from the LSD profiles. It also provides Python classes for the manipulation of spectropolarimetric products. The SpecpolFlow website includes an array of tutorials that guide users through common analysis procedures using the software. SpecpolFlow is distributed as a free, open-source package, with fully documented tools (via an API and command line interface) which are actively maintained by a team of contributors.
 
 # Statement of need
 
@@ -77,9 +77,9 @@ Several successful programs supporting spectropolarimetric analyses exist in the
 
 # Overview of SpecpolFlow
 
-The `SpecpolFlow` package is a modernized, unified revitalization of the tools that have preceded it. The software is open source, well documented, and the code itself is extensively commented and designed to be readable. `SpecpolFlow` produces results that are consistent with previous proprietary codes implementing similar algorithms. It produces LSD profiles that are consistent with the code of @Donati1997 and `iLSD`, and it produces $\langle B_z \rangle$ values that are consistent with the code of @Wade2000.
+The SpecpolFlow package is a modernized, unified revitalization of the tools that have preceded it. The software is open source, well documented, and the code itself is extensively commented and designed to be readable. SpecpolFlow produces results that are consistent with previous proprietary codes implementing similar algorithms. It produces LSD profiles that are consistent with the code of @Donati1997 and `iLSD`, and it produces $\langle B_z \rangle$ values that are consistent with the code of @Wade2000.
 
-`SpecpolFlow` provides a toolkit with an ensemble of Python functions that:
+SpecpolFlow provides a toolkit with an ensemble of Python functions that:
 
 - Convert observed spectra into a common file format
 - Continuum normalize spectra, with an interactive graphical interface
@@ -93,10 +93,10 @@ The `SpecpolFlow` package is a modernized, unified revitalization of the tools t
 The continuum normalization routine follows the algorithm briefly described in @Folsom2008 and @Folsom2013, and implements an interactive graphical interface with the Tkinter and Matplotlib packages. Line masks can be generated from line lists in the [Vienna Atomic Line Database](https://vald.astro.uu.se/) [@Ryabchikova2015] "extract stellar" "long" format. If necessary, effective Landé factors are estimated using LS, J$_1$J$_2$, and J$_1$K coupling schemes [@Martin1978; @LandiAndLandolfi2004]. The LSD calculation follows the method of @Donati1997, with details from @Kochukhov2010. It relies on [NumPy](https://numpy.org/) [@Harris2020] and makes careful use of NumPy's sparse arrays for efficiency.
 The interactive line mask cleaning tool uses Tkinter and Matplotlib for the interface. This tool can remove lines from the mask, and automatically fit line depths using a reference observed spectrum, following @Grunhut2017 with some optimizations. The line depth fitting routine inverts the linear least squares problem in LSD, and instead fits line depths given an observation and LSD profile. That LSD profile must be approximately correct, calculated using a mask (or part of a mask) with dominantly acceptable lines. Line depth fitting remains a weighted linear least squares problem, similar to the LSD calculation, and can be solved efficiently using spare matrix operations. Radial velocities are calculated by fitting a Gaussian to an LSD profile by default, although calculating from first moments is also supported. The $\langle B_z \rangle$ calculation uses the first moment technique applied to LSD profiles [@Rees1979; @Donati1997; @Kochukhov2010].
 
-`SpecpolFlow` enables users to build their own custom workflow from the available classes and functions, which can enhance scientific archiving and reproducibility. This is also valuable for training or involving students in projects. `SpecpolFlow`'s [website](https://folsomcp.github.io/specpolFlow/) includes an extensive set of tutorials that explain the use of the package and demonstrate some common analysis cases. These tutorials, in the form of [Jupyter Notebooks](https://jupyter.org/), can flexibly be used within a classroom or workshop setting.
+SpecpolFlow enables users to build their own custom workflow from the available classes and functions, which can enhance scientific archiving and reproducibility. This is also valuable for training or involving students in projects. SpecpolFlow's [website](https://folsomcp.github.io/specpolFlow/) includes an extensive set of tutorials that explain the use of the package and demonstrate some common analysis cases. These tutorials, in the form of [Jupyter Notebooks](https://jupyter.org/), can flexibly be used within a classroom or workshop setting.
 
 # Acknowledgements
-The authors gratefully acknowledge contributions to the early development and testing of `SpecpolFlow`'s tools, including Dax Moraes, David Meleney Jr., and Gregg Wade.
+The authors gratefully acknowledge contributions to the early development and testing of SpecpolFlow's tools, including Dax Moraes, David Meleney Jr., and Gregg Wade.
 
 This research was supported by the Munich Institute for Astro-, Particle and BioPhysics (MIAPbP), which is funded by the Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) under Germany's Excellence Strategy – EXC-2094 – 390783311.
 
@@ -110,6 +110,6 @@ SS gratefully acknowledges support for this work from the Delaware Space Grant C
 
 BZ acknowledges funding from the CAPES-PrInt program (#88887.683070/2022-00 and #88887.802913/2023-00).
 
-The `SpecpolFlow` team also thanks Ms. Tali Natan for her creative design of the SpecpolFlow logo.
+The SpecpolFlow team also thanks Ms. Tali Natan for her creative design of the SpecpolFlow logo.
 
 # References
