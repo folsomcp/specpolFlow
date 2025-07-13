@@ -29,6 +29,8 @@ These tutorials are in the form of Jupyter Notebooks, which can also be run usin
 
 The full documentation can be found here: [folsomcp.github.io/specpolFlow/](https://folsomcp.github.io/specpolFlow/)
 
+If you use SpecpolFlow in your research, please cite our forthcoming paper from the Journal of Open Source Software.  The pre-print of the paper is on arXiv here: [https://arxiv.org/abs/2505.18476](https://arxiv.org/abs/2505.18476)
+
 ## Contact us!
 You can reach the SpF Development Team at: specpolflow@gmail.com
 
