@@ -20,11 +20,12 @@ authors = [ {name="SpecpolFlow Team", email="specpolflow@gmail.com"},
 description = "Tools for the analysis of stellar spectropolarimetric data"
 readme = "README.md"
 requires-python = ">=3.8"
+license = "GPL-2.0-or-later"
+license-files = ["LICEN[CS]E*"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Science/Research",
     "Topic :: Scientific/Engineering :: Astronomy",
-    "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
     "Programming Language :: Python :: 3",
 ]
 dependencies = [
