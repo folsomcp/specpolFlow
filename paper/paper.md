@@ -34,13 +34,15 @@ authors:
   - name: Mary E. Oksala
     orcid: 0000-0003-2580-1464
     affiliation: "5, 6"
-  - name: Federico Villadiego Forero
+  - given-names: Federico
+    surname: Villadiego Forero
     #orcid: 0000-0000-0000-0000
     affiliation: 3
   - name: Robin Moore
     #orcid: 0000-0000-0000-0000
     affiliation: 3
-  - name: Marisol Catalan Olais
+  - given-names: Marisol
+    surname: Catalan Olais
     orcid: 0009-0006-2442-6235
     affiliation: 3
 
