@@ -29,7 +29,13 @@ These tutorials are in the form of Jupyter Notebooks, which can also be run usin
 
 The full documentation can be found here: [folsomcp.github.io/specpolFlow/](https://folsomcp.github.io/specpolFlow/)
 
-If you use SpecpolFlow in your research, please cite our forthcoming paper from the Journal of Open Source Software.  The pre-print of the paper is on arXiv here: [https://arxiv.org/abs/2505.18476](https://arxiv.org/abs/2505.18476)
+
+## Citing
+
+If you use SpecpolFlow in your research, please cite our paper in the Journal of Open Source Software:
+[Folsom, Erba, et al., (2025). SpecpolFlow: a new software package for spectropolarimetry using Python. Journal of Open Source Software, 10(111), 7891](https://joss.theoj.org/papers/10.21105/joss.07891)
+
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.07891/status.svg)](https://doi.org/10.21105/joss.07891)
 
 ## Contact us!
 You can reach the SpF Development Team at: specpolflow@gmail.com
