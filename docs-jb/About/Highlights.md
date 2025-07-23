@@ -18,9 +18,11 @@ Think `SpecpolFlow` is awesome? Check out some of these other projects, too!
 SpF 1: with the [MOBSTER](https://mobster-collab.com/) Collaboration; May 13th, 11 am Eastern
 
 ### Publications
-Check out the links below to see papers that have used `SpecpolFlow`! If you've used `SpecpolFlow` in a publication, please [cite the SpecpolFlow paper](https://github.com/folsomcp/specpolFlow/blob/main/docs-jb/index.md#using-specpolflow-in-publications) and [let us know!](https://folsomcp.github.io/specpolFlow/index.html#) 
+Check out the links below to see papers that have used `SpecpolFlow`! If you've used `SpecpolFlow` in a publication, please [cite the SpecpolFlow paper](https://folsomcp.github.io/specpolFlow/index.html#using-specpolflow-in-publications) and [let us know!](https://folsomcp.github.io/specpolFlow/index.html#) 
 
-7\. [Dissimilar magnetically driven accretion on the components of V4046 Sagittarii.](https://ui.adsabs.harvard.edu/abs/2025arXiv250410217P/abstract) Pouilly & Audard (2025) A&A, accepted.    
+8\. [Evolving magnetic lives of Sun-like stars. I. Characterisation of the large-scale magnetic field with Zeeman-Doppler imaging](https://ui.adsabs.harvard.edu/abs/2025arXiv250714861B/abstract) Bellotti et al. (2025) A&A, accepted.  
+
+7\. [Dissimilar magnetically driven accretion on the components of V4046 Sagittarii.](https://ui.adsabs.harvard.edu/abs/2025A%26A...698A.100P/abstract) Pouilly & Audard (2025) A&A, 698 A100.  
 
 6\. [Magnetic Fields or Overstable Convective Modes in HR 7495: Exploring the Underlying Causes of the Spike in the 'Hump & Spike' Features.](https://ui.adsabs.harvard.edu/abs/2025arXiv250211879A/abstract) Antoci et al. (2025) A&A, 696, A111.  
 
