@@ -15,7 +15,8 @@ class LineList:
     This usually contains: 
      
     * nLines - number of lines in the line list
-    * ion - list of species identifiers (element or molecule and ionization)
+    * ion - array of strings of species identifiers
+      (element or molecule and ionization)
     * wl - array of wavelengths
     * loggf - array of oscillator strengths (log gf)
     * Elo - array of excitation potentials for the lower level in
@@ -31,11 +32,11 @@ class LineList:
     * stark - array of quadratic Stark damping coefficients
     * waals - array of van der Waals damping coefficients
     * depth - depth at the centre of the spectral line, as estimated by VALD
-    * configLo - list of strings with the electron configuration and
+    * configLo - array of strings with the electron configuration and
       term symbols for the lower level
-    * configUp - list of strings with the electron configuration and
+    * configUp - array of strings with the electron configuration and
       term symbols for the upper level
-    * refs - list of references for the sources of the line data (optional)
+    * refs - array of references for the sources of the line data (optional)
     """
     def __init__(self, ion, wl, loggf, Elo, Jlo, Eup, Jup, landeLo, landeUp,
                  landeEff, rad, stark, waals, depth, configLo, configUp, refs):
@@ -213,7 +214,7 @@ def line_list_zeros(nLines):
     :param nLines: the number of lines in the LineList of zeros
     :rtype: LineList
     """
-    ion      = np.tile(np.array([''], dtype='U6'), nLines)
+    ion      = np.tile(np.array([''], dtype='U8'), nLines)
     wl       = np.zeros(nLines)
     loggf    = np.zeros(nLines)
     Elo      = np.zeros(nLines)
