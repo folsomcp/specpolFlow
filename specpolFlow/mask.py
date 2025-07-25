@@ -145,6 +145,48 @@ class Mask:
 
         return mask_clean
 
+    def convert_to_line_list(self, onlyFlaggedLines=True):
+        """
+        Convert this line mask to a LineList object.
+
+        Since the line mask does not contain the full set of data from a
+        line list, many fields in the LineList will be filled with zeros.
+        This will not be suitable for most kinds of detailed modeling.
+
+        :param onlyFlaggedLines: Whether to only include lines with their
+              iuse flag set to 1 (True), or all lines in the mask (False)
+        :rtype: LineList
+        """
+        from . import lineList as lineListLib
+        elements=('H' ,'He','Li','Be','B' ,'C' ,'N' ,'O' ,'F' ,'Ne','Na','Mg',
+              'Al','Si','P' ,'S' ,'Cl','Ar','K' ,'Ca','Sc','Ti','V' ,'Cr',
+              'Mn','Fe','Co','Ni','Cu','Zn','Ga','Ge','As','Se','Br','Kr',
+              'Rb','Sr','Y' ,'Zr','Nb','Mo','Tc','Ru','Rh','Pd','Ag','Cd',
+              'In','Sn','Sb','Te','I' ,'Xe','Cs','Ba','La','Ce','Pr','Nd',
+              'Pm','Sm','Eu','Gd','Tb','Dy','Ho','Er','Tm','Yb','Lu','Hf',
+              'Ta','W' ,'Re','Os','Ir','Pt','Au','Hg','Tl','Pb','Bi','Po',
+              'At','Rn','Fr','Ra','Ac','Th','Pa','U' )
+
+        if onlyFlaggedLines:
+            mask = self[self.iuse != 0]
+        else:
+            mask = self
+        
+        nlines = len(mask.wl)
+        llist = lineListLib.line_list_zeros(nlines)
+        for i in range(nlines):
+            llist.wl[i] = mask.wl[i]
+            llist.depth[i] =  mask.depth[i]
+            llist.Elo[i] = mask.excite[i]
+            llist.landeEff[i] = mask.lande[i]
+            
+            strIon = elements[int(mask.element[i]) - 1]
+            strIon = strIon + ' {:d}'.format(
+                round(100.*(mask.element[i] % 1.0) + 1.0))
+            llist.ion[i] = strIon
+        
+        return llist
+
 def read_mask(fname):
     """
     Read in an LSD line mask file and return a Mask object.
