@@ -15,60 +15,66 @@ def plot_LineList(llist, depthCut=0.0, maxLabels=None,
     for the species of line.
 
     This will either generate new matplotlib figure and axes objects with
-    the plot, or if an existing axes is passed to the function (with the ax
-    keyword) then the line list will be plotted in that axes.  
+    the plot, or if an existing axes object is passed to the function 
+    (with the ax keyword) the line list will be plotted in that axes.  
     
     By default, this function will try to adjust the positions of the labels
     so that they don't overlap.
 
-    Labels plotted can be limited to only being deeper than a threshold depth
+    You can limit the lines shown to only those deeper than a threshold depth
     with depthCut.  The maximum number of labels drawn can be limited with
-    maxLabels, in this case tick marks are drawn for all lines, only the
-    number text labels is limited, which can be useful for efficiency.
+    maxLabels, which can be useful for efficiency.  In this case tick marks are
+    still drawn for all lines, only the number text labels is limited.  Labels
+    are shown for the maxLabels deepest lines in the window.  Drawing labels
+    is quite slow, so for a large line list limiting the number of labels drawn
+    is usualy a good idea.
     
     :param llist: the line list to plot, as a LineList object
-    :param depthCut: only lines with a depth value bigger than this will be plotted.
+    :param depthCut: only lines with a depth value greater than this will be plotted.
     :param maxLabels: the maximum number of line labels that will be drawn at
                       one time. Only labels for the maxLabels deepest lines
                       depths will be drawn, although tick marks for all lines
-                      will be drawn.
+                      will be drawn. 
                       Drawing labels is relatively slow, and drawing a large
                       number can make this routine run slowly (as well as being 
                       hard to read!).  Defaults to plotting all labels.
     :param scaleDepths: scale the depths of the tick marks by this value. Tick 
                         depths are proportional to the line depth parameter.
                         (Tick marks extend down to 1.0 - llist.depth*scaleDepths)
-    :param cont: draw tick lines from the depth up to this value
+    :param cont: draw tick marks from the depth up to this value
                  (typically set this at or just above the continuum level).
     :param rise: place the labels this much above the cont level.
     :param nrows: the number of rows of labels to be drawn
-    :param padding: spacing to leave between labels (in pixels)
+    :param padding: spacing to leave between labels (in pixels),
+                    when avoidOverlaps is True.
     :param vpadding: vertical spacing to leave between rows of labels (in pixels),
                      only used when avoidOverlaps is True.
     :param romanIon: if True, convert the numbers in the ion strings to use
                      roman numerals. Roman numerals for ionization stage 
-                     are typically better for publication quality figures.
-    :param avoidOverlaps: if True shift, the positions of labels to avoid 
+                     are typically nicer for publication quality figures.
+    :param avoidOverlaps: if True, shift the positions of labels to avoid 
                           having the text overlap.  If too many labels are
-                          plotted, overlaps may still occur (try changing
+                          plotted overlaps will still occur (try changing
                           maxLabels or depthCut).  Defaults to True.
     :param dynamicUpdate: update the label positions of every time the figure changes.
                           This keeps labels from overlapping or being cut off
                           if the x-axis changes (e.g. when using ax.set_xlim() or
                           through panning or zooming in an interactive window).
-                          (This connects to the Axes 'xlim_changed' event and the
-                          Figure 'resize_event', and stores some additional data
-                          in the Figure object as fig.dynamicLineList.)
+                          If you set this to False, use ax.set_xlim() before
+                          running plot_LineList(). 
+                          (note: this function connects to the Axes 'xlim_changed'
+                          event and the Figure 'resize_event', and stores some 
+                          data in the Figure object as fig.dynamicLineList)
                           Defaults to True.
     :param linewidth: matplotlib line width for the tick marks
     :param linecolor: matplotlib color for the tick marks
     :param linestyle: matplotlib line style for the tick marks
     :param fontsize: font size for the labels
-    :param rotation: orientation of the line labels, can be 'horizontal',
+    :param rotation: orientation of the line label text, can be 'horizontal',
                      'vertical', or a float with an angle in degrees.
-    :param bindKeys: bind some keys (using matplotlib) to interactively
-                     adjust some plot properties.  Set this False to prevent
-                     this behaviour.  Only active if dynamicUpdate is True.
+    :param bindKeys: If True, set up some keys to interactively adjust the range
+                     viewed in the plot, by panning and zooming (using matplotlib).
+                     Only active if dynamicUpdate is True.
                      Keys used are:
                      arrow keys -- pan left, right, up, and down;
                      i -- zoom in; o -- zoom out;
@@ -79,13 +85,13 @@ def plot_LineList(llist, depthCut=0.0, maxLabels=None,
                None, then a new figure and axes will be generated.
     :param **kwargs: any remaining keyword arguments are passed to the matplotlib 
                      ax.text() function when creating the labels for lines.
-    :return: a matplotlib figure object, and an axes object,
+    :return: a matplotlib figure object, and an axes object
              containing the plot.
     '''
 
     llist_all = llist[np.argsort(llist.wl)]
 
-    #optionally convert the ion strings to use roman numerals
+    # optionally convert the ion strings to use roman numerals
     if romanIon:
         fion = _fancy_ion_string(llist_all.ion)
         llist_all.ion = fion
@@ -98,11 +104,11 @@ def plot_LineList(llist, depthCut=0.0, maxLabels=None,
     #(for fast mode, when the size of the labels in display coordinates isn't known)
 
     if ax is None:
-        fig, ax = plt.subplots(figsize=(12,6)) #layout='constrained'
+        fig, ax = plt.subplots(figsize=(12,6), layout='constrained')
     else:
         fig = ax.get_figure()
 
-    # If this is a new empty Axes object, set the the x-range,
+    # If we need a new empty Axes object, set the the x-range,
     # this is useful for placing non-overlapping labels later.
     if ax.has_data():
         wlMin, wlMax = ax.get_xlim()
@@ -121,7 +127,7 @@ def plot_LineList(llist, depthCut=0.0, maxLabels=None,
     show_labels, ind_labels_in_lines = _get_visible_labels(
         wlMin, wlMax, show_lines, llist_all, maxLabels)
 
-    #generate a list of line labels first (hide them all now, show some later)
+    #generate a list of line labels (hide them all now, show some later)
     llabels = [] # list of text objects
     for i, line in enumerate(llist_all):
         if dynamicUpdate or show_labels[i]:
@@ -131,7 +137,7 @@ def plot_LineList(llist, depthCut=0.0, maxLabels=None,
                           visible=False, clip_on=True, **kwargs)
             llabels += [txt]
 
-    # flag each n-th label that is shown as being in the n-th row
+    # flag each n-th label (that is shown) indicating it is in row n
     nrowText = np.arange(np.sum(show_labels)) % nrows
     labelFlx = riser + nrowText*rowSpacing
     if dynamicUpdate:  #leave hidden labels in row 0
@@ -139,7 +145,7 @@ def plot_LineList(llist, depthCut=0.0, maxLabels=None,
         _nrowText[show_labels] = nrowText
         nrowText = _nrowText
     labelWls = llist_all.wl[show_labels]
-    # shift those labels into their rows, and set as visable
+    # shift those labels into their rows, and set as visible
     llabels2d = [[] for nrow in range(nrows)] # list of rows with lists of text
     j = 0
     for i, label in enumerate(llabels):
@@ -149,7 +155,7 @@ def plot_LineList(llist, depthCut=0.0, maxLabels=None,
             llabels2d[nrowText[i]] += [label]
             j += 1
 
-    #If not in 'fast' mode, set the line label positions to avoid overlapping
+    # If not in 'fast' mode, set the line label positions to avoid overlapping
     if avoidOverlaps:
         labelWls, labelFlx = _set_label_pos(fig, ax, llabels2d,
                                     llist_all[show_labels], padding, vpadding)
@@ -157,8 +163,6 @@ def plot_LineList(llist, depthCut=0.0, maxLabels=None,
     # Generate tick marks and connectors to labels,
     # use 3 points (2 line segments) to make a vertical tick & riser connector
     # the final array of points should have shape (nLines, 3, 2)
-    ##wlpts = np.tile(llist_show.wl, (3,1))
-    ##flxpts = np.tile(1.0 - llist_show.depth*scaleDepths, (3,1))
     wlpts = np.tile(llist_all.wl[show_lines], (3,1))
     flxpts = np.tile(1.0 - llist_all.depth[show_lines]*scaleDepths, (3,1))
     linePts = np.stack([wlpts.T,flxpts.T], axis=2)
@@ -230,18 +234,14 @@ class _updateLinesPlot:
         self.fig = fig
         self.ax = ax
         self.ax.callbacks.connect('xlim_changed', self.on_lims_change)
-        ##self.ax.callbacks.connect('ylim_changed', self.on_lims_change)
+        ##self.ax.callbacks.connect('ylim_changed', self.on_lims_change) #unnecessary
         self.fig.canvas.mpl_connect('resize_event', self.on_fig_resize)
-        #self.fig.canvas.mpl_connect('draw_event', self.on_fig_draw)
         
     def on_lims_change(self, ax):
         self.update_labels(redraw=False)
         return
     def on_fig_resize(self, event):
         self.update_labels(redraw=True)
-        return
-    def on_fig_draw(self, event):
-        #self.update_labels(redraw=False)
         return
 
     def update_labels(self, redraw):
@@ -260,7 +260,7 @@ class _updateLinesPlot:
         show_labels, ind_labels_in_lines = _get_visible_labels(
             wlMin, wlMax, self.show_lines, self.llist_all, self.maxLabels)
 
-        # flag each n-th label that is shown as being in the n-th row
+        # flag each n-th label (that is shown) indicating it's in row n
         nrowText = np.zeros(len(self.llabels), dtype=int)
         nrowText[show_labels] = np.arange(np.sum(show_labels)) % self.nrows
         labelFlx = self.riser + nrowText[show_labels]*self.rowSpacing
@@ -366,12 +366,12 @@ class _updateLinesPlot:
         self.ax.set_ylim(ymin-yspan*fracZoom, ymax+yspan*fracZoom)
         self.fig.canvas.draw()
     def autoScale(self, event):
-        fracSpace = 0.05
         self.ax.autoscale(enable=True, axis='both')
         self.fig.canvas.draw()
         return
     def autoScaleY(self, event):
-        #self.ax.autoscale(enable=True, axis='y')
+        #self.ax.autoscale(enable=True, axis='y') # behaves badly
+        #because it auto-scales on data outside the current x range
         fracSpace = 0.05
         xmin, xmax = self.ax.get_xlim()
         axLines = self.ax.get_lines()
@@ -424,9 +424,9 @@ def _get_visible_labels(wlMin, wlMax, show_lines, llist_all, maxLabels):
     '''
     show_labels = (llist_all.wl > wlMin) & (llist_all.wl < wlMax) & show_lines
     
-    # Limit the number of text labels plotted, only plotting the deepest lines
-    # set flags for the sub-set of the line list used for drawing text labels
-    # and get indices for their positions in the full line list being plotted
+    # Limit the number of text labels plotted, only plotting the deepest lines.
+    # Set flags for the sub-set of the line list used for drawing text labels,
+    # and get indices for their positions in the full line list being plotted.
     if np.sum(show_labels) > maxLabels:
         # get only the maxLabels deepest lines
         indSortDepth = np.argsort(llist_all.depth[show_labels])
@@ -451,7 +451,7 @@ def _label_overlap_regions(llabels2d, padding, closeRegions=None, textBBcorn=Non
     Check if line labels are overlapping in the plot, using screen space
     (pixels). Flag lines that all overlap as one overlapping
     region group, and give them the same value in the closeRegions array.
-    Lines can be iteratively added to the closeRegions array,
+    Lines can be iteratively added to groups in the closeRegions array,
     with subsequent function calls.
     
     * llabels2d - list of lists, containing rows of matplotlib text objects
@@ -468,8 +468,8 @@ def _label_overlap_regions(llabels2d, padding, closeRegions=None, textBBcorn=Non
     * closeRegions - list of arrays of close/overlapping regions
     * textBBcorn - list of arrays of text label bounding box corners
     '''
-    # (allow a margin since data - pixel conversions may not be perfect)
     marginForError = 1.0 #allowable overlap in pixels
+    # (allow a margin since data - pixel conversions may not be perfect)
     
     nrows = len(llabels2d)
     numOverlaps = 0
@@ -496,7 +496,7 @@ def _label_overlap_regions(llabels2d, padding, closeRegions=None, textBBcorn=Non
         _closeRegions = closeRegions[m]
         if len(llabels2d[m]) > 0: #protect against empty rows/lists
             _numClose = np.max(_closeRegions)
-            xlast = -100000.0
+            xlast = _textBBcorn[0,0,0] - 100000.0
             for i, txt in enumerate(llabels2d[m]):
                 x = _textBBcorn[i,0,0]
                 
@@ -527,10 +527,20 @@ def _set_label_pos(fig, ax, llabels2d, llist_labels, padding, vpadding, redraw=T
     Modify the positions of labels on the plot, to avoid having overlapping
     text labels.
 
+    The basic idea is to proceed iteratively: draw the labels, check 
+    for overlaps, and then adjust positions.  When overlaps occur,
+    define an overlapping group, and add any contiguous set of labels that
+    overlap with each other to that group.  Then, adjust the positions of all
+    the labels in a group so that they don't overlap and are centered on the
+    middle wavelength of the group.  With the positions adjusted, check for
+    any new overlaps and iterate, adding any new overlapping labels to the
+    existing overlapping groups.
+
     Takes:
     * fig - the figure object containing the plot
     * ax - the axes object containing the plot
     * llabels2d - a list of lists, with label text objects in lists for each row
+    * llist_labels - a LineList corresponding to the text labels in llabels2d
     * padding - extra space to leave around the labels, in pixels
     * vpadding - extra vertical space to leave between rows of labels, in pixels
 
@@ -541,7 +551,7 @@ def _set_label_pos(fig, ax, llabels2d, llist_labels, padding, vpadding, redraw=T
     nrows = len(llabels2d)
     # Draw the figure so that overlapping labels can be identified
     if redraw: fig.draw_without_rendering() #this drawing call is very slow...
-    ##if redraw: fig.canvas.draw()  #... but drawing and rendering is even slower
+    # ... but drawing and rendering with fig.canvas.draw() is even slower
     # get a function for converting screen space coordinates back into data coordinates
     invertCoords = ax.transData.inverted()
 
@@ -592,26 +602,18 @@ def _set_label_pos(fig, ax, llabels2d, llist_labels, padding, vpadding, redraw=T
         nIter += 1
         for m in range(nrows):
             
-            # loop over groups of close labels and reposition all of them
+            # loop over groups of close labels, and reposition all the labels in one group
             for n in np.unique(closeRegions[m][closeRegions[m] > 0]):
                 # get the indices for labels in this overlap region
                 iuse = np.nonzero(closeRegions[m] == n)[0]
 
-                ## Get the position of the middle label (or midpoint of two labels)
-                ## and the index for the label(s) at the middle of the region
-                ## in the overlap (for an odd number of labels imidLo == imidUp)
-                #imidLo = iuse[0] + (iuse[-1] - iuse[0])//2
-                #imidUp = iuse[0] + (iuse[-1] - iuse[0] + 1)//2
-                #xmid = 0.5*(textBBcorn[m][imidLo, 0, 0] + textBBcorn[m][imidUp, 1, 0])
-                
-                # Get the center of the labels in this overlap region
+                # Get the center of the labels in this overlap region,
+                # and position labels in this group around that mid point
                 xmid = 0.5*(textBBcorn[m][iuse[0], 0, 0] + textBBcorn[m][iuse[-1], 1, 0])
-                
-                #Position labels in this close group around the mid point
                 tot_width = np.sum(textBBcorn[m][iuse,1,0] - textBBcorn[m][iuse,0,0])
                 tot_width += padding*(iuse.size - 1)
                 
-                #set the left edge x position for the first label
+                # set the left edge x position for the first label
                 xnewL = xmid - 0.5*tot_width
                 #check that it fits on the plot (if a group hits an edge stick to it)
                 if (xnewL < win_x) or (flagLEdge[m] == 1 and n == 1):
@@ -623,7 +625,7 @@ def _set_label_pos(fig, ax, llabels2d, llist_labels, padding, vpadding, redraw=T
                     xnewL = win_x + win_w - tot_width - padding
                     flagREdge[m] = 1
 
-                #adjust the positions for the labels in this group
+                # adjust the positions for the labels in this group
                 for i in iuse:
                     xwidth = textBBcorn[m][i, 1, 0] - textBBcorn[m][i, 0, 0] 
                     xnew = xnewL + 0.5*xwidth
@@ -633,7 +635,7 @@ def _set_label_pos(fig, ax, llabels2d, llist_labels, padding, vpadding, redraw=T
                     # update stored corner positions, for comparison with other labels 
                     textBBcorn[m][i, 0, 0] = xnewL
                     textBBcorn[m][i, 1, 0] = xnewL + xwidth
-                    # set up for the next label
+                    # setup for the next label
                     xnewL += xwidth + padding
         
         # done one full iteration, check if there are any remaining overlaps
