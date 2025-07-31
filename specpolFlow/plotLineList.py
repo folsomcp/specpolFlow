@@ -2,6 +2,226 @@ import copy
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
+# for the plot_obs_lines() function we also need:
+from .obsSpec import Spectrum, read_spectrum
+from .lineList import LineList, read_VALD, line_list_zeros
+
+def plot_obs_lines(spectra=[], lineList=[], depthCut=0.0, maxLabels=100,
+                   velSpec=0.0, velLines=0.0,
+                   stokes='I', showErr=False, showLegend=False, ax=None):
+    '''
+    Plot observed spectra and/or a line list
+
+    This is mostly intended as a quick look tool.  This uses the plot_LineList
+    function, and you can construct more tailored to your specific case
+    using that function and matplotlib.
+
+    This funciton also binds some keys for navigating around the plot:
+    arrow keys -- pan left, right, up, and down;
+    i -- zoom in;
+    o -- zoom out;
+    z -- activate matplotlib's zoom tool;
+    a -- autoscale the zoom to show all data;
+    A -- autoscale the y-axis only;
+    
+    :param spectra: the observed spectrum, or a python list containing multiple
+               observations. This can either be Spectrum objects or
+               file names of .s files.  Model spectra can be included here
+               too, provided that they are readable as .s files or are in
+               Spectrum objects.
+    :param lineList: the line list, or a python list containing multiple
+               line lists.  This can either be LineList objects or
+               file names of VALD long format, extract stellar line lists.
+               (Optional, if no lineList is given only spectra are plotted).
+    :param depthCut: only lines in the line list with depth values greater
+               than depthCut are plotted.
+    :param maxLabels: the labels for the maxLabels deepest lines are drawn
+               in the plot.  Tick marks are still drawn for the other lines.
+               Drawing labels is slow, so decreasing maxLabels can improve
+               performance.
+    :param velSpec: a single velocity used to Doppler shift all the spectra, 
+               or a list of velocities, one for each spectrum (in km/s).  
+    :param velLines: a single velocity used to Doppler shift all line lists, 
+               or a list of velocities, one for each line list (in km/s).  
+    :param stokes: which Stokes parameter from the spectrum to plot.  Options
+               are 'I', 'V', 'N1', 'N2', or 'IV'.  The 'IV' option will plot
+               Stokes I and also Stokes V, with V shifted vertically above I.
+    :param showErr: flag for whether or not to plot errorbars for the data
+               (defaults to False, plotting errorbars can be a bit slow).
+    :param showLegend: flag for whether to show a legend, labeling the plotted
+               spectra.  The legend will include filenames for the spectra, if
+               filenames were given (otherwise this is just an index 
+               in the order the spectra were given).
+    :param ax: the matplotlib axes object to use for plotting. If None,
+               then a new figure and axes are created.
+    :return: a matplotlib figure object, and an axes object
+             containing the plot.
+    '''
+
+    # Make sure the spectra and line list are iterable
+    if isinstance(spectra, list) or isinstance(spectra, tuple):
+        _spectra = spectra
+    else:
+        _spectra = [spectra]
+    if isinstance(lineList, list) or isinstance(lineList, tuple):
+        _lineList = lineList
+    else:
+        _lineList = [lineList]
+    # and that any velocity shifts are consistent in dimensions
+    velSpecIsList = False
+    if isinstance(velSpec, list) or isinstance(velSpec, tuple):
+        velSpecIsList = True
+        if len(velSpec) != len(_spectra):
+            raise ValueError('in plot_obs_lines() velSpec must either be a '
+                             'float or a list with the same length as spectra')
+    velLinesIsList = False
+    if isinstance(velLines, list) or isinstance(velLines, tuple):
+        velLinesIsList = True
+        if len(velLines) != len(_lineList):
+            raise ValueError('in plot_obs_lines() velLines must either be a '
+                             'float or a list with the same length as lineList')
+
+    # Get the axes and figure objects
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(12,6), layout='constrained')
+    else:
+        fig = ax.get_figure()
+
+    # Set up some extra color cyclers for plotting
+    default_cycle = plt.rcParams['axes.prop_cycle']
+    colors_list = ['#000000'] + default_cycle.by_key()['color']
+    ax.set_prop_cycle(color=colors_list)
+
+    # Plot the spectra in a loop
+    wlMax = 0.0
+    wlMin = 1e99
+    for i, obs in enumerate(_spectra):
+        # get the Spectrum object
+        if isinstance(obs, Spectrum):
+            obsU = copy.deepcopy(obs)
+            obsName = '{:}'.format(i)
+        elif isinstance(obs, str):
+            obsU = read_spectrum(obs)
+            obsName = obs
+        else:
+            raise TypeError('in plot_obs_lines() spectra must contain '
+                            'the name of a .s file or a Spectrum object')
+        # get errorbars, if they are to be plotted
+        if showErr:
+            err = obsU.specSig
+        else:
+            err = None
+        # Doppler shift the spectrum if necessary
+        if velSpecIsList:
+            vel = velSpec[i]
+        else:
+            vel = velSpec
+        if vel != 0.0: obsU = obsU.doppler_shift(vel)
+
+        # generate the plot
+        if stokes == 'I':
+            plt.errorbar(obsU.wl, obsU.specI, yerr=err, label=obsName)
+        elif stokes == 'V':
+            plt.errorbar(obsU.wl, obsU.specV, yerr=err, label=obsName)
+            plt.plot(obsU.wl, np.zeros_like(obsU.wl), 'k--', zorder=2.5)
+        elif stokes == 'N1' or stokes == 'N':
+            plt.errorbar(obsU.wl, obsU.specN1, yerr=err, label=obsName)
+            plt.plot(obsU.wl, np.zeros_like(obsU.wl), 'k--', zorder=2.5)
+        elif stokes == 'N2':
+            plt.errorbar(obsU.wl, obsU.specN2, yerr=err, label=obsName)
+            plt.plot(obsU.wl, np.zeros_like(obsU.wl), 'k--', zorder=2.5)
+        elif stokes == 'IV':
+            shiftV = 1.05
+            color = colors_list[i % (len(colors_list))]
+            plt.errorbar(obsU.wl, obsU.specI, yerr=err, color=color, label=obsName)
+            plt.errorbar(obsU.wl, obsU.specV + shiftV, color=color, yerr=err)
+            plt.plot(obsU.wl, np.zeros_like(obsU.wl) + shiftV, 'k--', zorder=2.5)
+        else:
+            raise ValueError("in plot_obs_lines() unrecognized stokes flag "
+                             "(use 'I', 'V', 'N1' 'N2', or 'IV'")
+        
+        if np.max(obsU.wl) > wlMax: wlMax = np.max(obsU.wl)
+        if np.min(obsU.wl) < wlMin: wlMin = np.min(obsU.wl)
+
+    # Plot the line lists in a loop
+    lines_color_list = ['grey', 'seagreen', 'slateblue', 'firebrick']
+    for i, llist in enumerate(_lineList):
+        # get the LineList object
+        if isinstance(llist, LineList):
+            llistU = copy.deepcopy(llist)
+        elif isinstance(llist, str):
+            llistU = read_VALD(llist)
+        else:
+            raise TypeError('in plot_obs_lines() lineList must contain '
+                            'the name of a line list file or a LineList object')
+
+        if wlMax <= 0.0: wlMax = llistU.wl[-1]
+        if wlMin >= 1e99: wlMin = llistU.wl[0]
+        # check if observation and line list have similar units
+        if wlMin/np.max(llistU.wl) > 3.0:
+            print('Warning: line list and observations appear to have different '
+                  'units!\n  Attempting to correct, assuming an observation in A '
+                  'and a line list in nm\n  Scaling the line list wavelengths by 10')
+            llistU.wl = llistU.wl*10.0
+        if np.min(llistU.wl)/wlMax > 3.0:
+            print('Warning: line list and observations appear to have different '
+                  'units!\n  Attempting to correct, assuming an observation in nm '
+                  'and a line list in A\n  Scaling the line list wavelengths by 0.1')
+            llistU.wl = llistU.wl*0.1
+
+        # Doppler shift the line list if necessary
+        if velLinesIsList:
+            vel = velLines[i]
+        else:
+            vel = velLines
+        if vel != 0.0:
+            c = 299792.458  #speed of light in km/s
+            llistU.wl = llistU.wl + llistU.wl*vel/c
+        
+        # plot the line list, but set some parameters for that function first
+        color = lines_color_list[i%len(lines_color_list)]
+        if len(_lineList) > 1:
+            nrows = 1
+            rotation='vertical'
+            vshift = 0.04
+        else:
+            nrows = 2
+            rotation='horizontal'
+            vshift = 0.02
+        if stokes == 'IV':
+            cont = 1.0
+            rise = 0.07 + vshift*i
+        elif stokes == 'V' or stokes == 'N1' or stokes == 'N2' or stokes == 'N':
+            llistU.depth = 0.2*llistU.depth + 1.0
+            cont = 0.01
+            vshift = 0.02
+            rise = 0.02 + vshift*i
+        else:
+            cont = 1.0
+            rise = 0.05 + vshift*i
+        plot_LineList(llistU, ax=ax, depthCut=depthCut, maxLabels=maxLabels,
+                      cont=cont, rise=rise, nrows=nrows,
+                      rotation=rotation, linecolor=color)
+
+    # If there is no line list, generate an empty list and add it
+    # for consistent keybinding behavior
+    if len(_lineList) == 0:
+        tmp_llist = line_list_zeros(0)
+        plot_LineList(tmp_llist, ax=ax, depthCut=depthCut, maxLabels=maxLabels)
+        
+    # Some fancy extras
+    if showLegend:
+        ax.legend(loc='lower left')
+    ax.set_xlabel('Wavelength')
+    if stokes == 'I' or stokes == 'IV':
+        ax.set_ylabel('Normalized flux')
+    elif stokes == 'V':
+        ax.set_ylabel('V/I')
+    elif stokes == 'N1' or stokes == 'N2' or stokes == 'N':
+        ax.set_ylabel('N/I')
+    
+    return fig, ax
+
 
 def plot_LineList(llist, depthCut=0.0, maxLabels=None,
                   scaleDepths=1.0, cont=1.01, rise=0.05,
@@ -9,7 +229,7 @@ def plot_LineList(llist, depthCut=0.0, maxLabels=None,
                   romanIon=False, avoidOverlaps=True, dynamicUpdate=True,
                   linewidth=1.0, linecolor='grey', linestyle='-',
                   fontsize=8, rotation='horizontal',
-                  bindKeys=True, ax=None, **kwargs):
+                  bindKeys=True, ax=None, lineKwargs={}, **kwargs):
     '''
     Plot a line list, with tick marks at the positions of lines and text labels
     for the species of line.
@@ -27,7 +247,7 @@ def plot_LineList(llist, depthCut=0.0, maxLabels=None,
     still drawn for all lines, only the number text labels is limited.  Labels
     are shown for the maxLabels deepest lines in the window.  Drawing labels
     is quite slow, so for a large line list limiting the number of labels drawn
-    is usualy a good idea.
+    is usually a good idea.
     
     :param llist: the line list to plot, as a LineList object
     :param depthCut: only lines with a depth value greater than this will be plotted.
@@ -83,6 +303,9 @@ def plot_LineList(llist, depthCut=0.0, maxLabels=None,
                      A -- autoscale the y-axis only;
     :param ax: the matplotlib axes object to plot the lines in. If this is 
                None, then a new figure and axes will be generated.
+    :param lineKwargs: a dictionary of additional keyword arguments that are 
+                       passed to the matplotlib LineCollection function.
+                       e.g. {'zorder':10.0, 'alpha':0.2, 'lw':5.0}
     :param **kwargs: any remaining keyword arguments are passed to the matplotlib 
                      ax.text() function when creating the labels for lines.
     :return: a matplotlib figure object, and an axes object
@@ -108,16 +331,20 @@ def plot_LineList(llist, depthCut=0.0, maxLabels=None,
     else:
         fig = ax.get_figure()
 
-    # If we need a new empty Axes object, set the the x-range,
+    # If we have a new empty Axes object, set the the x-range,
     # this is useful for placing non-overlapping labels later.
     if ax.has_data():
         wlMin, wlMax = ax.get_xlim()
-    else:
+    elif llist.wl.size > 1:
         wlMin = np.min(llist.wl)
         wlMax = np.max(llist.wl)
         wlRange = wlMax - wlMin
         ax.set_xlim(wlMin - 0.05*wlRange, wlMax + 0.05*wlRange, auto=True)
         ax.set_ylim(0.0, 1.1, auto=True)
+    else:
+        print("no list or data")
+        wlMin = 0.
+        wlMax = 1.
 
     # trim the shown lines to be deep enough
     show_lines = llist_all.depth > depthCut
@@ -173,7 +400,7 @@ def plot_LineList(llist, depthCut=0.0, maxLabels=None,
 
     # plot the tick marks as a matplotlib LineCollection
     linecollection = LineCollection(linePts, colors=linecolor,
-                                    linewidths=linewidth, linestyles=linestyle)
+                                    linewidths=linewidth, linestyles=linestyle, **lineKwargs)
     lcPlot = ax.add_collection(linecollection)
 
     if dynamicUpdate:
@@ -246,7 +473,7 @@ class _updateLinesPlot:
 
     def update_labels(self, redraw):
         '''
-        Update which labels are visable, and update their positions,
+        Update which labels are visible, and update their positions,
         for the new window and x axis ranges.
         '''
         wlMin, wlMax = self.ax.get_xlim()
