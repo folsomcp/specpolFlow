@@ -216,9 +216,9 @@ def plot_obs_lines(spectra=[], lineList=[], depthCut=0.0, maxLabels=100,
     if stokes == 'I' or stokes == 'IV':
         ax.set_ylabel('Normalized flux')
     elif stokes == 'V':
-        ax.set_ylabel('V/I')
+        ax.set_ylabel('V/Ic')
     elif stokes == 'N1' or stokes == 'N2' or stokes == 'N':
-        ax.set_ylabel('N/I')
+        ax.set_ylabel('N/Ic')
     
     return fig, ax
 

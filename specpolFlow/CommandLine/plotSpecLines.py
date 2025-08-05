@@ -52,9 +52,8 @@ def plot_spec_lines_cli():
                         "improve performance.")
     parser.add_argument("-g", "--legend", action='store_true',
                         help="Optionally, show a legend of spectra file names.")
-    ##parser.add_argument("-s", "--save", default=None,
-    ##                    help="Optionally, save the plot to this file")
     args = parser.parse_args()
+    
     #Process the command line parameters
     specList = []
     for fileName in args.fileList:
