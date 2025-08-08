@@ -4,3 +4,4 @@ __pycache__/
 dist/
 specpolFlow.egg-info/
 docs-jb/_build
+build/
