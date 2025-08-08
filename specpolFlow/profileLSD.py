@@ -671,7 +671,8 @@ class LSD:
         return(probV, probN1, probN2)
 
     def calc_bz(self, cog='I', norm='auto', lambda0=500., geff=1.2,
-                velrange=None, bzwidth=None, plot=True, **kwargs):
+                velrange=None, bzwidth=None, plot=True, plotAllCOG=False,
+                verbose=False, **kwargs):
         '''Calculate the Bz of an LSD profile
         
         :param cog: The value or calculation method for the center of gravity.
@@ -703,6 +704,10 @@ class LSD:
                     Two elements = left and right of line center.
                     Not given (default): instead use velrange for this.
         :param plot: whether or not a graph is generated and returned.
+        :param plotAllCOG: whether to include all the center of gravity
+                    possibilities in the plot (True) or only the COG that is
+                    actually used in the calculation (False, the default).
+        :param verbose: if True print some extra diagnostic information.
         :param kwargs: additional keyword arguments are passed to the
                    matplotlib plotting routines, if a plot is generated.
         :return: a dictionary with Bz (in G) and FAP calculations,
@@ -723,17 +728,19 @@ class LSD:
         
         # Check if norm is a string.
         if isinstance(norm, str):
-            print('using AUTO method for the normalization')
+            if verbose: print('using AUTO method for the normalization')
             if velrange != None:
-                print('  using the median of the continuum outside of the line')
                 norm_val = np.median(lsd_out.specI)
+                if verbose: print('  using the median of the continuum outside '
+                                  'of the line: {:}'.format(norm_val))
             else:
-                print('  no range in velocity given, using the median '
-                      +'of the whole specI to determine continuum')
                 norm_val = np.median(lsd_in.specI)
+                if verbose: print('  no range in velocity given, using the '
+                                  +'median of the whole specI to determine '
+                                  +'continuum: {:}'.format(norm_val))
         else:
             norm_val = copy.copy(norm)
-            print('using given norm value')
+            if verbose: print('using given norm value {:}'.format(norm_val))
 
         # Check if cog is a string.
         if isinstance(cog, str):
@@ -757,12 +764,14 @@ class LSD:
         if bzwidth == None:
             # No bzwidth. using vrange if defined
             if velrange != None:
-                print('no bzwidth defined, using velrange to calculate Bz')
+                if verbose: print('no bzwidth defined, using velrange to '
+                                  'calculate Bz')
                 lsd_bz = copy.copy(lsd_in)
                 # saving the range for plotting later.
                 p_bzwidth = np.copy(velrange)
             else:
-                print('no bzwidth nor velrange defined, using full range to calculate Bz')
+                print('no bzwidth nor velrange defined, using full range to '
+                      'calculate Bz')
                 p_bzwidth = [self.vel.min(), self.vel.max()]
                 lsd_bz = copy.copy(self)
         else:
@@ -837,7 +846,8 @@ class LSD:
 
         if plot:
             fig  = _plot_bz_calc(self, lsd_in, lsd_bz, velrange,
-                            p_bzwidth, norm_val, cog_val, cog, **kwargs)
+                                 p_bzwidth, norm_val, cog_val, cog,
+                                 plotAllCOG, **kwargs)
             return result,fig
         else:
             return result
@@ -1092,7 +1102,7 @@ class LSD:
             return False
 
     def calc_ew(self, cog='I', norm='auto', lambda0=None, velrange=None, 
-                ewwidth=None, fullOutput=True, plot=True):
+                ewwidth=None, fullOutput=True, plot=True, verbose=False):
         '''
         Calculate the equivalent width, of Stokes I, for this LSD profile.
 
@@ -1132,6 +1142,7 @@ class LSD:
                     the equivalent width with no uncertainty.
         :param plot: If True, return a matplotlib figure of the line profile
                     and velocity ranges used, as the last returned value.
+        :param verbose: If True print some extra diagnostic information.
         
         :return: the equivalent width, optionally the uncertainty,
                  and optionally a figure. The equivalent width is in
@@ -1458,8 +1469,8 @@ def _integrate_bz(vel, spec, specSig, geff, lambda0, cog_val,
     return bl, blSig
 
 
-def _plot_bz_calc(lsd, lsd_in, lsd_bz, velrange, p_bzwidth, norm_val, cog_val, cog,
-                  **kwargs):
+def _plot_bz_calc(lsd, lsd_in, lsd_bz, velrange, p_bzwidth, norm_val, 
+                  cog_val, cog, plotAllCOG=False, **kwargs):
     """
     Generate a plot showing the center of gravity and integration ranges used
     in the calculation of Bz from an LSD profile.  Called by the calc_bz
@@ -1473,6 +1484,7 @@ def _plot_bz_calc(lsd, lsd_in, lsd_bz, velrange, p_bzwidth, norm_val, cog_val, c
     :param norm_val: the continuum level used for normalization
     :param cog_val: the final COG used for Bz calculation
     :param cog: the input COG flag/value given by the user
+    :param plotAllCOG: flag to plot all possible COGs or only the input COG
     :return: a matplotlib figure object
     """
     #This function relies on the plot method of the LSD profile class
@@ -1490,12 +1502,17 @@ def _plot_bz_calc(lsd, lsd_in, lsd_bz, velrange, p_bzwidth, norm_val, cog_val, c
     # for the plot, calculate and display all of the possible methods
     # for calculating the cog.
     for item in ax:
-        item.axvline(x=lsd_in.cog_min(), label='cog min I', lw=3, alpha=0.5, c='blue')
-        item.axvline(x=lsd_in.cog_I(norm_val), label='cog I',lw=3, alpha=0.5, c='red')
-        item.axvline(x=lsd_in.cog_IV(norm_val), label='cog I*V',lw=3, alpha=0.5, c='orange')
-        item.axvline(x=lsd_in.cog_V(), label='cog V',lw=3, alpha=0.5, c='green')
+        if plotAllCOG:
+            item.axvline(x=lsd_in.cog_min(), label='cog min I',
+                         lw=3, alpha=0.5, c='blue')
+            item.axvline(x=lsd_in.cog_I(norm_val), label='cog I',
+                         lw=3, alpha=0.5, c='red')
+            item.axvline(x=lsd_in.cog_IV(norm_val), label='cog I*V',
+                         lw=3, alpha=0.5, c='orange')
+            item.axvline(x=lsd_in.cog_V(), label='cog V',
+                         lw=3, alpha=0.5, c='green')
         item.axvline(x=cog_val, label='chosen cog: {}'.format(cog), ls='--', c='k')
-       
+    
     ax[-1].legend(loc=0)
     
     red = lsd_bz.vel > cog_val
