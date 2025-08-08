@@ -191,7 +191,8 @@ class LSD:
         Return a renormalized LSD profile. Divides the I, V, and Null 
         profiles, and their uncertainties, by a value.
         
-        :param normValue: the value to renormalize (divide) the LSD profile by
+        :param normValue: the float value or array with dimension len(LSD)
+                          to renormalize (divide) the LSD profile by
         :rtype: LSD
         """
         new = LSD(self.vel, 
@@ -892,7 +893,7 @@ class LSD:
                                  '{:}'.format(cog))
         else:
             cog_val=copy.copy(cog)
-            cog = 'fixed \; val.'
+            cog = 'fixed val.'
 
         # Get the velocity range
         if biswidth == None:
@@ -904,7 +905,7 @@ class LSD:
                 if len(biswidth) == 1:
                     # keeping the actual bis calculation range for plotting later.
                     velrange = (cog_val-biswidth[0], cog_val+biswidth[0])
-                elif len(bzwidth) == 2:
+                elif len(biswidth) == 2:
                     velrange = (cog_val-biswidth[0], cog_val+biswidth[1])
                 else:
                     print('biswidth has too many elements (need one or two)')
