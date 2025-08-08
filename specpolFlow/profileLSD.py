@@ -692,7 +692,8 @@ class LSD:
                     For an LSD profile, this is the geff value the LSD profile
                     shape was scaled with.
         :param velrange: range of velocity to use for the determination of the
-                    line center and the continuum. If bzwidth is not given,
+                    line center and the continuum. This should be a list 
+                    or array with two values. If bzwidth is not given,
                     this range will also be used for the integration range
                     in the Bz calculation. 
                     If not given, the whole LSD profile will be used. 
@@ -859,7 +860,7 @@ class LSD:
                     or a float: a user defined value in km/s.
         :param biswidth: Distance from the line center for the BIS calculation.
                     One element = same on each side of line center.
-                    Two elements, left and right of line center.
+                    Two elements = left and right of line center.
                     Not defined: using the entire profile.
         :param plotFit: If True, plot the bisector curve and the LSD profile
                         with matplotlib
@@ -1090,43 +1091,57 @@ class LSD:
         else:
             return False
 
-    def calc_ew(self, cog='I', norm='auto', lambda0=None,
-                velrange=None, ewwidth=None, fullOutput=True, plot=True):
+    def calc_ew(self, cog='I', norm='auto', lambda0=None, velrange=None, 
+                ewwidth=None, fullOutput=True, plot=True):
         '''
-        Helper function to return the equivalent width of Stokes I for
-        this LSD profile, for a given continuum level
+        Calculate the equivalent width, of Stokes I, for this LSD profile.
 
-        :param cog: The value, or calculation method for the center of gravity.
+        This function can automatically estimate a continuum level and
+        a line center, or specific values can be given for either of those
+        parameters.
+
+        :param cog: The velocity value for the line center, or method for
+                    automatically estimating the center of gravity. 
                     The choices are:
                     'I': center of gravity of I,
-                    'V': center of gravity of V,
-                    'IV': center of gravity of I*V,
                     'min': velocity of the minimum of I,
                     or a float: a user defined value in km/s.
         :param norm: calculation method for the continuum. The choices are:
                     'auto': the median of I outside of velrange (if defined)
                     or the full range (if velrange is not defined),
                     or float: a user defined value to use for Ic.
-        :param lambda0: wavelength of the line center in nanometers (default=500).
-                    For an LSD profile, this is the lambda value the LSD
-                    profile shape was scaled with.
-        :param velrange: range of velocity to use for the determination of the
-                    line center and the continuum. If not defined, the whole
-                    range will be used. 
-        :param ewwidth: distance from the line center for the EW calculation.
-                One element = same on each side of line center.
-                Two elements, left and right of line center.
-                Not defined: using velrange.
-        :param fullOutput: If True, Return also the error of the equivalent
-                            width
-        :param plot: If True, Return also a figure
-                        
-        :return: the equivalent width in nanometers
+        :param lambda0: wavelength of the line center, used for calculating
+                    equivalent width in appropriate wavelength units. 
+                    For an LSD profile, this is the normalizing wavelength 
+                    the LSD profile shape was scaled with.
+                    If not provided (or None) then the equivalent width is
+                    in velocity units (km/s).
+        :param velrange: range of velocity to use for determining the
+                    the continuum level and line center.  This should be 
+                    a list or array with two values. The continuum is
+                    estimated from points outside velrange. The line center
+                    is estimated from points inside velrange. If not defined, 
+                    the whole profile will be used. 
+        :param ewwidth: distance from the line center used as the integration
+                    range in the EW calculation, in velocity.
+                    One element = same on each side of line center.
+                    Two elements = left and right of line center.
+                    Not given (default): instead use velrange for this.
+        :param fullOutput: If True, return the equivalent width and its 
+                    uncertainty, as two values (default). If False return
+                    the equivalent width with no uncertainty.
+        :param plot: If True, return a matplotlib figure of the line profile
+                    and velocity ranges used, as the last returned value.
+        
+        :return: the equivalent width, optionally the uncertainty,
+                 and optionally a figure. The equivalent width is in
+                 the wavelength units of lambda0, or if lambda0 is not 
+                 provided it is in velocity units.
         '''
-        # Velrange is used to identify the position of the line,
+        # velrange is used to identify the position of the line,
         # for calculating the cog, and for calculating the position
         # of the continuum.
-        # If Velrange is not defined, it will use the whole range.
+        # If velrange is not defined, it will use the whole range.
         # The range for calculating EW itself is controlled by ewwidth below
         if velrange != None:
             inside = np.logical_and(self.vel>=velrange[0], self.vel<=velrange[1])
