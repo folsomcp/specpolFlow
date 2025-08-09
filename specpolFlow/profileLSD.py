@@ -756,7 +756,7 @@ class LSD:
             elif cog == 'V':
                 cog_val = lsd_in.cog_V()
             else:
-                raise ValueError('calcBz got unrecognized value for cog: '
+                raise ValueError('calc_bz got unrecognized value for cog: '
                                  +'{:}'.format(cog))
         else:
             cog_val=copy.copy(cog)
@@ -1195,7 +1195,8 @@ class LSD:
             elif cog == 'V':
                 cog_val = lsd_in.cog_V()
             else:
-                raise ValueError('calcBz got unrecognized value for cog: {:}'.format(cog))
+                raise ValueError('calc_ew got unrecognized value for cog: '
+                                 +'{:}'.format(cog))
         else:
             cog_val=copy.copy(cog)
 
@@ -1206,12 +1207,12 @@ class LSD:
             if velrange is not None:
                 if verbose: print('using velrange to calculate EW')
                 lsd_ew = copy.copy(lsd_in)
-                p_ewwidth = copy.deepcopy(velrange)
+                #p_ewwidth = copy.deepcopy(velrange) # not used
             else:
                 print('no ewwidth or velrange defined, using full velocity '
                       'range to calculate EW')
                 lsd_ew = copy.copy(self)
-                p_ewwidth = [self.vel.min(), self.vel.max()]
+                #p_ewwidth = [self.vel.min(), self.vel.max()] # not used
         else:
             # Check whether ewwidth is a list or tuple (or array?)
             if (isinstance(ewwidth, list) or isinstance(ewwidth, tuple)
@@ -1265,38 +1266,51 @@ class LSD:
                 return EW
 
     
-    def calc_V_R(self, cog='I', norm='auto', lambda0=None,
-                velrange=None, ewwidth=None, fullOutput=True, plot=True):
+    def calc_V_R(self, cog='I', norm='auto', velrange=None, ewwidth=None, 
+                 fullOutput=True, plot=True, verbose=False):
         '''
-        Helper function to return the V/R ratio of Stokes I for
-        this LSD profile, for a given continuum level
+        Calculate the V/R ratio of Stokes I for, this LSD profile.
 
-        :param cog: The value, or calculation method for the center of gravity.
+        The V/R ratio is the ratio of the equivalent width for the violet half
+        (negative velocities from line center) of the line profile to the
+        equivalent width of the red half (positive velocities) of the line
+        profile.
+
+        This function can automatically estimate the line center and
+        continuum level, or specific values can be given for either of those
+        parameters.
+        
+        :param cog: The velocity value for the line center, or method for
+                    automatically estimating the center of gravity. 
                     The choices are:
                     'I': center of gravity of I,
-                    'V': center of gravity of V,
-                    'IV': center of gravity of I*V,
                     'min': velocity of the minimum of I,
                     or a float: a user defined value in km/s.
         :param norm: calculation method for the continuum. The choices are:
                     'auto': the median of I outside of velrange (if defined)
                     or the full range (if velrange is not defined),
                     or float: a user defined value to use for Ic.
-        :param lambda0: wavelength of the line center in nanometers (default=500).
-                    For an LSD profile, this is the lambda value the LSD
-                    profile shape was scaled with.
-        :param velrange: range of velocity to use for the determination of the
-                    line center and the continuum. If not defined, the whole
-                    range will be used. 
-        :param ewwidth: distance from the line center for the EW calculation (split into Red half and Violet Half).
-                One element = same on each side of line center.
-                Two elements, left and right of line center.
-                Not defined: using velrange.
-        :param fullOutput: If True, Return also the error of the equivalent
-                            width
-        :param plot: If True, Return also a figure
+        :param velrange: range of velocity to use for determining the
+                    the continuum level and line center. This should be 
+                    a list or array with two values. The continuum is
+                    estimated from points outside velrange. The line center
+                    is estimated from points inside velrange. If not defined, 
+                    the whole profile will be used. 
+        :param ewwidth: distance from the line center used as the integration
+                    range in the EW calculation, in velocity.
+                    This will be split into a red half and violet half.
+                    One element = same on each side of line center.
+                    Two elements = left and right of line center.
+                    Not given (default): instead use velrange for this.
+        :param fullOutput: If True, return the equivalent width and its 
+                    uncertainty, as two values (default). If False return
+                    the equivalent width with no uncertainty.
+        :param plot: If True, return a matplotlib figure of the line profile
+                    and velocity ranges used, as the last returned value.
+        :param verbose: If True print some extra diagnostic information.
                         
-        :return: the V/R ratio
+        :return: the V/R ratio, optionally the uncertainty on the ratio,
+                 optionally a matplotlib figure
         '''
         
         if velrange is not None:
@@ -1304,25 +1318,26 @@ class LSD:
             lsd_in = self[inside]
             lsd_out = self[np.logical_not(inside)]
             # saving the range for plotting later.
-            p_ewwidth = np.copy(velrange)
             p_velrange = np.copy(velrange)
         else:
             lsd_in=copy.deepcopy(self)
-            p_ewwidth = [self.vel.min(), self.vel.max()]
             p_velrange = [self.vel.min(), self.vel.max()]
 
         # Check if norm is a string.
         if isinstance(norm, str):
-            print('using AUTO method for the normalization')
+            if verbose: print('using AUTO method for the normalization')
             if velrange is not None:
-                print('  using the median of the continuum outside of the line')
                 norm_val = np.median(lsd_out.specI)
+                if verbose: print('  using the median of the continuum outside '
+                                  'of the line: {:}'.format(norm_val))
             else:
-                print('  no range in velocity given, using the median of the whole specI to determine continuum')
                 norm_val = np.median(lsd_in.specI)
+                if verbose: print('  no range in velocity given, using the '
+                                  'median of the whole specI to determine '
+                                  'continuum: {:}'.format(norm_val))
         else:
             norm_val = copy.copy(norm)
-            print('using given norm value')
+            if verbose: print('using given norm value: {:}'.format(norm_val))
 
         # Check if cog is a string.
         if isinstance(cog, str):
@@ -1336,62 +1351,84 @@ class LSD:
             elif cog == 'V':
                 cog_val = lsd_in.cog_V()
             else:
-                raise ValueError('calcBz got unrecognized value for cog: {:}'.format(cog))
+                raise ValueError('calc_V_R got unrecognized value for cog: '
+                                 +'{:}'.format(cog))
+            if verbose: print('  using calculated cog: {:}'.format(cog_val))
         else:
             cog_val=copy.copy(cog)
 
+        # start and end integration on the pixel closest to the COG
+        # (this could be a bit more precise by using fractions of a pixel
+        # on either side of the COG, but that adds some complication.)
+        cog_closest = self.vel[np.argmin(np.abs(self.vel - cog_val))]
+        diff_closest_cog = cog_closest - cog_val
+        # if this would end the integration before the COG, go up to the COG
+        # (include some padding for floating point errors)
+        widthVend = max(0.0, diff_closest_cog + 1e-6)
+        widthRstart = max(0.0, -diff_closest_cog + 1e-6)
         
+        # set the integration ranges for the V and R halves of the line
         if ewwidth is None:
-            # Using vrange  defined
+            # instead use vrange, if defined
             if velrange is not None:
-                Vwidth=[velrange[0],cog_val]
-                Rwidth=[cog_val,velrange[1]]
+                if verbose: print('using velrange to calculate V/R')
+                Vwidth=[cog_val - velrange[0], widthVend]
+                Rwidth=[widthRstart, velrange[1] - cog_val]
             else:
-                Vwidth=[p_velrange[0],cog_val]
-                Rwidth=[cog_val,p_velrange[1]]
+                print('no ewwidth or velrange defined, using full velocity '
+                      'range to calculate V/R')
+                Vwidth=[cog_val - self.vel.min(), widthVend]
+                Rwidth=[widthRstart, self.vel.max() - cog_val]
         else:
-            # Check whether it is a numpy array
-            if isinstance(ewwidth, list) or isinstance(ewwidth, tuple):
+            # Check whether ewwidth is a list, tuple, or numpy array
+            if (isinstance(ewwidth, list) or isinstance(ewwidth, tuple)
+                or isinstance(ewwidth, np.ndarray)):
                 if len(ewwidth) == 1:
-                    #print('list with one element')
                     # keeping the actual EW calculation range for plotting later.
-                    Vwidth=[cog_val-ewwidth[0],cog_val]
-                    Rwidth=[cog_val,cog_val+ewwidth[0]]
+                    Vwidth=[ewwidth[0], widthVend]
+                    Rwidth=[widthRstart, ewwidth[0]]
                 elif len(ewwidth) == 2:
-                    #print('list with two elements')
-                    Vwidth=[ewwidth[0],cog_val]
-                    Rwidth=[cog_val,ewwidth[1]]
+                    Vwidth=[ewwidth[0], widthVend]
+                    Rwidth=[widthRstart, ewwidth[1]]
                 else:
                     print('ewwidth has too many elements (need one or two)')
-                    raise ValueError('ewwidth has too many elements {:} (need 1 or 2)'.format(len(ewwidth)))
+                    raise ValueError('ewwidth has too many elements '
+                                     +'{:} (need 1 or 2)'.format(len(ewwidth)))
             else:
-                Vwidth=[cog_val-ewwidth,cog_val]
-                Rwidth=[cog_val,cog_val+ewwidth]
-
-        V,VSig=self.calc_ew(cog=cog_val, norm=norm_val, lambda0=lambda0,
-                velrange=velrange, ewwidth=Vwidth, fullOutput=True, plot=False)
+                Vwidth=[ewwidth, widthVend]
+                Rwidth=[widthRstart, ewwidth]
+        # get the (absolute) velocity ranges corresponding to
+        # Vwidth and Rwidth (which are relative to line center) for plotting
+        p_Vrange = [cog_val - Vwidth[0], cog_val + Vwidth[1]]
+        p_Rrange = [cog_val - Rwidth[0], cog_val + Rwidth[1]]
         
-        R,RSig=self.calc_ew(cog=cog_val, norm=norm_val, lambda0=lambda0,
-                velrange=velrange, ewwidth=Rwidth, fullOutput=True, plot=False)
+        Vew, VSig = self.calc_ew(cog=cog_val, norm=norm_val,
+                                 velrange=velrange, ewwidth=Vwidth,
+                                 fullOutput=True, plot=False)
+        
+        Rew, RSig = self.calc_ew(cog=cog_val, norm=norm_val, 
+                                 velrange=velrange, ewwidth=Rwidth,
+                                 fullOutput=True, plot=False)
 
-        V_R=V/R #returns V/R (Unitless)
+        V_R = Vew/Rew #calculate V/R (unitless)
 
-        # Estimate the associated error
-        V_RSig = (np.sqrt((1/R)**2*VSig**2+(V/R**2)**2*RSig**2 )) #Unitless
+        # Estimate the associated uncertainty (unitless)
+        V_RSig = np.sqrt(((1.0/Rew)*VSig)**2 + ((Vew/Rew**2)*RSig)**2 )
 
-        #Optionally return the EW and its error 
-        if plot == False:
-            if fullOutput == True:
-                return V_R, V_RSig
-            else:
-                return V_R
+        # return V/R and optionally its uncertainty or a figure 
         if plot == True:
-            fig=_plot_ew(self, norm_val,p_velrange, Rwidth, Vwidth, cog_val, EW=False)
+            fig=_plot_ew(self, norm_val, p_velrange, p_Vrange, p_Rrange,
+                         cog_val, EW=False)
             if fullOutput == True:
                 return V_R, V_RSig, fig
             else:
                 return V_R, fig
-##################
+        else:
+            if fullOutput == True:
+                return V_R, V_RSig
+            else:
+                return V_R
+
 ##################
 
 def _gaussProf(x, cont, ampl, center, width):
@@ -1540,7 +1577,7 @@ def _plot_bz_calc(lsd, lsd_in, lsd_bz, velrange, p_bzwidth, norm_val,
     return fig
 
 
-def _plot_ew(prof, norm, velrange, Rwidth, Vwidth, cog_val, EW):
+def _plot_ew(prof, norm, velrange, Vrange, Rrange, cog_val, EW):
 
     """
     Generate a plot showing the center of gravity and integration ranges used
@@ -1550,10 +1587,10 @@ def _plot_ew(prof, norm, velrange, Rwidth, Vwidth, cog_val, EW):
     :param prof: the full LSD profile to plot
     :param norm: the continuum level used for normalization
     :param velrange: the velocity range used for COG calculation
-    :param Rwidth: the velocity range used for integration of the red half of
-                   the line
-    :param Vwidth: the velocity range used for integration of the violet half
+    :param Vrange: the velocity range used for integration of the violet half
                    of the line
+    :param Rrange: the velocity range used for integration of the red half of
+                   the line
     :param cog_val: the final COG used for Bz calculation
     :param EW: True means the Rwidth and Vwidth are the same and shades the
                entire ewwidth (used for EW plotting), False shades Rwidth and
@@ -1567,18 +1604,18 @@ def _plot_ew(prof, norm, velrange, Rwidth, Vwidth, cog_val, EW):
                 xerr=None, fmt='o', ms=3, ecolor='0.5', c='k')
     if EW==False:
         ax.fill_between(prof.vel, prof.specI, np.ones(len(prof.vel))*norm,
-                        where=(prof.vel >= Rwidth[0]) & (prof.vel <= Rwidth[1]),
+                        where=(prof.vel >= Rrange[0]) & (prof.vel <= Rrange[1]),
                         alpha=0.1, color='r')
         ax.fill_between(prof.vel, prof.specI, np.ones(len(prof.vel))*norm,
-                        where=(prof.vel >= Vwidth[0]) & (prof.vel <= Vwidth[1]),
+                        where=(prof.vel >= Vrange[0]) & (prof.vel <= Vrange[1]),
                         alpha=0.1, color='blue')
     if EW==True:
         ax.fill_between(prof.vel, prof.specI, np.ones(len(prof.vel))*norm,
-                        where=(prof.vel >= Vwidth[0]) & (prof.vel <= Rwidth[1]),
+                        where=(prof.vel >= Vrange[0]) & (prof.vel <= Rrange[1]),
                         alpha=0.1, color='k')
     ax.axvline(cog_val, color='k', ls='--', label='cog')
-    ax.axvline(Vwidth[0], color='tab:blue', ls=':', label='ewwidth')
-    ax.axvline(Rwidth[1], color='tab:blue', ls=':')
+    ax.axvline(Vrange[0], color='tab:blue', ls=':', label='ewwidth')
+    ax.axvline(Rrange[1], color='tab:blue', ls=':')
     ax.axvline(velrange[0], color='tab:blue', ls='--', label='velrange')
     ax.axvline(velrange[1], color='tab:blue', ls='--')
     ax.axhline(norm, color='pink', ls='--', label='norm')
