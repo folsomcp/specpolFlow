@@ -159,7 +159,7 @@ class LSD:
         """
         
         oFile = open(fname, 'w')
-        if self.header != None:
+        if self.header is not None:
             if self.header == "":
                 #For blank headers include some placeholder text
                 oFile.write('#LSD profile\n')
@@ -399,7 +399,7 @@ class LSD:
         npar = self.numParam
 
         firstPlt = True
-        if fig == None:
+        if fig is None:
             fig, ax = plt.subplots(npar, 1, figsize=figsize, sharex=True)
         else:
             ax = fig.axes
@@ -463,9 +463,10 @@ class LSD:
                  amplitude & error, and width & error
         """
 
-        if velrange == None:
+        if velrange is None:
             velrange = (self.vel[1], self.vel[-2])
-        elif not(isinstance(velrange, list) or isinstance(velrange, tuple)):
+        elif not(isinstance(velrange, list) or isinstance(velrange, tuple)
+                 or isinstance(velrange, np.ndarray)):
             raise TypeError('velrange in fitGaussianRV should be a list or '
                             +'tuple, with two elements')
         indVelUse = (self.vel >= velrange[0]) & (self.vel <= velrange[1])
@@ -534,7 +535,8 @@ class LSD:
         :return:  the velocity of the center of gravity, and its uncertainty
         '''
         #Error checking on velrange
-        if not (isinstance(velrange, list) or isinstance(velrange, tuple)):
+        if not (isinstance(velrange, list) or isinstance(velrange, tuple)
+                or isinstance(velrange, np.ndarray)):
             raise TypeError('LSD.cog_rv: velrange must be a list (or tuple) '
                              'with two values!')
         if len(velrange) < 2:
@@ -719,7 +721,7 @@ class LSD:
         # of the continuum.
         # If velrange is not defined, it will use the whole range.
         # The range for calculating Bz itself is controlled by bzwidth below
-        if velrange != None:
+        if velrange is not None:
             inside = np.logical_and(self.vel>=velrange[0], self.vel<=velrange[1])
             lsd_in = self[inside]
             lsd_out = self[np.logical_not(inside)]
@@ -729,7 +731,7 @@ class LSD:
         # Check if norm is a string.
         if isinstance(norm, str):
             if verbose: print('using AUTO method for the normalization')
-            if velrange != None:
+            if velrange is not None:
                 norm_val = np.median(lsd_out.specI)
                 if verbose: print('  using the median of the continuum outside '
                                   'of the line: {:}'.format(norm_val))
@@ -761,9 +763,9 @@ class LSD:
         
         # Now we define the position of the line for the Bz calculation itself.
         # If the keyword bzwidth is defined, we use that range from the chosen cog.
-        if bzwidth == None:
+        if bzwidth is None:
             # No bzwidth. using vrange if defined
-            if velrange != None:
+            if velrange is not None:
                 if verbose: print('no bzwidth defined, using velrange to '
                                   'calculate Bz')
                 lsd_bz = copy.copy(lsd_in)
@@ -776,7 +778,8 @@ class LSD:
                 lsd_bz = copy.copy(self)
         else:
             # Check whether it is a numpy array
-            if isinstance(bzwidth, list) or isinstance(bzwidth, tuple):
+            if (isinstance(bzwidth, list) or isinstance(bzwidth, tuple)
+                or isinstance(bzwidth, np.ndarray)):
                 if len(bzwidth) == 1:
                     # keeping the actual bz calculation range for plotting later.
                     p_bzwidth = [cog_val-bzwidth, cog_val+bzwidth]
@@ -907,7 +910,7 @@ class LSD:
             cog = 'fixed val.'
 
         # Get the velocity range
-        if biswidth == None:
+        if biswidth is None:
             print('no biswidth, using full velocity range to calculate BIS')
             velrange = (lsd.vel[1], lsd.vel[-2])
         else:
@@ -1154,7 +1157,7 @@ class LSD:
         # of the continuum.
         # If velrange is not defined, it will use the whole range.
         # The range for calculating EW itself is controlled by ewwidth below
-        if velrange != None:
+        if velrange is not None:
             inside = np.logical_and(self.vel>=velrange[0], self.vel<=velrange[1])
             lsd_in = self[inside]
             lsd_out = self[np.logical_not(inside)]
@@ -1167,7 +1170,7 @@ class LSD:
         # Check if norm is a string.
         if isinstance(norm, str):
             if verbose: print('using AUTO method for the normalization')
-            if velrange != None:
+            if velrange is not None:
                 norm_val = np.median(lsd_out.specI)
                 if verbose: print('  using the median of the continuum outside '
                                   'of the line: {:}'.format(norm_val))
@@ -1198,9 +1201,9 @@ class LSD:
 
         # Now we define the position of the line for the EW calculation itself.
         # If the keyword ewwidth is defined, we use that range from the chosen cog.
-        if ewwidth == None:
+        if ewwidth is None:
             # Using vrange, if defined
-            if velrange != None:
+            if velrange is not None:
                 if verbose: print('using velrange to calculate EW')
                 lsd_ew = copy.copy(lsd_in)
                 p_ewwidth = copy.deepcopy(velrange)
@@ -1292,7 +1295,7 @@ class LSD:
         :return: the V/R ratio
         '''
         
-        if velrange != None:
+        if velrange is not None:
             inside = np.logical_and(self.vel>=velrange[0], self.vel<=velrange[1])
             lsd_in = self[inside]
             lsd_out = self[np.logical_not(inside)]
@@ -1307,7 +1310,7 @@ class LSD:
         # Check if norm is a string.
         if isinstance(norm, str):
             print('using AUTO method for the normalization')
-            if velrange != None:
+            if velrange is not None:
                 print('  using the median of the continuum outside of the line')
                 norm_val = np.median(lsd_out.specI)
             else:
@@ -1334,9 +1337,9 @@ class LSD:
             cog_val=copy.copy(cog)
 
         
-        if ewwidth == None:
+        if ewwidth is None:
             # Using vrange  defined
-            if velrange != None:
+            if velrange is not None:
                 Vwidth=[velrange[0],cog_val]
                 Rwidth=[cog_val,velrange[1]]
             else:
@@ -1495,7 +1498,7 @@ def _plot_bz_calc(lsd, lsd_in, lsd_bz, velrange, p_bzwidth, norm_val,
     fig, ax = lsd.plot(sameYRange=False, **kwargs)
     
     for item in ax:
-        if velrange != None:
+        if velrange is not None:
             item.axvline(x=velrange[0], ls='--', label='velrange')
             item.axvline(x=velrange[1], ls='--')
         item.axvline(x=p_bzwidth[0], ls='dotted', label='bzwidth')
