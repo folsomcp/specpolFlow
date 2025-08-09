@@ -1214,14 +1214,15 @@ class LSD:
                 p_ewwidth = [self.vel.min(), self.vel.max()]
         else:
             # Check whether ewwidth is a list or tuple (or array?)
-            if isinstance(ewwidth, list) or isinstance(ewwidth, tuple):
+            if (isinstance(ewwidth, list) or isinstance(ewwidth, tuple)
+                or isinstance(ewwidth, np.ndarray)):
                 if len(ewwidth) == 1:
                     # keeping the actual EW calculation range for plotting later.
                     p_ewwidth = [cog_val - ewwidth, cog_val + ewwidth]
                     lsd_ew = self[np.logical_and(self.vel >= p_ewwidth[0],
                                                  self.vel <= p_ewwidth[1])]
                 elif len(ewwidth) == 2:
-                    p_ewwidth = [cog_val + ewwidth[0], cog_val + ewwidth[1]]
+                    p_ewwidth = [cog_val - ewwidth[0], cog_val + ewwidth[1]]
                     lsd_ew = self[np.logical_and(self.vel >= p_ewwidth[0],
                                                  self.vel <= p_ewwidth[1])]
                 else:
@@ -1235,9 +1236,12 @@ class LSD:
         
         # Computes the equivalenth width (in velocity units)
         EW = _trapezoid((norm_val - lsd_ew.specI), x=lsd_ew.vel)
-        # Estimate the associated error
-        deltav = lsd_ew.vel[1] - lsd_ew.vel[0]
-        EWSig = np.sqrt(np.sum((lsd_ew.specSigI)**2) * deltav**2)
+        # Estimate the associated error, allowing for uneven pixel spacing
+        # (following the logic of _integrate_bz() )
+        deltav_arr = lsd_ew.vel[1:] - lsd_ew.vel[:-1]
+        err_scale = deltav_arr[:-1] + deltav_arr[1:]
+        err_scale = 0.5*np.concatenate((deltav_arr[:1], err_scale, deltav_arr[-1:]))
+        EWSig = np.sqrt(np.sum((lsd_ew.specSigI * err_scale)**2))
         
         if lambda0 is not None:
             # convert to wavelength units using lambda0
@@ -1468,7 +1472,7 @@ def _integrate_bz(vel, spec, specSig, geff, lambda0, cog_val,
     #si0vConst = np.sqrt((0.5*specSigI[0]*deltav)**2
     #                    + np.sum(specSigI[1:-1]**2)*deltav**2
     #                    + (0.5*specSigI[-1]*deltav)**2)
-    
+
     # Make the actual Bz calculation.
     # for the units to work out, lambda0 should be in nm
     bl = -1*fnum / (ri0v*geff*lambda0*cvel*lambda_B_constant)
