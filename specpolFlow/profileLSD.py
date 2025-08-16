@@ -567,58 +567,80 @@ class LSD:
 
         :param Ic: the continuum level to use the the COG calculation
                    (float, default=1.0)
-        :param fullOutput: If True, return the error of the velocity
-                            of the center of gravity
-        :return: the velocity of the center of gravity, optionally also its error
+        :param fullOutput: If True, return the uncertainty on the velocity
+                           of the center of gravity
+        :return: the velocity of the center of gravity, optionally also its
+                 uncertainty
         '''
         # Computes the velocity of the center of gravity
-        numerator = _trapezoid(self.vel * (Ic - self.specI), x=self.vel)
-        denominator = _trapezoid(Ic - self.specI, x=self.vel)
-        rv = numerator/denominator
+        # Also propagate errors through the trapezoidal integration, 
+        # with uneven pixel spacing.
+        numer, numerSig = _moment(self.vel, Ic - self.specI, self.specSigI,
+                                  0.0, 1)
+        denom, denomSig = _moment(self.vel, Ic - self.specI, self.specSigI,
+                                  0.0, 0)
+        rv = numer/denom
         
         if fullOutput == True:
-            #Propagate errors through the trapezoidal integration, with uneven 
-            #pixel spacing, using the same math as _integrate_bz()
-            deltav_arr = self.vel[1:] - self.vel[:-1]
-            err_scale = deltav_arr[:-1] + deltav_arr[1:]
-            err_scale = 0.5*np.concatenate((deltav_arr[:1], err_scale, deltav_arr[-1:]))
-            
-            numeratorSig = np.sqrt(np.sum((self.vel * self.specSigI * err_scale)**2))
-            denominatorSig = np.sqrt(np.sum((self.specSigI * err_scale)**2))
-            #Note, this bit of linear error propagation, assuming independent
-            #uncertainties isn't quite perfect, since the numerator and denominator
-            #depend on the same specSigI.  But the numerator dominates the total
-            #uncertainty, so treatment of the denominator isn't really important.
-            rvSig = np.abs(rv) * np.sqrt((numeratorSig/numerator)**2
-                                         + (denominatorSig/denominator)**2)
+            # Note, this bit of linear error propagation, assuming independent
+            # uncertainties isn't quite perfect, since the numerator and 
+            # denominator depend on the same specSigI.  But the numerator 
+            # dominates the total uncertainty, so treatment of the denominator
+            # isn't really important.
+            rvSig = np.abs(rv) * np.sqrt((numerSig/numer)**2
+                    + (denomSig/denom)**2)
             return rv, rvSig
         return rv
 
-    def cog_IV(self, Ic=1.0):
+    def cog_IV(self, Ic=1.0, fullOutput=False):
         '''
         Helper function to return the center of gravity of (Stokes I)*(Stoke V)
         for the LSD profile, for a given continuum level.
 
         :param Ic: the continnum level to use the the COG calculation
                    (float, default=1.0)
-        :return: the velocity of the center of gravity
+        :param fullOutput: If True, return the uncertainty on the velocity
+                           of the center of gravity
+        :return: the velocity of the center of gravity, optionally also its
+                 uncertainty
         '''
-        numerator = _trapezoid(self.vel * np.abs(self.specV * (Ic-self.specI)),
-                             x=self.vel)
-        denominator = _trapezoid(np.abs(self.specV * (Ic-self.specI)),
-                               x=self.vel)
-        return numerator/denominator
+        numer, numerSig = _moment(self.vel, np.abs(self.specV*(Ic-self.specI)),
+                                  np.sqrt((self.specSigV*(Ic-self.specI))**2
+                                           + (self.specSigI*self.specV)**2),
+                                  0.0, 1)
+        denom, denomSig = _moment(self.vel, np.abs(self.specV*(Ic-self.specI)),
+                                  np.sqrt((self.specSigV*(Ic-self.specI))**2
+                                           + (self.specSigI*self.specV)**2),
+                                  0.0, 0)
+        rv = numer/denom
+        
+        if fullOutput == True:
+            rvSig = np.abs(rv) * np.sqrt((numerSig/numer)**2
+                    + (denomSig/denom)**2)
+            return rv, rvSig
+        return rv
 
-    def cog_V(self):
+    def cog_V(self, fullOutput=False):
         '''
         Helper function to return the center of gravity of the Stokes V
         LSD profile.
         
-        :return: the velocity of the center of gravity
+        :param fullOutput: If True, return the uncertainty on the velocity
+                           of the center of gravity
+        :return: the velocity of the center of gravity, optionally also its
+                 uncertainty
         '''
-        numerator = _trapezoid(self.vel * np.abs(self.specV), x=self.vel)
-        denominator = _trapezoid(np.abs(self.specV), x=self.vel)
-        return(numerator/denominator)        
+        numer, numerSig = _moment(self.vel, np.abs(self.specV), self.specSigV,
+                                  0.0, 1)
+        denom, denomSig = _moment(self.vel, np.abs(self.specV), self.specSigV,
+                                  0.0, 0)
+        rv = numer/denom
+        
+        if fullOutput == True:
+            rvSig = np.abs(rv) * np.sqrt((numerSig/numer)**2
+                    + (denomSig/denom)**2)
+            return rv, rvSig
+        return rv
 
     def cog_min(self):
         '''
@@ -1236,13 +1258,8 @@ class LSD:
                                              self.vel <= p_ewwidth[1])]
         
         # Computes the equivalenth width (in velocity units)
-        EW = _trapezoid((norm_val - lsd_ew.specI), x=lsd_ew.vel)
-        # Estimate the associated error, allowing for uneven pixel spacing
-        # (following the logic of _integrate_bz() )
-        deltav_arr = lsd_ew.vel[1:] - lsd_ew.vel[:-1]
-        err_scale = deltav_arr[:-1] + deltav_arr[1:]
-        err_scale = 0.5*np.concatenate((deltav_arr[:1], err_scale, deltav_arr[-1:]))
-        EWSig = np.sqrt(np.sum((lsd_ew.specSigI * err_scale)**2))
+        EW, EWSig = _moment(lsd_ew.vel, norm_val - lsd_ew.specI,
+                            lsd_ew.specSigI, 0.0, 0)
         
         if lambda0 is not None:
             # convert to wavelength units using lambda0
@@ -1439,11 +1456,58 @@ def _gaussProf(x, cont, ampl, center, width):
     return y
 
 
+def _moment(x, y, dy, cog, n):
+    '''
+    Helper function that calculates the nth moment a line profile.
+
+    Uncertainties are calculated by standard error propagation.
+    Values are calculated relative to x =  cog (e.g. a rest velocity or center
+    of gravity).  These are unnormalized and not standardized,
+    specifically: integral y*(x - cog)**n dx
+    So n=0 is the area (e.g. equivalent width),
+    n=1 divided by n=0 is the mean (or center of gravity when cog=0),
+    n=2 divided by n=0 is the variance when cog is correct
+    (and square root of that is the standard deviation),
+    n=3 divided by n=0 is related to the skewness
+    (you may need to standardize, dividing by the variance to the 3/2 power).
+    Uses trapezoidal integration.  Mostly for internal use.
+    
+    :param x: array of x values (usually velocity for LSD profiles)
+    :param y: array of y values (usually Stokes I, V or nulls)
+    :param dy: array of uncertainties on y values
+    :param cog: float of the x value the calculation is relative to
+    :return: the nth moment, and the uncertainty on that value
+    '''
+    moment = _trapezoid((x - cog)**n * y, x=x - cog)
+    # Estimate the associated uncertainty, allowing for uneven pixel spacing
+    # Error propigation: for trapezoidal integration we use:
+    # A = sum of  0.5 [ x_(i+1) - x_(i) ]*[ Y_(i) + Y_(i+1) ] (from i=1 to i=N-1)
+    # If we define dx_i = x_(i+1) - x_(i) we can rewrite this as:
+    # A = sum of 0.5*dx_(i)*[ Y_(i) + Y_(i+1) ]  (from i=1 to i=N-1)
+    # if we expand the sum, and gather all of the Y_i together, we get:
+    # dx_1 Y_1 + [dx_1+dx_2]Y_2 + [dx_2+dx_3]Y_3 +
+    #      ... + [dx_{N-2}+dx_{N-1}]Y_{N-1} + dx_{N-1} Y_N
+    # Now, assuming uncertainties only on the Y_i, of s_i, the propagated error is
+    # error^2 = 0.5 * ( (dx_1 s_1)**2 + ([dx_1+dx_2]s_2)**2 + ([dx_2+dx_3]s_3)**2 +
+    #           ... +  ([dx_{N-2}+dx_{N-1}]*s_{N-1})**2 + (dx_{N-1} s_N)**2 )
+    # numerically, if we have: vel = [x_1, x_2, x_3, ..., x_n],
+    #              then: vel[1:]-vel[:-1] = [dx_1, dx_2, dx_3, ..., dx_{n-1}]
+    # adding a zero at each end: [0, dx1, dx2, dx3, ..., dx_(n-1), 0], and doing [1:]+[:-1] 
+    # will give us the array that we need to multiply with the s_i array.
+    # (There will be issues with order overlap if the function is used
+    # with an LSD object that was calculated with individual_line function. )
+    deltas = x[1:] - x[:-1]
+    err_scale = deltas[:-1] + deltas[1:]
+    err_scale = 0.5*np.concatenate((deltas[:1], err_scale, deltas[-1:]))
+    uncertainty = np.sqrt(np.sum(((x - cog)**n * dy * err_scale)**2))
+    return moment, uncertainty
+
+
 def _integrate_bz(vel, spec, specSig, geff, lambda0, cog_val,
                   specI, specSigI, norm_val):
     '''
-    Helper function that is used in the Bz calculations to integrate one Stokes parameter. 
-    Internal.
+    Helper function that is used in the Bz calculations to integrate 
+    one Stokes parameter. For internal use only.
 
     :param vel: (numpy array) the velocity array
     :param spec: (numpy array) the associated Stokes parameter array
@@ -1463,53 +1527,14 @@ def _integrate_bz(vel, spec, specSig, geff, lambda0, cog_val,
     lambda_B_constant = 4.668644778304102e-12 #to match/cancel lambda0 in nm
     cvel = 2.99792458e5 #c in km/s to match/cancel the LSD profile velocities
     
-    # set the velocity step for error propagation
-    # (There might be some issues with order overlap if the function is used
-    # with an LSD object that was calculated with individual_line function. )
-    ###
-    # For trapezoidal integration
-    # A = sum of  0.5 [ x_(i+1) - x_(i) ]*[ Y_(i) + Y_(i+1) ] (from i=1 to i=N-1)
-    # If we define dx_i = x_(i+1) - x_(i) we can rewrite this as:
-    # A = sum of 0.5*dx_(i)*[ Y_(i) + Y_(i+1) ]  (from i=1 to i=N-1)
-    # if we expand the sum, and gather all of the Y_i together, we get:
-    # dx_1 Y_1 + [dx_1+dx_2]Y_2 + [dx_2+dx_3]Y_3 +
-    #      ... + [dx_{N-2}+dx_{N-1}]Y_{N-1} + dx_{N-1} Y_N
-    # Now, assuming uncertainties only on the Y_i, of s_i, the propagated error is
-    # error^2 = 0.5 * ( (dx_1 s_1)**2 + ([dx_1+dx_2]s_2)**2 + ([dx_2+dx_3]s_3)**2 +
-    #           ... +  ([dx_{N-2}+dx_{N-1}]*s_{N-1})**2 + (dx_{N-1} s_N)**2 )
-    # numerically, if we have: vel = [x_1, x_2, x_3, ..., x_n],
-    #              then: vel[1:]-vel[:-1] = [dx_1, dx_2, dx_3, ..., dx_{n-1}]
-    # adding a zero at each end: [0, dx1, dx2, dx3, ..., dx_(n-1), 0], and doing [1:]+[:-1] 
-    # will give us the array that we need to multiply with the s_i array. Et voila!
-    ###
-    #deltav_arr = vel[1:] - vel[:-1]
-    #dx = np.hstack([0., deltav_arr, 0.])
-    #err_scale = 0.5*(dx[:-1] + dx[1:])
-    # or more intuitively to Colin (and marginally faster):
-    deltav_arr = vel[1:] - vel[:-1]
-    err_scale = deltav_arr[:-1] + deltav_arr[1:]
-    err_scale = 0.5*np.concatenate((deltav_arr[:1], err_scale, deltav_arr[-1:]))
-
     # Calculation of the integral in the numerator of the Bz function
     # with a trapezoidal numerical integral
-    fnum = _trapezoid((vel - cog_val) * spec, x=vel-cog_val) #in (km/s)^2
-    sfnum = np.sqrt(np.sum(((vel - cog_val) * specSig * err_scale)**2))
-    # for a constant pixel spacing deltav (with the end points treated exactly)
-    #sfnumConst = np.sqrt((0.5*(vel[0] - cog_val)*specSig[0]*deltav)**2
-    #               + np.sum(((vel[1:-1] - cog_val)*specSig[1:-1])**2)*deltav**2
-    #               + (0.5*(vel[-1] - cog_val)*specSig[-1]*deltav)**2)
+    fnum, sfnum = _moment(vel, spec, specSig, cog_val, 1)
     
     # Calculation of the integral in the denominator of the Bz function
     # with a trapezoidal numerical integral
-    # For the square error calculation, we propagate like we would for
-    # summation in a numerical integral.
-    ri0v = _trapezoid(norm_val - specI, x=vel) # in km/s
-    si0v = np.sqrt(np.sum((specSigI * err_scale)**2)) # in km/s
-    # for a constant pixel spacing deltav (with the end points treated exactly)
-    #si0vConst = np.sqrt((0.5*specSigI[0]*deltav)**2
-    #                    + np.sum(specSigI[1:-1]**2)*deltav**2
-    #                    + (0.5*specSigI[-1]*deltav)**2)
-
+    ri0v, si0v = _moment(vel, norm_val - specI, specSigI, cog_val, 0)
+    
     # Make the actual Bz calculation.
     # for the units to work out, lambda0 should be in nm
     bl = -1*fnum / (ri0v*geff*lambda0*cvel*lambda_B_constant)
