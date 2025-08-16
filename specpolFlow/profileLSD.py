@@ -695,7 +695,7 @@ class LSD:
         return(probV, probN1, probN2)
 
     def calc_bz(self, cog='I', norm='auto', lambda0=500., geff=1.2,
-                velrange=None, bzwidth=None, plot=True, plotAllCOG=False,
+                velrange=None, bzwidth=None, plot=True, plotAllCOG=True,
                 verbose=False, **kwargs):
         '''Calculate the Bz of an LSD profile
         
