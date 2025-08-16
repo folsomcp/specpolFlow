@@ -1543,7 +1543,7 @@ def _integrate_bz(vel, spec, specSig, geff, lambda0, cog_val,
 
 
 def _plot_bz_calc(lsd, lsd_in, lsd_bz, velrange, p_bzwidth, norm_val, 
-                  cog_val, cog, plotAllCOG=False, **kwargs):
+                  cog_val, cog, plotAllCOG=True, **kwargs):
     """
     Generate a plot showing the center of gravity and integration ranges used
     in the calculation of Bz from an LSD profile.  Called by the calc_bz
