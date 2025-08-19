@@ -2,8 +2,9 @@
 Tools for manipulating spectra, typically spectropolarimetric observations.
 """
 
-import numpy as np
 import copy
+import warnings
+import numpy as np
 
 # use a version dependent name for trapezoidal integration,
 # since Numpy 2.0 changed names (this could also be a try except)
@@ -112,7 +113,7 @@ class Spectrum:
                             cat_specN2, cat_specSig, header=cat_header)
         return cat_spec
 
-    def coadd(self, *args):
+    def coadd(self, *args, byOrders=True, mergeOrders='none'):
         """
         coadd this spectrum with other spectra
 
@@ -122,62 +123,114 @@ class Spectrum:
         by 1/sigma**2. This assumes the spectra are continuum normalized,
         and have reliable uncertainties.
 
-        Warning: regions with order overlap, or where wavelength goes backwards,
-        will produce incorrect results with this routine.  We strongly
-        recommend using the merge_orders function before using this routine.
+        Spectra can be split into individual spectral orders and then have each
+        order coadded (when byOrders=True) or the orders in the spectra can
+        be merged before coadding (when mergeOrders='trim' or ='coadd').
+        If neither option is used, and there are regions with order overlap,
+        or where wavelength goes backwards, will produce incorrect results
+        with this routine. 
         
         :param args: other Spectrum objects (or a list or tuple of them)
                      to coadd with this one
+        :param byOrders: flag for whether individual orders are coadded (True),
+                     or whole spectra are coadded at once assuming no overlap
+                     (False).  If this is False, orders should already be merged,
+                     or the mergeOrders flag should be set to 'trim' or 'coadd'.  
+        :param mergeOrders: optional method for merging spectral orders before
+                     coadding.  Options are 'trim', 'coadd', or 'none'.
+                     See the merge_orders function for details.  (If this is
+                     not 'trim' or 'coadd' no merging will be done.)
+                     If both this flag and byOrders=True are set, then orders
+                     are merged before coadding, effectively overriding
+                     byOrders=True.
         :rtype: Spectrum
         """
-        #Set up the weighted average using self as the first entry
-        #weight by 1/sigma**2, and save the sum of the weights
         spec = copy.deepcopy(self) #work on a copy (not self!)
-        weight = 1./self.specSig**2
-        spec.specI = self.specI*weight
-        spec.specV = self.specV*weight
-        spec.specN1 = self.specN1*weight
-        spec.specN2 = self.specN2*weight
-        totalWeight = weight.copy()
-
-        args2 = args
-        #Check if the user passed a list or tuple of spectra (unwrap it)
+        specList = list(args)
+        # Check if the user passed a list or tuple of spectra (unwrap it)
         if len(args) > 0:
             if isinstance(args[0], list) or isinstance(args[0], tuple):
                 if isinstance(args[0][0], Spectrum):
-                    args2 = args[0]
-        for arg in args2:
+                    specList = list(args[0])
+        # Type checking
+        for arg in specList:
             if not isinstance(arg, Spectrum):
                 raise ValueError('coadd can only use Spectrum objects!')
             if np.any(arg.specSig <= 0.0):
                 raise ValueError("coadd requires uncertainties "
                                  "(>0) for all points!")
-            if not np.all(np.diff(arg.wl) > 0):
-                print('Warning: in Spectrum.coadd, coadding spectra with order'
-                      ' overlap or decreasing wavelength.  This will cause'
-                      ' incorrect results in those regions.')
-            #Interpolate this spectrum onto the reference wavelengths
-            bspecI   = np.interp(spec.wl, arg.wl, arg.specI)
-            bspecV   = np.interp(spec.wl, arg.wl, arg.specV)
-            bspecN1  = np.interp(spec.wl, arg.wl, arg.specN1)
-            bspecN2  = np.interp(spec.wl, arg.wl, arg.specN2)
-            bspecSig = np.interp(spec.wl, arg.wl, arg.specSig)
 
-            #Add this spectrum to the weighted sums
-            weight = 1./bspecSig**2
-            spec.specI += bspecI*weight
-            spec.specV += bspecV*weight
-            spec.specN1 += bspecN1*weight
-            spec.specN2 += bspecN2*weight
-            totalWeight += weight
+        # Merge orders if requested
+        if mergeOrders == 'trim' or mergeOrders == 'coadd':
+            spec = spec.merge_orders(mode=mergeOrders)
+            for i, arg in enumerate(specList):
+                specList[i] = arg.merge_orders(mode=mergeOrders)
 
-        #Once all spectra have been added, complete the weighted average
-        spec.specI /= totalWeight
-        spec.specV /= totalWeight
-        spec.specN1 /= totalWeight
-        spec.specN2 /= totalWeight
-        spec.specSig = np.sqrt(1/totalWeight)
-        return spec
+        # Split orders if requested (ignore gaps, since only overlaps
+        # cause problems for the interpolation routine)
+        if byOrders:
+            specOrds = spec.get_orders(ignoreGaps=True)
+            norders = len(specOrds)
+            specListOrds = []
+            for arg in specList:
+                argOrds = arg.get_orders(ignoreGaps=True)
+                if len(argOrds) != norders:
+                    raise ValueError('in Spectrum.coadd(), when coadding by '
+                                     'orders, all spectra must have the same '
+                                     'number of orders!  ')
+                specListOrds += [argOrds]
+        else: # Wrap spectra in lists (1 element lists with the whole spectrum)
+            specOrds = [spec]
+            specListOrds = [[arg] for arg in specList]
+
+        # loop over orders adding spectra for each order
+        for i, spec in enumerate(specOrds):
+            #Set up the weighted average using self as the first entry
+            #weight by 1/sigma**2, and save the sum of the weights
+            weight = 1./spec.specSig**2
+            spec.specI = spec.specI*weight
+            spec.specV = spec.specV*weight
+            spec.specN1 = spec.specN1*weight
+            spec.specN2 = spec.specN2*weight
+            totalWeight = weight.copy()
+            
+            for argOrds in specListOrds:
+                arg = argOrds[i] #get this order of this spectrum
+                if not np.all(np.diff(arg.wl) > 0):
+                    warnings.warn('\nin Spectrum.coadd: Using spectra '
+                        'with order overlap or a decreasing wavelength.\n'
+                        'Doing this will cause incorrect results in those '
+                        'regions!\n(You can try using the mergeOrders="trim" '
+                        'or  byOrders=True options to fix this.)',
+                        stacklevel=2)
+
+                #Interpolate this spectrum onto the reference wavelengths
+                bspecI   = np.interp(spec.wl, arg.wl, arg.specI)
+                bspecV   = np.interp(spec.wl, arg.wl, arg.specV)
+                bspecN1  = np.interp(spec.wl, arg.wl, arg.specN1)
+                bspecN2  = np.interp(spec.wl, arg.wl, arg.specN2)
+                bspecSig = np.interp(spec.wl, arg.wl, arg.specSig)
+
+                #Add this spectrum to the weighted sums
+                weight = 1./bspecSig**2
+                spec.specI += bspecI*weight
+                spec.specV += bspecV*weight
+                spec.specN1 += bspecN1*weight
+                spec.specN2 += bspecN2*weight
+                totalWeight += weight
+
+            #Once all spectra have been added, complete the weighted average
+            spec.specI /= totalWeight
+            spec.specV /= totalWeight
+            spec.specN1 /= totalWeight
+            spec.specN2 /= totalWeight
+            spec.specSig = np.sqrt(1/totalWeight)
+
+        #concatenate orders if necessary back into one Spectrum object
+        specOut = specOrds[0]
+        if len(specOrds) > 1:
+            specOut = specOrds[0].concatenate(specOrds[1:])
+        return specOut
 
     def doppler_shift(self, velocity):
         '''
@@ -414,7 +467,8 @@ class Spectrum:
                     indO2[np.nonzero(np.logical_not(indO2))[0][0]] = True
                     
                     #coadd the region in the overlap
-                    ord1[indO1] = ord1[indO1].coadd(ord2[indO2])
+                    ord1[indO1] = ord1[indO1].coadd(ord2[indO2], byOrders=False,
+                                                    mergeOrders='none')
                     
                 #Save this order with coadded values,
                 #except for the overlap with the previous order
