@@ -340,7 +340,7 @@ def plot_LineList(llist, depthCut=0.0, maxLabels=None,
         wlMax = np.max(llist.wl)
         wlRange = wlMax - wlMin
         ax.set_xlim(wlMin - 0.05*wlRange, wlMax + 0.05*wlRange, auto=True)
-        ax.set_ylim(0.0, 1.1, auto=True)
+        ax.set_ylim(0.0, 1.2, auto=True)
     else:
         print("no list or data")
         wlMin = 0.

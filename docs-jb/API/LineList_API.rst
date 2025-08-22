@@ -5,6 +5,8 @@ LineList class and functions
 .. autoclass:: specpolFlow.LineList
     :members:
 
+.. autofunction:: specpolFlow.plot_LineList
+
 .. autofunction:: specpolFlow.line_list_zeros
 
 .. autofunction:: specpolFlow.read_VALD
