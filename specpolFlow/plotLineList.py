@@ -144,7 +144,7 @@ def plot_obs_lines(spectra=[], lineList=[], depthCut=0.0, maxLabels=100,
         if np.min(obsU.wl) < wlMin: wlMin = np.min(obsU.wl)
 
     # Plot the line lists in a loop
-    lines_color_list = ['grey', 'seagreen', 'slateblue', 'firebrick']
+    lines_color_list = ['grey', 'seagreen', 'slateblue', 'orchid', 'firebrick']
     for i, llist in enumerate(_lineList):
         # get the LineList object
         if isinstance(llist, LineList):
@@ -185,8 +185,8 @@ def plot_obs_lines(spectra=[], lineList=[], depthCut=0.0, maxLabels=100,
             rotation='vertical'
             vshift = 0.04
         else:
-            nrows = 2
-            rotation='horizontal'
+            nrows = 1
+            rotation='vertical'
             vshift = 0.02
         if stokes == 'IV':
             cont = 1.0
@@ -224,11 +224,11 @@ def plot_obs_lines(spectra=[], lineList=[], depthCut=0.0, maxLabels=100,
 
 
 def plot_LineList(llist, depthCut=0.0, maxLabels=None,
-                  scaleDepths=1.0, cont=1.01, rise=0.05,
-                  nrows=2, padding=4.0, vpadding=6.0,
+                  scaleDepths=0.25, cont=1.01, rise=0.05,
+                  nrows=1, padding=4.0, vpadding=6.0,
                   romanIon=False, avoidOverlaps=True, dynamicUpdate=True,
                   linewidth=1.0, linecolor='grey', linestyle='-',
-                  fontsize=8, rotation='horizontal',
+                  fontsize=8, rotation='vertical',
                   bindKeys=True, ax=None, lineKwargs={}, **kwargs):
     '''
     Plot a line list, with tick marks at the positions of lines and text labels
