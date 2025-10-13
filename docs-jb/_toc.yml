@@ -21,6 +21,7 @@ parts:
     - file: Tutorials/1-ConvertToSFiles_Tutorial.ipynb
     - file: Tutorials/2-Normalizing_Tutorial.md
     - file: Tutorials/10-SpectrumClass_Tutorial.ipynb
+    - file: Tutorials/PlotLinesSpectra_Tutorial.ipynb
     - file: Tutorials/3-MaskClass_Tutorial.ipynb
     - file: Tutorials/3b-MaskUI_Tutorial.md
     - file: Tutorials/4-ExcludeMaskRegionClass_Tutorial.ipynb
