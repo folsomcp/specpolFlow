@@ -5,3 +5,5 @@ Spectrum classes and functions
     :members:
 
 .. autofunction:: specpolFlow.read_spectrum
+
+.. autofunction:: specpolFlow.plot_obs_lines
