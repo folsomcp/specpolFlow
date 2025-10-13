@@ -12,7 +12,7 @@ def plot_obs_lines(spectra=[], lineList=[], depthCut=0.0, maxLabels=100,
     '''
     Plot observed spectra and/or a line list
 
-    This is mostly intended as a quick look tool.  This uses the plot_LineList
+    This is mostly intended as a quick look tool.  This uses the plot_lineList
     function, and you can construct more tailored to your specific case
     using that function and matplotlib.
 
@@ -179,6 +179,7 @@ def plot_obs_lines(spectra=[], lineList=[], depthCut=0.0, maxLabels=100,
             llistU.wl = llistU.wl + llistU.wl*vel/c
         
         # plot the line list, but set some parameters for that function first
+        _depthCut = depthCut
         color = lines_color_list[i%len(lines_color_list)]
         if len(_lineList) > 1:
             nrows = 1
@@ -192,14 +193,17 @@ def plot_obs_lines(spectra=[], lineList=[], depthCut=0.0, maxLabels=100,
             cont = 1.0
             rise = 0.07 + vshift*i
         elif stokes == 'V' or stokes == 'N1' or stokes == 'N2' or stokes == 'N':
-            llistU.depth = 0.2*llistU.depth + 1.0
+            # tic marcks bottom position = 1-depth*scale, so modified depth = (1-bottom)/scale
+            # and here we want the bottom to be -0.1*depth, so modified depth = (1+0.1*depth)/scale
+            llistU.depth = (1.0 + 0.1*llistU.depth)/0.25
+            _depthCut = (1.0 + 0.1*depthCut)/0.25
             cont = 0.01
             vshift = 0.02
             rise = 0.02 + vshift*i
         else:
             cont = 1.0
             rise = 0.05 + vshift*i
-        plot_LineList(llistU, ax=ax, depthCut=depthCut, maxLabels=maxLabels,
+        plot_lineList(llistU, ax=ax, depthCut=_depthCut, maxLabels=maxLabels,
                       cont=cont, rise=rise, nrows=nrows,
                       rotation=rotation, linecolor=color)
 
@@ -207,7 +211,7 @@ def plot_obs_lines(spectra=[], lineList=[], depthCut=0.0, maxLabels=100,
     # for consistent keybinding behavior
     if len(_lineList) == 0:
         tmp_llist = line_list_zeros(0)
-        plot_LineList(tmp_llist, ax=ax, depthCut=depthCut, maxLabels=maxLabels)
+        plot_lineList(tmp_llist, ax=ax, depthCut=depthCut, maxLabels=maxLabels)
         
     # Some fancy extras
     if showLegend:
@@ -223,7 +227,7 @@ def plot_obs_lines(spectra=[], lineList=[], depthCut=0.0, maxLabels=100,
     return fig, ax
 
 
-def plot_LineList(llist, depthCut=0.0, maxLabels=None,
+def plot_lineList(llist, depthCut=0.0, maxLabels=None,
                   scaleDepths=0.25, cont=1.01, rise=0.05,
                   nrows=1, padding=4.0, vpadding=6.0,
                   romanIon=False, avoidOverlaps=True, dynamicUpdate=True,
@@ -281,7 +285,7 @@ def plot_LineList(llist, depthCut=0.0, maxLabels=None,
                           if the x-axis changes (e.g. when using ax.set_xlim() or
                           through panning or zooming in an interactive window).
                           If you set this to False, use ax.set_xlim() before
-                          running plot_LineList(). 
+                          running plot_lineList(). 
                           (note: this function connects to the Axes 'xlim_changed'
                           event and the Figure 'resize_event', and stores some 
                           data in the Figure object as fig.dynamicLineList)
