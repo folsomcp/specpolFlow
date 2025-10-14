@@ -179,10 +179,19 @@ class Mask:
             llist.depth[i] =  mask.depth[i]
             llist.Elo[i] = mask.excite[i]
             llist.landeEff[i] = mask.lande[i]
-            
-            strIon = elements[int(mask.element[i]) - 1]
-            strIon = strIon + ' {:d}'.format(
-                round(100.*(mask.element[i] % 1.0) + 1.0))
+
+            try:
+                if mask.element[i] < 1.0: raise ValueError
+                strIon = elements[int(mask.element[i]) - 1]
+                strIon = strIon + ' {:d}'.format(
+                    round(100.*(mask.element[i] % 1.0) + 1.0))
+            except:
+                warnings.warn('\nin Mask.convert_to_line_list(): Could not '
+                              'identify the element from the ion string,\n'
+                              'trying to just use the number '
+                              '{:.2f}'.format(mask.element[i]),
+                              stacklevel=2)
+                strIon = '{:.2f}'.format(mask.element[i])
             llist.ion[i] = strIon
         
         return llist
