@@ -634,14 +634,26 @@ def _fancy_ion_string(ion):
     '''
     Convert the ion string from VALD's format to a fancier format
     using roman numerals for the ionization stage.
-    (Currently only supports ionization up to IX)
+    (Currently only supports ionization up to 999,
+    but the LineList class may truncate that if the ion string gets too long).
     '''
     fion = copy.deepcopy(ion)
-    trans = str.maketrans({'1':'I', '2':'II', '3':'III', '4':'IV', '5':'V',
-                           '6':'VI', '7':'VII', '8':'VIII', '9':'IX'})
+    numerals1 = ('', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII','IX')
+    numerals10 = ('', 'X', 'XX', 'XXX', 'XL', 'L', 'LX', 'LXX', 'LXXX','XC')
+    numerals100 = ('', 'C', 'CC', 'CCC', 'CD', 'D', 'DC', 'DCC', 'DCCC','CM')
     for i in range(len(fion)):
-        text = fion[i].translate(trans)
-        fion[i] = text
+        try:
+            p1, sep, p2 = fion[i].partition(' ')  #split the ion string
+            ip2 = int(p2) #get the integer ionization level
+            if ip2 > 0 and ip2 < 1000: #build the roman numeral
+                hunds, others = divmod(ip2, 100)
+                tens, ones = divmod(others, 10)
+                romion = numerals100[hunds] + numerals10[tens] + numerals1[ones]
+            else: #as a fallback just use the existing ion string
+                romion = p2
+            fion[i] = p1 + ' ' + romion #combine the element and roman numeral
+        except: #as a fallback just use the existing ion string
+            fion[i] = ion[i]
     return fion
 
 

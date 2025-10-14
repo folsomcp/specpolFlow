@@ -214,7 +214,7 @@ def line_list_zeros(nLines):
     :param nLines: the number of lines in the LineList of zeros
     :rtype: LineList
     """
-    ion      = np.tile(np.array([''], dtype='U8'), nLines)
+    ion      = np.tile(np.array([''], dtype='U12'), nLines)
     wl       = np.zeros(nLines)
     loggf    = np.zeros(nLines)
     Elo      = np.zeros(nLines)
