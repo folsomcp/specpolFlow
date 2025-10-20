@@ -562,6 +562,11 @@ def read_spectrum(fname, trimBadPix=False, sortByWavelength=False):
                        and pixels with extremely large values.
     :param sortByWavelength: reorder the points in the spectrum to always
                              increase in wavelength, if set to True.
+                             Note: if there are multiple spectral orders this
+                             will will destroy information about order edges.
+                             If you want to merge orders, it is usually better
+                             to leave this False and then use
+                             Spectrum.merge_orders() after reading the file.
     :rtype: Spectrum
     """
     # Reading manually is often faster than np.loadtxt for a large files
@@ -648,8 +653,34 @@ def read_spectrum(fname, trimBadPix=False, sortByWavelength=False):
     
     #Optionally, sort the observation so wavelength is always increasing
     if sortByWavelength:
-        obs_ind = np.argsort(obs.wl)
-        obs = obs[obs_ind]
+        # if the observation isn't already sorted
+        if not np.all(obs.wl[1:] >= obs.wl[:-1]):
+            obs_ind = np.argsort(obs.wl)   # then get indexes that sort it
+
+            # if the observation isn't simply reversed send a warning
+            if not np.all(obs.wl[1:] <= obs.wl[:-1]):
+                # check the number of orders with wavelength overlaps
+                ordersOverlapping = obs.get_orders(ignoreGaps=True)
+                norders = len(ordersOverlapping)
+                # if it looks like this will merge orders
+                if norders < 100 and norders > 1:
+                    warnings.warn("\nIn read_spectrum(..., sortByWavelength=True): "
+                                  "It looks like there are spectral orders, which "
+                                  "will be lost when this is done!\n"
+                                  "If you care about spectral orders use "
+                                  "sortByWavelength=False. If you don't care about "
+                                  "spectral orders, it is still usually better "
+                                  "to use sortByWavelength=False, and then use the "
+                                  "Spectrum.merge_orders() function. Using "
+                                  "sortByWavelength=True will effectively perform "
+                                  "a 'zipper merge', which is frequently not ideal.",
+                                  stacklevel=2)
+                else:
+                    print('reading spectrum and sorting pixels by wavelength')
+                    print('note this will destroy information about spectral '
+                          'orders, if separate orders are present')
+            # apply sorting
+            obs = obs[obs_ind]
     
     return obs
 
