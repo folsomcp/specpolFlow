@@ -670,6 +670,9 @@ def _get_visible_labels(wlMin, wlMax, show_lines, llist_all, maxLabels):
     # Limit the number of text labels plotted, only plotting the deepest lines.
     # Set flags for the sub-set of the line list used for drawing text labels,
     # and get indices for their positions in the full line list being plotted.
+    if maxLabels <= 0:
+        show_labels[:] = False
+        ind_labels_in_lines = np.nonzero(show_labels[show_lines])[0]
     if np.sum(show_labels) > maxLabels:
         # get only the maxLabels deepest lines
         indSortDepth = np.argsort(llist_all.depth[show_labels])
