@@ -1,2 +1,2 @@
-jupyter-book
+jupyter-book>=1.0,<2.0
 astropy
