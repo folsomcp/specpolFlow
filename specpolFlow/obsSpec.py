@@ -5,6 +5,7 @@ Tools for manipulating spectra, typically spectropolarimetric observations.
 import copy
 import warnings
 import numpy as np
+import matplotlib.pyplot as plt
 
 # use a version dependent name for trapezoidal integration,
 # since Numpy 2.0 changed names (this could also be a try except)
@@ -545,7 +546,7 @@ class Spectrum:
         return specC
 
     def calc_ew(self, lineRange, contRange=None, norm='auto',
-                fullOutput=True, plot=True, verbose=False):
+                fullOutput=False, plot=True, verbose=False):
         '''
         Calculate the equivalent width, of Stokes I, for a portion of this
         spectrum.
@@ -557,27 +558,28 @@ class Spectrum:
         and LSD.calc_ew()
 
         :param lineRange: the wavelength range used for the equivalent width
-                          calculation. This should be 2 element list, tuple,
-                          or array with start and end values.
+                    calculation. This should be 2 element list, tuple,
+                    or array with start and end values.
         :param contRange: the wavelength range used to estimate the continuum
-                          level, using the median value, if norm='auto'.
-                          Multiple ranges can be used, with a list of
-                          lists (with the inner list containing start and end
-                          values), or an array of dimensions (nRanges, 2).
-                          The region inside lineRange is automatically 
-                          excluded, so contRange can span lineRange.
+                    level, using the median value, if norm='auto'.
+                    Multiple ranges can be used, with a list of
+                    lists (with the inner list containing start and end
+                    values), or an array of dimensions (nRanges, 2).
+                    The region inside lineRange is automatically
+                    excluded, so contRange can span lineRange.
         :param norm: calculation method for the continuum. The choices are:
-                     'auto': the median of Stokes I outside of lineRange and 
-                     inside contRange, or float: a user defined fixed value.
-        :param fullOutput: If True, return the equivalent width and its 
-                    uncertainty, as two values (default). If False return
-                    the equivalent width with no uncertainty.
+                    'auto': the median of Stokes I outside of lineRange and
+                    inside contRange, or float: a user defined fixed value.
+        :param fullOutput: If True, return the continuum level, along with
+                    the equivalent width and its uncertainty, as 3 values.
+                    If False (default) return just the equivalent width
+                    and uncertainty.
         :param plot: If True, return a matplotlib figure of the line profile
                     and velocity ranges used, as the last returned value.
         :param verbose: If True print some extra diagnostic information,
-                        including the continuum level.
-        :return: the equivalent width in wavelength units,
-                 optionally the uncertainty, and optionally a figure.
+                    including the continuum level.
+        :return: the equivalent width and uncertainty in wavelength units,
+                    optionally the continuum level, and optionally a figure.
         '''
         c = 299792.458  #speed of light in km/s        
         # Check input values are valid
@@ -609,7 +611,8 @@ class Spectrum:
                 raise ValueError('In Spectrum.calc_ew, contRange has invalid '
                                  'dimensions.  It must be something that can be '
                                  'converted to an array with shape (nRanges, 2).')
-            allRanges = np.concatenate((aLineRange[np.newaxis, :], aContRange), axis=0)
+            allRanges = np.concatenate((aLineRange[np.newaxis, :], aContRange),
+                                       axis=0)
         else:
             allRanges = aLineRange[np.newaxis, :]
         
@@ -634,8 +637,9 @@ class Spectrum:
                    (lineRange[1] - wlCenter)/wlCenter*c]
         velrange = [-ewwidth[0], ewwidth[1]]
         rvals = profU.calc_ew(cog=0.0, norm=norm, lambda0=wlCenter, 
-                             velrange=velrange, ewwidth=ewwidth,
-                             fullOutput=fullOutput, plot=plot, verbose=verbose)
+                              velrange=velrange, ewwidth=ewwidth,
+                              fullOutput=fullOutput, plot=plot, verbose=verbose)
+        
         if plot: # add the full chunk of spectrum to the plot
             axs = rvals[-1].get_axes()
             axs[0].plot(prof.vel, prof.specI, 'o', ms=3, c='lightgrey')
