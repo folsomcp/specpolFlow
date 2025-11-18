@@ -544,6 +544,104 @@ class Spectrum:
                 specC.specN2[i] = np.sum((prod[:-1] + prod[1:])*0.5*(specT.wl[1:] - specT.wl[:-1]))
         return specC
 
+    def calc_ew(self, lineRange, contRange=None, norm='auto',
+                fullOutput=True, plot=True, verbose=False):
+        '''
+        Calculate the equivalent width, of Stokes I, for a portion of this
+        spectrum.
+
+        This function can automatically estimate a continuum level, or a
+        specific value can be given.  
+        
+        This function is a convenience wrapper around Spectrum.individual_line()
+        and LSD.calc_ew()
+
+        :param lineRange: the wavelength range used for the equivalent width
+                          calculation. This should be 2 element list, tuple,
+                          or array with start and end values.
+        :param contRange: the wavelength range used to estimate the continuum
+                          level, using the median value, if norm='auto'.
+                          Multiple ranges can be used, with a list of
+                          lists (with the inner list containing start and end
+                          values), or an array of dimensions (nRanges, 2).
+                          The region inside lineRange is automatically 
+                          excluded, so contRange can span lineRange.
+        :param norm: calculation method for the continuum. The choices are:
+                     'auto': the median of Stokes I outside of lineRange and 
+                     inside contRange, or float: a user defined fixed value.
+        :param fullOutput: If True, return the equivalent width and its 
+                    uncertainty, as two values (default). If False return
+                    the equivalent width with no uncertainty.
+        :param plot: If True, return a matplotlib figure of the line profile
+                    and velocity ranges used, as the last returned value.
+        :param verbose: If True print some extra diagnostic information,
+                        including the continuum level.
+        :return: the equivalent width in wavelength units,
+                 optionally the uncertainty, and optionally a figure.
+        '''
+        c = 299792.458  #speed of light in km/s        
+        # Check input values are valid
+        if contRange is None:
+            if not isinstance(norm, float):
+                raise ValueError('Spectrum.calc_ew requires either contRange '
+                                 'to be specified, or norm to be a specified '
+                                 'continuum value')
+        elif not (isinstance(contRange, list) or isinstance(contRange, tuple)
+                  or isinstance(contRange, np.ndarray)):
+            raise TypeError('Spectrum.calc_ew requires contRange to be a '
+                            'list or tuple')
+        if not (isinstance(lineRange, list) or isinstance(lineRange, tuple)
+                  or isinstance(lineRange, np.ndarray)):
+            raise TypeError('Spectrum.calc_ew requires lineRange to be a '
+                            'list or tuple')
+
+        # Generate a 2D array with all the wavelength ranges of interest
+        aLineRange = np.array(lineRange)
+        if aLineRange.ndim != 1 or aLineRange.shape[0] != 2:
+            raise ValueError('In Spectrum.calc_ew, lineRange has invalid '
+                             'dimensions. It must contain only a start and '
+                             'end value.')
+        if contRange is not None:
+            aContRange = np.array(contRange)
+            if aContRange.ndim == 1:
+                aContRange = aContRange[np.newaxis, :]
+            if aContRange.shape[1] != 2:
+                raise ValueError('In Spectrum.calc_ew, contRange has invalid '
+                                 'dimensions.  It must be something that can be '
+                                 'converted to an array with shape (nRanges, 2).')
+            allRanges = np.concatenate((aLineRange[np.newaxis, :], aContRange), axis=0)
+        else:
+            allRanges = aLineRange[np.newaxis, :]
+        
+        # Get the widest wavelength range needed for conversion to an LSD object
+        wlStart = np.min(allRanges)
+        wlEnd = np.max(allRanges)
+        wlCenter = (lineRange[0] + lineRange[1])*0.5
+
+        # Convert the spectrum to an LSD object, and use its calc_ew() function
+        prof = self.individual_line(wlCenter,
+                                    [wlCenter - wlStart, wlEnd - wlCenter])
+
+        # Remove the portions of the spectrum that we don't want to use
+        fuse = np.zeros_like(prof.vel, dtype=bool)
+        for i in range(allRanges.shape[0]):
+            fuse += ((prof.vel >= (allRanges[i, 0] - wlCenter)/wlCenter*c)
+                    & (prof.vel <= (allRanges[i, 1] - wlCenter)/wlCenter*c))
+        profU = prof[fuse]
+
+        # Calculate the EW
+        ewwidth = [(wlCenter - lineRange[0])/wlCenter*c,
+                   (lineRange[1] - wlCenter)/wlCenter*c]
+        velrange = [-ewwidth[0], ewwidth[1]]
+        rvals = profU.calc_ew(cog=0.0, norm=norm, lambda0=wlCenter, 
+                             velrange=velrange, ewwidth=ewwidth,
+                             fullOutput=fullOutput, plot=plot, verbose=verbose)
+        if plot: # add the full chunk of spectrum to the plot
+            axs = rvals[-1].get_axes()
+            axs[0].plot(prof.vel, prof.specI, 'o', ms=3, c='lightgrey')
+        
+        return rvals
+
 
 def read_spectrum(fname, trimBadPix=False, sortByWavelength=False):
     """
