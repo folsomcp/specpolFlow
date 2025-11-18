@@ -1127,7 +1127,7 @@ class LSD:
             return False
 
     def calc_ew(self, cog='I', norm='auto', lambda0=None, velrange=None, 
-                ewwidth=None, fullOutput=True, plot=True, verbose=False):
+                ewwidth=None, fullOutput=False, plot=True, verbose=False):
         '''
         Calculate the equivalent width, of Stokes I, for this LSD profile.
 
@@ -1162,17 +1162,18 @@ class LSD:
                     One element = same on each side of line center.
                     Two elements = left and right of line center.
                     Not given (default): instead use velrange for this.
-        :param fullOutput: If True, return the equivalent width and its 
-                    uncertainty, as two values (default). If False return
-                    the equivalent width with no uncertainty.
+        :param fullOutput: If True, return the continuum level, along with
+                    the equivalent width and its uncertainty, as 3 values.
+                    If False (default) return just the equivalent width
+                    and uncertainty.
         :param plot: If True, return a matplotlib figure of the line profile
                     and velocity ranges used, as the last returned value.
         :param verbose: If True print some extra diagnostic information.
         
-        :return: the equivalent width, optionally the uncertainty,
-                 and optionally a figure. The equivalent width is in
-                 the wavelength units of lambda0, or if lambda0 is not 
-                 provided it is in velocity units.
+        :return: the equivalent width, the uncertainty, optionally
+                 the continuum level and optionally a figure.
+                 The equivalent width is in the wavelength units of lambda0,
+                 or if lambda0 is not provided it is in velocity units.
         '''
         # velrange is used to identify the position of the line,
         # for calculating the cog, and for calculating the position
@@ -1273,18 +1274,18 @@ class LSD:
                          [lsd_ew.vel[0], lsd_ew.vel[-1]],
                          cog_val, EW=True)
             if fullOutput == True:
-                return EW, EWSig, fig
+                return EW, EWSig, norm_val, fig
             else:
-                return EW, fig
+                return EW, EWSig, fig
         else:
             if fullOutput == True:
-                return EW, EWSig
+                return EW, EWSig, norm_val
             else:
-                return EW
+                return EW, EWSig
 
     
     def calc_V_R(self, cog='I', norm='auto', velrange=None, ewwidth=None, 
-                 fullOutput=True, plot=True, verbose=False):
+                 fullOutput=False, plot=True, verbose=False):
         '''
         Calculate the V/R ratio of Stokes I for, this LSD profile.
 
@@ -1319,15 +1320,15 @@ class LSD:
                     One element = same on each side of line center.
                     Two elements = left and right of line center.
                     Not given (default): instead use velrange for this.
-        :param fullOutput: If True, return the equivalent width and its 
-                    uncertainty, as two values (default). If False return
-                    the equivalent width with no uncertainty.
+        :param fullOutput: If True, return the V/R value, its uncertainty,
+                    and the continuum level as 3 values. If False (default)
+                    return just the V/R and uncertainty.
         :param plot: If True, return a matplotlib figure of the line profile
                     and velocity ranges used, as the last returned value.
         :param verbose: If True print some extra diagnostic information.
                         
-        :return: the V/R ratio, optionally the uncertainty on the ratio,
-                 optionally a matplotlib figure
+        :return: the V/R ratio, the uncertainty, optionally the continuum
+                 level, optionally a matplotlib figure
         '''
         
         if velrange is not None:
@@ -1421,11 +1422,11 @@ class LSD:
         
         Vew, VSig = self.calc_ew(cog=cog_val, norm=norm_val,
                                  velrange=velrange, ewwidth=Vwidth,
-                                 fullOutput=True, plot=False)
+                                 fullOutput=False, plot=False)
         
         Rew, RSig = self.calc_ew(cog=cog_val, norm=norm_val, 
                                  velrange=velrange, ewwidth=Rwidth,
-                                 fullOutput=True, plot=False)
+                                 fullOutput=False, plot=False)
 
         V_R = Vew/Rew #calculate V/R (unitless)
 
@@ -1437,14 +1438,14 @@ class LSD:
             fig=_plot_ew(self, norm_val, p_velrange, p_Vrange, p_Rrange,
                          cog_val, EW=False)
             if fullOutput == True:
-                return V_R, V_RSig, fig
+                return V_R, V_RSig, norm_val, fig
             else:
-                return V_R, fig
+                return V_R, V_RSig, fig
         else:
             if fullOutput == True:
-                return V_R, V_RSig
+                return V_R, V_RSig, norm_val
             else:
-                return V_R
+                return V_R, V_RSig
 
 ##################
 
