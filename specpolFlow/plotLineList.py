@@ -310,7 +310,7 @@ def plot_lineList(llist, depthCut=0.0, maxLabels=None,
     :param lineKwargs: a dictionary of additional keyword arguments that are 
                        passed to the matplotlib LineCollection function.
                        e.g. {'zorder':10.0, 'alpha':0.2, 'lw':5.0}
-    :param **kwargs: any remaining keyword arguments are passed to the matplotlib 
+    :param kwargs: any remaining keyword arguments are passed to the matplotlib 
                      ax.text() function when creating the labels for lines.
     :return: a matplotlib figure object, and an axes object
              containing the plot.

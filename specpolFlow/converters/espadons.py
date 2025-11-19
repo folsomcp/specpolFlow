@@ -22,6 +22,7 @@ def espadons(flist, flistout=None, ftype=None, writeSpecHeader=False):
     
     * The UPENA normalized spectrum (n.s), with automated radial velocity corrections from the telluric lines.
     * The UPENA unnormalized spectrum (u.s), using the automated radial velocity correction from the normalized spectrum.
+    
     This is done starting from the unnormalized spectrum without the automated 
     radial velocity correction, to which we apply the radial velocity
     correction determined from the normalized spectrum. The reason behind this
