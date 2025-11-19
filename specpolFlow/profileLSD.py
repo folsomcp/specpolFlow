@@ -832,7 +832,6 @@ class LSD:
                           "you want -- merge orders before running calc_bz()!",
                           stacklevel=2)
             lsd_bz = lsd_bz._sortvel()
-            #deltav_array = lsd_bz.vel[1:]-lsd_bz.vel[:-1]
 
         # Actual calculation of the Bz:
 
@@ -1206,6 +1205,19 @@ class LSD:
             norm_val = copy.copy(norm)
             if verbose: print('using given norm value: {:}'.format(norm_val))
 
+        # Check for order overlap, and raise a warning
+        flagSortVel = False
+        deltav_array = self.vel[1:] - self.vel[:-1]
+        if np.any(deltav_array < 0.0):
+            warnings.warn("\n In calc_ew(): There appears to be order overlap "
+                    "in the observation used.\n The velocity array is not "
+                    "monotonically increasing.\n calc_ew will sort the LSD "
+                    "profile in velocity order. \n Make sure this is what "
+                    "you want -- merge orders before running calc_ew()!",
+                    stacklevel=2)
+            lsd_in = lsd_in._sortvel()
+            flagSortVel = True
+        
         # Check if cog is a string.
         if isinstance(cog, str):
             # calculate the cog for the chosen method
@@ -1229,13 +1241,10 @@ class LSD:
             # Using vrange, if defined
             if velrange is not None:
                 if verbose: print('using velrange to calculate EW')
-                lsd_ew = copy.copy(lsd_in)
-                #p_ewwidth = copy.deepcopy(velrange) # not used
             else:
                 print('no ewwidth or velrange defined, using full velocity '
                       'range to calculate EW')
-                lsd_ew = copy.copy(self)
-                #p_ewwidth = [self.vel.min(), self.vel.max()] # not used
+            lsd_ew = copy.copy(lsd_in)
         else:
             # Check whether ewwidth is a list or tuple (or array?)
             if (isinstance(ewwidth, list) or isinstance(ewwidth, tuple)
@@ -1250,13 +1259,13 @@ class LSD:
                     lsd_ew = self[np.logical_and(self.vel >= p_ewwidth[0],
                                                  self.vel <= p_ewwidth[1])]
                 else:
-                    print('ewwidth has too many elements (need one or two)')
                     raise ValueError('ewwidth has too many elements '
                                      +'{:} (need 1 or 2)'.format(len(ewwidth)))
             else:
                 p_ewwidth = [cog_val - ewwidth, cog_val + ewwidth]
                 lsd_ew = self[np.logical_and(self.vel >= p_ewwidth[0],
                                              self.vel <= p_ewwidth[1])]
+            if flagSortVel: lsd_ew = lsd_ew._sortvel()
         
         # Computes the equivalenth width (in velocity units)
         EW, EWSig = _moment(lsd_ew.vel, norm_val - lsd_ew.specI,
