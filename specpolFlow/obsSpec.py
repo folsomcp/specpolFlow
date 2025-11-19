@@ -636,13 +636,30 @@ class Spectrum:
         ewwidth = [(wlCenter - lineRange[0])/wlCenter*c,
                    (lineRange[1] - wlCenter)/wlCenter*c]
         velrange = [-ewwidth[0], ewwidth[1]]
-        rvals = profU.calc_ew(cog=0.0, norm=norm, lambda0=wlCenter, 
-                              velrange=velrange, ewwidth=ewwidth,
-                              fullOutput=fullOutput, plot=plot, verbose=verbose)
+        ew, ewErr, cont = profU.calc_ew(cog=0.0, norm=norm, lambda0=wlCenter,
+                                        velrange=velrange, ewwidth=ewwidth,
+                                        fullOutput=True, plot=False,
+                                        verbose=verbose)
+        rvals = (ew, ewErr)
+        if fullOutput==True: rvals += (cont,)
         
-        if plot: # add the full chunk of spectrum to the plot
-            axs = rvals[-1].get_axes()
-            axs[0].plot(prof.vel, prof.specI, 'o', ms=3, c='lightgrey')
+        if plot: # make a custom plot for the spectrum ew (in wavelength units)
+            fig, ax = plt.subplots(figsize=(10, 4))
+            ax.errorbar(profU.vel/c*wlCenter+wlCenter, profU.specI,
+                        yerr=profU.specSigI, fmt='o', ms=3, ecolor='0.5', c='k')
+            ax.plot(prof.vel/c*wlCenter+wlCenter, prof.specI,
+                    'o', ms=3, c='lightgrey')
+            ax.fill_between(profU.vel/c*wlCenter+wlCenter, profU.specI,
+                            np.ones(len(profU.vel))*cont,
+                            where=(profU.vel >= velrange[0]) & (profU.vel <= velrange[1]),
+                            alpha=0.1, color='k')
+            ax.axvline(lineRange[0], color='tab:blue', ls='--', label='lineRange')
+            ax.axvline(lineRange[1], color='tab:blue', ls='--')
+            ax.axhline(cont, color='pink', ls='--', label='norm')
+            ax.set_ylabel('I/Ic')
+            ax.set_xlabel('Wavelength')
+            plt.legend()
+            rvals += (fig,)
         
         return rvals
 
