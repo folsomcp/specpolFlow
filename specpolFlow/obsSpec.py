@@ -653,8 +653,8 @@ class Spectrum:
                             np.ones(len(profU.vel))*cont,
                             where=(profU.vel >= velrange[0]) & (profU.vel <= velrange[1]),
                             alpha=0.1, color='k')
-            ax.axvline(lineRange[0], color='tab:blue', ls='--', label='lineRange')
-            ax.axvline(lineRange[1], color='tab:blue', ls='--')
+            ax.axvline(lineRange[0], color='tab:blue', ls=':', label='lineRange')
+            ax.axvline(lineRange[1], color='tab:blue', ls=':')
             ax.axhline(cont, color='pink', ls='--', label='norm')
             ax.set_ylabel('I/Ic')
             ax.set_xlabel('Wavelength')
