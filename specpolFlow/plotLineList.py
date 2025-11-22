@@ -434,7 +434,7 @@ def plot_lineList(llist, depthCut=0.0, maxLabels=None,
     return fig, ax
 
 
-def plot_ElementsChart(mask, wmin, wmax, plotStyle='pie', sort='Z', treshold=None):
+def plot_elementsChart(mask, wmin, wmax, plotStyle='pie', sort='Z', treshold=None):
     """
     Pie chart showing the distribution of elements in the given mask
     within the specified wavelength range [wmin, wmax].
