@@ -226,7 +226,6 @@ def plot_obs_lines(spectra=[], lineList=[], depthCut=0.0, maxLabels=100,
     
     return fig, ax
 
-
 def plot_lineList(llist, depthCut=0.0, maxLabels=None,
                   scaleDepths=0.25, cont=1.01, rise=0.05,
                   nrows=1, padding=4.0, vpadding=6.0,
@@ -434,6 +433,95 @@ def plot_lineList(llist, depthCut=0.0, maxLabels=None,
     
     return fig, ax
 
+
+def plot_ElementsChart(mask, wmin, wmax, plotStyle='pie', sort='Z', treshold=None):
+    """
+    Pie chart showing the distribution of elements in the given mask
+    within the specified wavelength range [wmin, wmax].
+
+    :param mask: mask object 
+    :param wmin: (float) Minimum wavelength for pruning.
+    :param wmax: (float) Maximum wavelength for pruning.
+    :param plotStyle: (str) Type of plot to generate. 
+                The choices are:
+                'pie': pie chart
+                'bar': bar chart (not implemented yet).
+    :param sort: (str) Sorting method for elements. 
+                The choices are:
+                'Z' or 'atomic': atomic number sorting, 
+                'A' or 'ascending': ascending order for the number of lines, 
+                'D' or 'descending': descending order for the number of lines. 
+    :param treshold: (float or None) Minimum fractional contribution for an element to be included in the pie chart.
+                      If None, all elements are included.
+
+    :
+    """
+
+    # Get the elements and their line counts within the specified wavelength range
+    Z, elements, counts = _get_elements_in_wavelength_range(mask, wmin, wmax)
+
+    # Sort the elements and counts based on the specified sorting method
+    if sort in ('A', 'a','ascending'):
+        sorted_indices = np.argsort(counts)
+    elif sort in ('D', 'd','descending'):
+        sorted_indices = np.argsort(counts)[::-1]
+    elif sort in (None, 'Z', 'z','atomic', 'atomic number'):
+        sorted_indices = np.argsort(Z)
+    else:
+        raise ValueError("Invalid sort option. Choose 'Z', 'A', or 'D'.")
+
+    Z = Z[sorted_indices]
+    elements = elements[sorted_indices]
+    counts = counts[sorted_indices] 
+
+    # Apply treshold cut if specified
+    if treshold is not None:
+        if treshold > 1:
+            treshold = treshold / 100.0  # Convert percentage to fraction 
+
+        total_counts = np.sum(counts)
+        fractional_counts = counts / total_counts
+        valid_indices = fractional_counts >= treshold
+        
+        # Check if any elements remain after applying the treshold
+        if np.sum(valid_indices) == 0:
+            raise ValueError("Treshold too high, no elements to display.")
+
+        # Add an 'Other' category if some elements were excluded
+        if np.sum(~valid_indices) > 0:
+            other_count = np.sum(counts[~valid_indices])
+            # Update Z, elements, and counts to include only valid indices
+            Z = Z[valid_indices]
+            elements = elements[valid_indices]
+            counts = counts[valid_indices]
+            # Append 'Other' category -- Note: 'Other' will always be last item in the plot, 
+            #                                  regardless of the sorting method.
+            elements = np.append(elements, 'Other')
+            counts = np.append(counts, other_count)
+
+
+    ## PLOTTING THE PIE CHART ##
+    # set the colormap
+    import seaborn as sns
+    sns.set_palette("tab20")
+
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(4,4), layout='constrained')
+    else:
+        fig = ax.get_figure()
+    
+    if plotStyle == 'pie':
+        # Create the pie chart
+        ax.pie(counts, labels=elements, autopct='%1.1f%%', 
+                startangle=90, labeldistance=1.05, pctdistance=0.85)
+    else:
+        raise NotImplementedError("Currently only 'pie' plotStyle is implemented.")
+    # Add a title to the chart
+    ax.set_title('Distribution of elements within [{}, {}]nm'.format(wmin, wmax))
+    # Ensure the circle is drawn as a circle
+    ax.axis('equal')
+    
+    return fig, ax
 
 class _updateLinesPlot:
     '''
@@ -913,3 +1001,32 @@ def _set_label_pos(fig, ax, llabels2d, llist_labels, padding, vpadding, redraw=T
         labelFlx[i] = labelPos[1]
     
     return labelWls, labelFlx
+
+def _get_elements_in_wavelength_range(mask, wmin, wmax):
+    """
+    Get statistics of elements present in the mask within the specified wavelength range [wmin, wmax].
+
+    :param mask: Mask object.
+    :param wmin: (float) Minimum wavelength for pruning.
+    :param wmax: (float) Maximum wavelength for pruning.
+    
+    :rtype: (arrays) Z, elements, counts.
+    """    
+    # List of element symbols corresponding to atomic numbers 
+    labels=('H' ,'He','Li','Be','B' ,'C' ,'N' ,'O' ,'F' ,'Ne','Na','Mg',
+              'Al','Si','P' ,'S' ,'Cl','Ar','K' ,'Ca','Sc','Ti','V' ,'Cr',
+              'Mn','Fe','Co','Ni','Cu','Zn','Ga','Ge','As','Se','Br','Kr',
+              'Rb','Sr','Y' ,'Zr','Nb','Mo','Tc','Ru','Rh','Pd','Ag','Cd',
+              'In','Sn','Sb','Te','I' ,'Xe','Cs','Ba','La','Ce','Pr','Nd',
+              'Pm','Sm','Eu','Gd','Tb','Dy','Ho','Er','Tm','Yb','Lu','Hf',
+              'Ta','W' ,'Re','Os','Ir','Pt','Au','Hg','Tl','Pb','Bi','Po',
+              'At','Rn','Fr','Ra','Ac','Th','Pa','U' )
+    # Prune the mask to only include lines within the wavelength range
+    mask_clean_prune = mask[(mask.wl>=wmin) & (mask.wl<=wmax)]
+    # List of atomic numbers of unique elements present in the specified wavelength range
+    Z = np.unique(np.round(mask_clean_prune.element).astype(int))
+    # List of element symbols corresponding to the atomic numbers in Z
+    elements = np.array([labels[int(el) - 1] for el in Z])
+    # List with the number of lines for each element in Z
+    counts = np.array([len(mask_clean_prune[np.round(mask_clean_prune.element).astype(int) == el]) for el in Z])
+    return Z, elements, counts
