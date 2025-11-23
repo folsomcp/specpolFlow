@@ -5,8 +5,10 @@ but they could occasionaly still be useful on their own.
 """
 import copy
 import warnings
+import numpy as np
 
 # constants
+
 # speed of light in m/s
 c_ms = 299792458.  
 # speed of light in km/s
@@ -34,8 +36,7 @@ def doppler_shift_kms(wl, velocity):
     :param velocity: the radial velocity in km/s
     :return: the Doppler shifted wavelengths
     '''
-    _wl = copy.deepcopy(wl) #work on a copy
-    _wl = _wl + _wl*velocity/c_kms
+    _wl = wl + wl*velocity/c_kms
     return _wl
 
 def vacuum_to_air(wl):
@@ -106,8 +107,22 @@ def atomic_symbol_to_number(symbol):
         raise ValueError('In atomic_symbol_to_number: input value must be a '
                          'string')
     _symbol = symbol.strip()
-    num = _atomicSym.index(_symbol) + 1
-    return
+    if len(_symbol) > 2: # if the string is too long, see if we can split it
+        _symbol =_symbol.split()[0]
+        if len(_symbol) > 2: # if the string is still to long
+            raise ValueError('In atomic_symbol_to_number: input value '
+                             'is not an atomic symbol: {:}'.format(symbol))
+        else: # if splitting it produces a plausable first part
+            warnings.warn('\nIn atomic_symbol_to_number: Input value is not '
+                          'an atomic symbol.  Trying to parse it as an ion '
+                          '(atomic symbol + ionization number)',
+                          stacklevel=2)
+    try:
+        num = _atomicSym.index(_symbol) + 1
+    except:
+        raise ValueError('In atomic_symbol_to_number: input value '
+                         'is not an known atomic symbol: {:}'.format(symbol))
+    return num
 
 def atomic_number_to_symbol(number):
     '''
@@ -119,16 +134,13 @@ def atomic_number_to_symbol(number):
     :return: an text string with the atomic symbol (e.g. "Fe")
     '''
     _num = number
-    if isinstance(number, float):
+    if isinstance(number, (float, np.floating)):
         _num = int(number)
-    elif not isinstance(number, int):
-        raise ValueError('In atomic_number_to_symbol: input atomic number '
-                         'must be an int')
     if _num < 1 or _num > 99:
         raise ValueError('In atomic_number_to_symbol: input atomic number '
-                         'outside supported range')
+                         'outside supported range ({:})'.format(_num))
     symbol = _atomicSym[_num - 1]
-    return copy.deepcopy(symbol)
+    return symbol
 
 def ion_symbol_to_number(symbol):
     '''
@@ -145,12 +157,27 @@ def ion_symbol_to_number(symbol):
     if not isinstance(symbol, str):
         raise ValueError('In ion_symbol_to_number: input value must be a '
                          'string')
-    _symbol = symbol.strip()
-    element = _symbol.split()[0]
-    ion = _symbol.split()[1]
+    symbol_parts = symbol.strip().split()
+    if len(symbol_parts) == 1:
+        element = symbol_parts[0]
+        ion = 1.0
+        warnings.warn('\nIn atomic_symbol_to_number: Input value is missing '
+                      'an ionisation level.  Trying to parse it as an atomic '
+                      'symbol for a neutral atom.',
+                      stacklevel=2)
+    elif len(symbol_parts) == 2:
+        element = symbol_parts[0]
+        ion = symbol_parts[1]
+    else:
+        raise ValueError('In ion_symbol_to_number: input string must contain'
+                         'only an atomic symbol and ionization state')
     try:
         num = float(_atomicSym.index(element) + 1) + (float(ion) - 1)*0.01
     except ValueError:
+        warnings.warn('\nIn atomic_symbol_to_number: could not parse input '
+                      'string, setting ion number to 0.0 '
+                      '(got: {:})'.format(symbol),
+                      stacklevel=2)
         num = 0.00
     return num
 
@@ -167,15 +194,14 @@ def ion_number_to_symbol(number):
     :return: a string with the ion symbol
     '''
     _num = number
-    if isinstance(number, int):
-        _num = float(int)
-    elif not isinstance(number, float):
-        raise ValueError('In ion_number_to_symbol: input ion number '
-                         'must be a float')
+    if isinstance(number, (int, np.integer)):
+        warnings.warn('\nIn ion_number_to_symbol: got an integer not a float, '
+                      'trying to treat this as a neutral ion',
+                      stacklevel=2)
+        _num = float(_num)
     if _num < 1.0 or _num >= 100.0:
         raise ValueError('In ion_number_to_symbol: input atomic number '
                          'outside supported range')
-    
     try:
         strIon = _atomicSym[int(_num) - 1]
         strIon = strIon + ' {:d}'.format(round(100.*(_num % 1.0) + 1.0))
