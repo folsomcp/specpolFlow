@@ -7,6 +7,7 @@ and interacively cleaning and tweaking.
 
 import numpy as np
 import warnings
+from .utils import c_kms
 #from . import lineList as lineListLib #(moved inside some functions)
 
 ###################################
@@ -339,7 +340,7 @@ def read_exclude_mask_regions(fname):
     
     return ExcludeMaskRegions(start, stop, np.array(type, dtype=object))
 
-def get_Balmer_regions_default(velrange=500):
+def get_Balmer_regions_default(velrange=500.0):
     '''
     Generate an ExcludeMaskRegions object with regions around Balmer H-lines
     (alpha to epsilon) up to a given radial velocity,
@@ -350,7 +351,6 @@ def get_Balmer_regions_default(velrange=500):
     :rtype: ExcludeMaskRegions
     '''
 
-    c = 299792.458 # Speed of light in km/s
     # Mask should be in nm
     wavelengths = [
         656.281,
@@ -370,8 +370,8 @@ def get_Balmer_regions_default(velrange=500):
     start = []
     stop = []
     for w in wavelengths:
-        start.append(-1*velrange/c*w + w)
-        stop.append(velrange/c*w + w)
+        start.append(-1*velrange/c_kms*w + w)
+        stop.append(velrange/c_kms*w + w)
 
     # Adding the Balmer jump
     start.append(360.0)
