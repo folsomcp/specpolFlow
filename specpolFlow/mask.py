@@ -5,6 +5,7 @@ lines from the mask, managing regions to exclude from the mask,
 and interacively cleaning and tweaking.
 """
 
+import copy
 import numpy as np
 import warnings
 from . import utils
@@ -106,7 +107,58 @@ class Mask:
         weightI = self.depth / normDepth
         weightV = self.depth*self.wl*self.lande / (normDepth*normWave*normLande)
         return weightI, weightV
-    
+
+    def doppler_shift(self, velocity):
+        '''
+        Doppler shift the mask according to an input radial velocity.
+
+        :param velocity: the radial velocity in km/s
+        :rtype: Mask
+        '''
+        mask = copy.deepcopy(self)
+        mask.wl = utils.doppler_shift_kms(mask.wl, velocity)
+        return mask
+
+    def vacuum_to_air(self):
+        '''
+        Convert the mask from wavelength in vacuum to wavelength in air
+        (assuming dry air at 15 C and 1 atmosphere of pressure)
+        and return the modified mask.
+
+        This function requires the line mask to have wavelength in angstroms.
+        
+        :rtype: Mask
+        '''
+        mask = copy.deepcopy(self)
+        if mask.wl[0] < 2500.:
+            warnings.warn('\nin Mask.vacuum_to_air: '
+                          'This function requires wavelengths in units of '
+                          'angstroms.\nIf you are using UV lines you can '
+                          'disregard this warning, otherwise check the units.',
+                          stacklevel=2)
+        mask.wl = utils.vacuum_to_air(mask.wl)
+        return mask
+
+    def air_to_vacuum(self):
+        '''
+        Convert the mask from wavelength in air to wavelength in vacuum
+        (assuming dry air at 15 C and 1 atmosphere of pressure)
+        and return the modified mask.
+        
+        This function requires the line mask to have wavelength in angstroms.
+        
+        :rtype: Mask
+        '''
+        mask = copy.deepcopy(self)
+        if mask.wl[0] < 2500.:
+            warnings.warn('\nin Mask.air_to_vacuum: '
+                          'This function requires wavelengths in units of '
+                          'angstroms.\nIf you are using UV lines you can '
+                          'disregard this warning, otherwise check the units.',
+                          stacklevel=2)
+        mask.wl = utils.air_to_vacuum(mask.wl)
+        return mask
+
     def save(self, fname):
         """
         Save the line Mask to a text file, in Donati's and LSDpy format.
