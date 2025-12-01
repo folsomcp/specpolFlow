@@ -160,7 +160,6 @@ class Mask:
         :rtype: LineList
         """
         from . import lineList as lineListLib
-        elements = utils._atomicSym
 
         if onlyFlaggedLines:
             mask = self[self.iuse != 0]
@@ -169,25 +168,14 @@ class Mask:
         
         nlines = len(mask.wl)
         llist = lineListLib.line_list_zeros(nlines)
+        llist.landeLo[:] = 99.0
+        llist.landeUp[:] = 99.0
         for i in range(nlines):
             llist.wl[i] = mask.wl[i]
             llist.depth[i] =  mask.depth[i]
             llist.Elo[i] = mask.excite[i]
             llist.landeEff[i] = mask.lande[i]
-
-            try:
-                if mask.element[i] < 1.0: raise ValueError
-                strIon = elements[int(mask.element[i]) - 1]
-                strIon = strIon + ' {:d}'.format(
-                    round(100.*(mask.element[i] % 1.0) + 1.0))
-            except:
-                warnings.warn('\nin Mask.convert_to_line_list(): Could not '
-                              'identify the element from the ion string,\n'
-                              'trying to just use the number '
-                              '{:.2f}'.format(mask.element[i]),
-                              stacklevel=2)
-                strIon = '{:.2f}'.format(mask.element[i])
-            llist.ion[i] = strIon
+            llist.ion[i] = utils.ion_number_to_symbol(mask.element[i])
         
         return llist
 
@@ -491,7 +479,6 @@ def convert_list_to_mask(lineList, depthCutoff=0.0, atomsOnly = True,
     #Loop through the line list making sure to use good data
     for i in range(lineList.nLines):
         element = lineList.ion[i].split()[0]
-        ion = lineList.ion[i].split()[1]
 
         if (lineList.depth[i] >= depthCutoff) and (
             (atomsOnly == False) or (element in elements and element != 'H')):
@@ -526,11 +513,7 @@ def convert_list_to_mask(lineList, depthCutoff=0.0, atomsOnly = True,
                 mask.iuse[j]   = 1
                 #The element code here is the atomic number plus 
                 #the ionization state/100, so Fe II becomes 26.01
-                try:
-                    mask.element[j] = float(elements.index(element)+1) \
-                        + (float(ion)-1)*0.01
-                except ValueError:
-                    mask.element[j] = 0.00
+                mask.element[j] = utils.ion_symbol_to_number(lineList.ion[i])
                 
                 j += 1
             else:
@@ -594,8 +577,6 @@ def filter_mask(mask, depthCutoff = 0.0, wlStart = None, wlEnd = None,
     :rtype: Mask
     """
     
-    elements = utils._atomicSym
-
     if wlStart is None: wlStart = 0.0
     if wlEnd is None: wlEnd = 1e10
     if landeStart is None: landeStart = -1e10
@@ -612,10 +593,7 @@ def filter_mask(mask, depthCutoff = 0.0, wlStart = None, wlEnd = None,
         indKeep = np.zeros_like(mask.iuse, dtype=bool)
         #Set a flag to only keep elements in the requested list
         for elUse in elementsUsed:
-            try: #get the atomic number for this element
-                elNumber = elements.index(elUse.strip())+1
-            except ValueError:
-                raise ValueError('Unrecognized element {:} in elementsUsed'.format(elUse))
+            elNumber = utils.atomic_symbol_to_number(elUse)
             indKeep = indKeep | (mask.element.astype(int) == elNumber)
         indRemove = indRemove | np.logical_not(indKeep)
     
@@ -627,10 +605,7 @@ def filter_mask(mask, depthCutoff = 0.0, wlStart = None, wlEnd = None,
         indExclude = np.zeros_like(mask.iuse, dtype=bool)
         #Set a flag to remove elements in the exclude list
         for elCut in elementsExclude:
-            try: #get the atomic number for this element
-                elNumber = elements.index(elCut.strip())+1
-            except ValueError:
-                raise ValueError('Unrecognized element {:} in elementsExclude'.format(elUse))
+            elNumber = utils.atomic_symbol_to_number(elCut)
             indExclude = indExclude | (mask.element.astype(int) == elNumber)
         indRemove = indRemove | indExclude
     
