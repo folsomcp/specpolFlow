@@ -7,6 +7,7 @@ and interacively cleaning and tweaking.
 
 import numpy as np
 import warnings
+from . import utils
 from .utils import c_kms
 #from . import lineList as lineListLib #(moved inside some functions)
 
@@ -159,14 +160,7 @@ class Mask:
         :rtype: LineList
         """
         from . import lineList as lineListLib
-        elements=('H' ,'He','Li','Be','B' ,'C' ,'N' ,'O' ,'F' ,'Ne','Na','Mg',
-              'Al','Si','P' ,'S' ,'Cl','Ar','K' ,'Ca','Sc','Ti','V' ,'Cr',
-              'Mn','Fe','Co','Ni','Cu','Zn','Ga','Ge','As','Se','Br','Kr',
-              'Rb','Sr','Y' ,'Zr','Nb','Mo','Tc','Ru','Rh','Pd','Ag','Cd',
-              'In','Sn','Sb','Te','I' ,'Xe','Cs','Ba','La','Ce','Pr','Nd',
-              'Pm','Sm','Eu','Gd','Tb','Dy','Ho','Er','Tm','Yb','Lu','Hf',
-              'Ta','W' ,'Re','Os','Ir','Pt','Au','Hg','Tl','Pb','Bi','Po',
-              'At','Rn','Fr','Ra','Ac','Th','Pa','U' )
+        elements = utils._atomicSym
 
         if onlyFlaggedLines:
             mask = self[self.iuse != 0]
@@ -484,14 +478,7 @@ def convert_list_to_mask(lineList, depthCutoff=0.0, atomsOnly = True,
     :rtype: Mask
     """
     from . import lineList as lineListLib
-    elements=('H' ,'He','Li','Be','B' ,'C' ,'N' ,'O' ,'F' ,'Ne','Na','Mg',
-              'Al','Si','P' ,'S' ,'Cl','Ar','K' ,'Ca','Sc','Ti','V' ,'Cr',
-              'Mn','Fe','Co','Ni','Cu','Zn','Ga','Ge','As','Se','Br','Kr',
-              'Rb','Sr','Y' ,'Zr','Nb','Mo','Tc','Ru','Rh','Pd','Ag','Cd',
-              'In','Sn','Sb','Te','I' ,'Xe','Cs','Ba','La','Ce','Pr','Nd',
-              'Pm','Sm','Eu','Gd','Tb','Dy','Ho','Er','Tm','Yb','Lu','Hf',
-              'Ta','W' ,'Re','Os','Ir','Pt','Au','Hg','Tl','Pb','Bi','Po',
-              'At','Rn','Fr','Ra','Ac','Th','Pa','U' )
+    elements = utils._atomicSym
     nLines = lineList.nLines
     mask = Mask(np.zeros(nLines), np.zeros(nLines), np.zeros(nLines),
                 np.zeros(nLines), np.zeros(nLines),
@@ -607,14 +594,7 @@ def filter_mask(mask, depthCutoff = 0.0, wlStart = None, wlEnd = None,
     :rtype: Mask
     """
     
-    elements=('H' ,'He','Li','Be','B' ,'C' ,'N' ,'O' ,'F' ,'Ne','Na','Mg',
-              'Al','Si','P' ,'S' ,'Cl','Ar','K' ,'Ca','Sc','Ti','V' ,'Cr',
-              'Mn','Fe','Co','Ni','Cu','Zn','Ga','Ge','As','Se','Br','Kr',
-              'Rb','Sr','Y' ,'Zr','Nb','Mo','Tc','Ru','Rh','Pd','Ag','Cd',
-              'In','Sn','Sb','Te','I' ,'Xe','Cs','Ba','La','Ce','Pr','Nd',
-              'Pm','Sm','Eu','Gd','Tb','Dy','Ho','Er','Tm','Yb','Lu','Hf',
-              'Ta','W' ,'Re','Os','Ir','Pt','Au','Hg','Tl','Pb','Bi','Po',
-              'At','Rn','Fr','Ra','Ac','Th','Pa','U' )
+    elements = utils._atomicSym
 
     if wlStart is None: wlStart = 0.0
     if wlEnd is None: wlEnd = 1e10
