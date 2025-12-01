@@ -183,7 +183,7 @@ def ion_symbol_to_number(symbol):
 
 def ion_number_to_symbol(number):
     '''
-    Convert an ion symbol (atom and ionization state) into a number
+    Convert an ion number into a text ion symbol (atom and ionization state)
 
     Uses ion numbers in the form atomic number + ionization state/100
     Generates text strings in the form "Fe 1" for neutral iron, and
