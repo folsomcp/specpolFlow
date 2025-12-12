@@ -12,6 +12,7 @@ import scipy.special as specialf
 from scipy.optimize import curve_fit
 
 from .obsSpec import Spectrum, read_spectrum
+from .utils import c_kms
 
 # use a version dependent name for trapezoidal integration,
 # since Numpy 2.0 changed names (this could also be a try except)
@@ -1273,8 +1274,8 @@ class LSD:
         
         if lambda0 is not None:
             # convert to wavelength units using lambda0
-            EW = EW*lambda0/2.99792458e5
-            EWSig = EWSig*lambda0/2.99792458e5
+            EW = EW*lambda0/c_kms
+            EWSig = EWSig*lambda0/c_kms
 
         #Optionally return the EW and its error 
         if plot == True:
@@ -1535,7 +1536,7 @@ def _integrate_bz(vel, spec, specSig, geff, lambda0, cog_val,
     # Lambda_B = constant * lambda0**2 B
     # lambda_B_constant = e/(4*pi*m_e*c) = 4.668644778304102e-05 in cgs units
     lambda_B_constant = 4.668644778304102e-12 #to match/cancel lambda0 in nm
-    cvel = 2.99792458e5 #c in km/s to match/cancel the LSD profile velocities
+    # use c in km/s to match/cancel the LSD profile velocities
     
     # Calculation of the integral in the numerator of the Bz function
     # with a trapezoidal numerical integral
@@ -1547,7 +1548,7 @@ def _integrate_bz(vel, spec, specSig, geff, lambda0, cog_val,
     
     # Make the actual Bz calculation.
     # for the units to work out, lambda0 should be in nm
-    bl = -1*fnum / (ri0v*geff*lambda0*cvel*lambda_B_constant)
+    bl = -1*fnum / (ri0v*geff*lambda0*c_kms*lambda_B_constant)
     blSig = np.abs(bl * np.sqrt((sfnum/fnum)**2 + (si0v/ri0v)**2))
     return bl, blSig
 
@@ -1832,12 +1833,11 @@ def run_lsdpy(obs, mask, outLSDName=None,
     # Make a default calculation for the pixel spacing if not user-defined
     if velPixel is None:
         #Get average observed wavelength spacing
-        cvel = 2.99792458e5 #c in km/s
         obsSp = read_spectrum(obs)
         wlStep = obsSp.wl[1:] - obsSp.wl[:-1]
-        medianVelPix = np.median(wlStep/obsSp.wl[:-1]*cvel)
+        medianVelPix = np.median(wlStep/obsSp.wl[:-1]*c_kms)
         #indWlSteps = ((wlStep > 0.) & (wlStep < 0.5))
-        #meanVelPix = np.average(wlStep[indWlSteps]/obsSp.wl[:-1][indWlSteps]*cvel)        
+        #meanVelPix = np.average(wlStep[indWlSteps]/obsSp.wl[:-1][indWlSteps]*c_kms)
         velPixel = round(medianVelPix, ndigits=2)
 
     # Set the controls to the call to LSDpy for saving the files if needed.

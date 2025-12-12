@@ -38,6 +38,8 @@ This will generate an output spectrum file (`[observation].s`). There is an opti
 
 The SPIRou .fits files contain nan values for pixels where the telluric correction or spectrum extraction was unreliable. This tool offers three ways to treat these values with the `-n` flag: `-n replace` (replace nan with 0 and set the errors to 100), `-n remove` (remove the nan pixels, and by default also remove some of the small fragments of spectrum nearby), `-n keep` (keep the nan values, which may cause problems for analysis with SpecpolFlow).  For more details see the [tutorial on converters](../Tutorials/1-ConvertToSFiles_Tutorial.ipynb), and for the full list of command line options run `spf-fitstos-spirou -h`.
 
+SPIRou spectra have wavelengths in vacuum, which is different from ESPaDOnS and most visible spectrographs that produce spectra with wavelengths in air.
+
 ## Normalizing spectra
 
 Reliable continuum normalization is needed before running LSD. Several normalization tools can do this.  SpecpolFlow includes the optional tool normPlot, which can handle the .s format with polarimetric information. 
@@ -61,6 +63,17 @@ normplot observationu.s -b -e exclude.dat -d poly-deg.dat -c params.dat
 ```
 For details on the command line parameters run `normplot -h`
 
+## Plotting spectra and line lists
+
+It can be handy to plot observed spectra, model spectra, and line lists, to explore the spectrum and identify features.  There is a tool `spf-plotspec` in SpecpolFlow that can do this for observations and models in a text '.s' format, along with VALD 'long format' line lists, for example:
+```
+spf-plotspec spectrum1.s spectrum2.s -l linelist.dat
+```
+Here the `-l` flag is used to indicate line list files.  Multiple spectra and multiple line lists can be plotted.  For convenience, in this tool the arrow keys will pan left/right and up/down, `i` zooms in, `o` zooms out, `a` auto-scales the plot, `A` auto-scales just the y-axis, and `z` activates the matplotlib zoom tool.  
+
+You can plot different Stokes parameters with the `-s` flag, with `-s IV` plotting both Stokes I and V spectra (with V vertically shifted).  There are a number of other options for this tool, which can be seen by running `spf-plotspec -h`.
+
+
 ## Making and cleaning a mask
 
 ### Making the mask
@@ -74,7 +87,7 @@ The line list can also be trimmed to only lines deeper than some depth, and in s
 ```
 spf-makemask -d 0.2 -w1 450 -w2 650 line_list.dat line_mask.dat
 ```
-For a full list of options run `spf-makemask -h`
+For a full list of options run `spf-makemask -h`.
 
 ### Cleaning the mask
 
