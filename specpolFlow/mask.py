@@ -25,6 +25,7 @@ class Mask:
     * element - the element+ion code for the line
     * depth - the depth of the line
     * lande - the effective Lande factor of the line
+    * excite - the excitation energy of the lower level (in eV)
     * iuse - integer flag for whether the line is used
     """
     def __init__(self, wl, element, depth, excite, lande, iuse):
