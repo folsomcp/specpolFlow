@@ -585,7 +585,7 @@ class Spectrum:
         return specC
 
     def calc_ew(self, lineRange, contRange=None, norm='auto',
-                fullOutput=False, plot=True, verbose=False):
+                plot=True, verbose=False):
         '''
         Calculate the equivalent width, of Stokes I, for a portion of this
         spectrum.
@@ -609,16 +609,14 @@ class Spectrum:
         :param norm: calculation method for the continuum. The choices are:
                     'auto': the median of Stokes I outside of lineRange and
                     inside contRange, or float: a user defined fixed value.
-        :param fullOutput: If True, return the continuum level, along with
-                    the equivalent width and its uncertainty, as 3 values.
-                    If False (default) return just the equivalent width
-                    and uncertainty.
         :param plot: If True, return a matplotlib figure of the line profile
                     and velocity ranges used, as the last returned value.
         :param verbose: If True print some extra diagnostic information,
                     including the continuum level.
-        :return: the equivalent width and uncertainty in wavelength units,
-                    optionally the continuum level, and optionally a figure.
+        :return: A dictionary containing the equivalent width, its uncertainty,
+                 the continuum level, and some other diagnostic information.
+                 If plot=True a matplotlib figure is also returned.
+                 The equivalent width is in the wavelength units of lambda0,
         '''
         # Check input values are valid
         if contRange is None:
@@ -674,12 +672,19 @@ class Spectrum:
         ewwidth = [(wlCenter - lineRange[0])/wlCenter*utils.c_kms,
                    (lineRange[1] - wlCenter)/wlCenter*utils.c_kms]
         velrange = [-ewwidth[0], ewwidth[1]]
-        ew, ewErr, cont = profU.calc_ew(cog=0.0, norm=norm, lambda0=wlCenter,
-                                        velrange=velrange, ewwidth=ewwidth,
-                                        fullOutput=True, plot=False,
-                                        verbose=verbose)
-        rvals = (ew, ewErr)
-        if fullOutput==True: rvals += (cont,)
+        res = profU.calc_ew(cog=0.0, norm=norm, lambda0=wlCenter,
+                            velrange=velrange, ewwidth=ewwidth,
+                            plot=False, verbose=verbose)
+        result = {
+                 'EW': res['EW'],
+                 'EW sig': res['EW sig'],
+                 'norm_method':res['norm_method'],
+                 'norm': res['norm'],
+                 'cog_method':res['cog_method'],
+                 'cog': res['cog'],
+                 'int. range start': lineRange[0],
+                 'int. range end': lineRange[1]
+                  }
         
         if plot: # make a custom plot for the spectrum ew (in wavelength units)
             fig, ax = plt.subplots(figsize=(10, 4))
@@ -688,18 +693,17 @@ class Spectrum:
             ax.plot(prof.vel/c_kms*wlCenter+wlCenter, prof.specI,
                     'o', ms=3, c='lightgrey')
             ax.fill_between(profU.vel/c_kms*wlCenter+wlCenter, profU.specI,
-                            np.ones(len(profU.vel))*cont,
+                            np.ones(len(profU.vel))*res['norm'],
                             where=(profU.vel >= velrange[0]) & (profU.vel <= velrange[1]),
                             alpha=0.1, color='k')
             ax.axvline(lineRange[0], color='tab:blue', ls=':', label='lineRange')
             ax.axvline(lineRange[1], color='tab:blue', ls=':')
-            ax.axhline(cont, color='pink', ls='--', label='norm')
+            ax.axhline(res['norm'], color='pink', ls='--', label='norm')
             ax.set_ylabel('I/Ic')
             ax.set_xlabel('Wavelength')
             plt.legend()
-            rvals += (fig,)
-        
-        return rvals
+            return result, fig
+        return result
 
 
 def read_spectrum(fname, trimBadPix=False, sortByWavelength=False):
