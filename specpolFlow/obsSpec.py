@@ -725,8 +725,8 @@ def read_spectrum(fname, usecols=None, trimBadPix=False, sortByWavelength=False)
                     the tuple corresponds to wavelength, Stokes I, Stokes V,
                     N1, N2, and errors.  Columns numbers start at 0.
                     If a negative value is given, then nothing is read for that
-                    parameter, and the parameter's values are left at 0.
-                    E.g. usecols=(0, 2) reads wavelength from the 1st column
+                    parameter and it is set to 0.
+                    E.g.: usecols=(0, 2) reads wavelength from the 1st column
                     and flux (Stokes I) from the 3rd column.
                     usecols=(0, 1, 2, 4, 4, 3) reads wavelength, I, and V as
                     usual, uses the 5th column for N1 and re-uses it for N2,
@@ -760,13 +760,6 @@ def read_spectrum(fname, usecols=None, trimBadPix=False, sortByWavelength=False)
         print('{:} column spectrum: unknown format!\n'.format(ncolumns))
         raise ValueError(('Reading {:} as an {:} column spectrum: '
                           'unknown format!').format(fname, ncolumns))
-    # check that usecols is consistent with the read number of columns
-    if usecols is not None:
-        if np.max(usecols) >= ncolumns:
-            raise ValueError(('Requesting column number {:} but only found '
-                              'column number up to {:} (total {:} columns) '
-                              'in {:}').format(np.max(usecols), ncolumns-1, 
-                                       ncolumns, fname))
 
     # Check if there are header lines in the file
     if len(line1.split()) == ncolumns and len(line2.split()) == ncolumns:
@@ -790,20 +783,27 @@ def read_spectrum(fname, usecols=None, trimBadPix=False, sortByWavelength=False)
         nHeader = 2
     fObs.close()
 
-    skiprows = 0
-    if obs_header is not None:
-        skiprows = 2
+    # check that usecols is consistent with the read number of columns
     if usecols is not None:
         _usecols = usecols
+        if np.max(usecols) >= ncolumns:
+            raise ValueError(('Requesting column number {:} but only found '
+                              'column number up to {:} (total {:} columns) '
+                              'in {:}').format(np.max(usecols), ncolumns-1,
+                                       ncolumns, fname))
+        if np.min(usecols) < -ncolumns:
+            _usecols = [max(x, -ncolumns) for x in usecols]
+
+    # Read the file with numpy (efficent in numpy version >= 1.23)
     elif ncolumns == 2:
         _usecols = (0,1)
     elif ncolumns == 3:
         _usecols = (0,1,2)
     elif ncolumns == 6:
         _usecols = (0,1,2,3,4,5)
-    data = np.loadtxt(fname, skiprows=skiprows, usecols=_usecols, unpack=True)
+    data = np.loadtxt(fname, skiprows=nHeader, usecols=_usecols, unpack=True)
 
-    # Read the file with numpy (efficent in numpy version >= 1.23)
+    # Store the data in a Spectrum
     nLines = data.shape[1]
     obs = Spectrum(np.zeros(nLines), np.zeros(nLines), np.zeros(nLines),
                     np.zeros(nLines), np.zeros(nLines), np.zeros(nLines),
