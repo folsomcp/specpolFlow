@@ -786,13 +786,20 @@ def read_spectrum(fname, usecols=None, trimBadPix=False, sortByWavelength=False)
     # check that usecols is consistent with the read number of columns
     if usecols is not None:
         _usecols = usecols
+        if not isinstance(usecols, (list, tuple, np.ndarray)):
+            raise TypeError('In read_spectrum, usecols should be a list or '
+                            'tuple')
         if np.max(usecols) >= ncolumns:
             raise ValueError(('Requesting column number {:} but only found '
                               'column number up to {:} (total {:} columns) '
                               'in {:}').format(np.max(usecols), ncolumns-1,
-                                       ncolumns, fname))
+                                               ncolumns, fname))
         if np.min(usecols) < -ncolumns:
             _usecols = [max(x, -ncolumns) for x in usecols]
+        if len(usecols) > 6:
+            warnings.warn("\nIn read_spectrum, usecols specifies more columns "
+                          "than can be stored in a Spectrum. Values after the "
+                          "6th entry in usecols will be ignored.", stacklevel=2)
 
     # Read the file with numpy (efficent in numpy version >= 1.23)
     elif ncolumns == 2:
