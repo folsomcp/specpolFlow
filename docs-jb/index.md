@@ -8,6 +8,17 @@
 
 The `SpecpolFlow` team also maintains a series of detailed tutorials with examples of how to construct a flexible workflow for your specific needs (e.g., automation for very large datasets using tools like `pandas`, the Python Data Analysis Library). These tutorials are in the form of Python notebooks, which can also be run using collaborative platforms such as Google Colab. 
 
+## Version Release Notes
+
+NEW: SpecpolFlow v1.1 release 2026 Jan 30 
+* Equivalent widths and V/R ratios can now be calculated using the [`calc_ew`](Spectrum.calc_ew) function from the [`Spectrum`](Spectrum) class or the [`calc_ew`](LSD.calc_ew) and [`calc_V_R`](LSD.calc_V_R) functions from the [`LSD`](LSD) class. Use cases are demonstrated in the subject tutorial.
+* New tutorials, including
+    * [Measuring equivalent widths](Tutorials/12-EquivalentWidth_Tutorial.ipynb)
+    * [Plotting Spectra with Line Lists](Tutorials/PlotLinesSpectra_Tutorial.ipynb)
+
+SpecpolFlow v1.0 was released in summer 2025.
+
+
 ## Contact us!
 You can reach the SpF Development Team with questions or comments at: specpolflow@gmail.com
 
