@@ -175,8 +175,7 @@ def plot_obs_lines(spectra=[], lineList=[], depthCut=0.0, maxLabels=100,
         else:
             vel = velLines
         if vel != 0.0:
-            c = 299792.458  #speed of light in km/s
-            llistU.wl = llistU.wl + llistU.wl*vel/c
+            llistU = llistU.doppler_shift(vel)
         
         # plot the line list, but set some parameters for that function first
         _depthCut = depthCut

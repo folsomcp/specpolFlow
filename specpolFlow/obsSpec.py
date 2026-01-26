@@ -6,6 +6,8 @@ import copy
 import warnings
 import numpy as np
 import matplotlib.pyplot as plt
+from . import utils
+from .utils import c_kms
 
 # use a version dependent name for trapezoidal integration,
 # since Numpy 2.0 changed names (this could also be a try except)
@@ -240,9 +242,48 @@ class Spectrum:
         :param velocity: the radial velocity in km/s
         :rtype: Spectrum
         '''
-        c = 299792.458  #speed of light in km/s
         spec = copy.deepcopy(self) #work on a copy (not self!)
-        spec.wl = spec.wl + spec.wl*velocity/c
+        spec.wl = utils.doppler_shift_kms(spec.wl, velocity)
+        return spec
+
+    def vacuum_to_air(self):
+        '''
+        Convert the spectrum from wavelength in vacuum to wavelength in air
+        (assuming dry air at 15 C and 1 atmosphere of pressure)
+        and return the modified spectrum.
+
+        This function requires the Spectrum to have wavelength in angstroms.
+        
+        :rtype: Spectrum
+        '''
+        spec = copy.deepcopy(self)
+        if spec.wl[0] < 2500.:
+            warnings.warn('\nin Spectrum.vacuum_to_air: '
+                          'This function requires wavelengths in units of '
+                          'angstroms.\nIf you are using UV spectra you can '
+                          'disregard this warning, otherwise check the units.',
+                          stacklevel=2)
+        spec.wl = utils.vacuum_to_air(spec.wl)
+        return spec
+
+    def air_to_vacuum(self):
+        '''
+        Convert the spectrum from wavelength in air to wavelength in vacuum
+        (assuming dry air at 15 C and 1 atmosphere of pressure)
+        and return the modified spectrum.
+        
+        This function requires the Spectrum to have wavelength in angstroms.
+        
+        :rtype: Spectrum
+        '''
+        spec = copy.deepcopy(self)
+        if spec.wl[0] < 2500.:
+            warnings.warn('\nin Spectrum.air_to_vacuum: '
+                          'This function requires wavelengths in units of '
+                          'angstroms.\nIf you are using UV spectra you can '
+                          'disregard this warning, otherwise check the units.',
+                          stacklevel=2)
+        spec.wl = utils.air_to_vacuum(spec.wl)
         return spec
 
     def individual_line(self, lambda0, lwidth):
@@ -278,8 +319,7 @@ class Spectrum:
         obs_line = self[(self.wl >= p_lwidth[0]) & (self.wl <= p_lwidth[1])]
 
         # Now we convert wavelengths to velocity space
-        c = 299792.458  #speed of light in km/s
-        vel = c*(obs_line.wl-lambda0)/lambda0
+        vel = c_kms*(obs_line.wl-lambda0)/lambda0
 
         prof = LSD(vel, obs_line.specI, obs_line.specSig, obs_line.specV, 
                    obs_line.specSig, obs_line.specN1, obs_line.specSig,
@@ -347,9 +387,8 @@ class Spectrum:
         #or a step forward in velocity more than 10x the average velocity step size.
         #(use velocity rather than wavelength since pixel size in velocity is
         # more consistent across a spectrum)
-        c = 299792.458  #speed of light in km/s
         gapSize = 20.
-        velSteps = (self.wl[1:-1] - self.wl[0:-2])/self.wl[1:-1]*c
+        velSteps = (self.wl[1:-1] - self.wl[0:-2])/self.wl[1:-1]*c_kms
         meanVelStep = np.mean(velSteps)
         if ignoreGaps:
             orderEdges = velSteps < 0.
@@ -546,7 +585,7 @@ class Spectrum:
         return specC
 
     def calc_ew(self, lineRange, contRange=None, norm='auto',
-                fullOutput=False, plot=True, verbose=False):
+                plot=True, verbose=False):
         '''
         Calculate the equivalent width, of Stokes I, for a portion of this
         spectrum.
@@ -570,18 +609,15 @@ class Spectrum:
         :param norm: calculation method for the continuum. The choices are:
                     'auto': the median of Stokes I outside of lineRange and
                     inside contRange, or float: a user defined fixed value.
-        :param fullOutput: If True, return the continuum level, along with
-                    the equivalent width and its uncertainty, as 3 values.
-                    If False (default) return just the equivalent width
-                    and uncertainty.
         :param plot: If True, return a matplotlib figure of the line profile
                     and velocity ranges used, as the last returned value.
         :param verbose: If True print some extra diagnostic information,
                     including the continuum level.
-        :return: the equivalent width and uncertainty in wavelength units,
-                    optionally the continuum level, and optionally a figure.
+        :return: A dictionary containing the equivalent width, its uncertainty,
+                 the continuum level, and some other diagnostic information.
+                 If plot=True a matplotlib figure is also returned.
+                 The equivalent width is in the wavelength units of lambda0,
         '''
-        c = 299792.458  #speed of light in km/s        
         # Check input values are valid
         if contRange is None:
             if not isinstance(norm, float):
@@ -628,40 +664,46 @@ class Spectrum:
         # Remove the portions of the spectrum that we don't want to use
         fuse = np.zeros_like(prof.vel, dtype=bool)
         for i in range(allRanges.shape[0]):
-            fuse += ((prof.vel >= (allRanges[i, 0] - wlCenter)/wlCenter*c)
-                    & (prof.vel <= (allRanges[i, 1] - wlCenter)/wlCenter*c))
+            fuse += ((prof.vel >= (allRanges[i, 0] - wlCenter)/wlCenter*c_kms)
+                    & (prof.vel <= (allRanges[i, 1] - wlCenter)/wlCenter*c_kms))
         profU = prof[fuse]
 
         # Calculate the EW
-        ewwidth = [(wlCenter - lineRange[0])/wlCenter*c,
-                   (lineRange[1] - wlCenter)/wlCenter*c]
+        ewwidth = [(wlCenter - lineRange[0])/wlCenter*utils.c_kms,
+                   (lineRange[1] - wlCenter)/wlCenter*utils.c_kms]
         velrange = [-ewwidth[0], ewwidth[1]]
-        ew, ewErr, cont = profU.calc_ew(cog=0.0, norm=norm, lambda0=wlCenter,
-                                        velrange=velrange, ewwidth=ewwidth,
-                                        fullOutput=True, plot=False,
-                                        verbose=verbose)
-        rvals = (ew, ewErr)
-        if fullOutput==True: rvals += (cont,)
+        res = profU.calc_ew(cog=0.0, norm=norm, lambda0=wlCenter,
+                            velrange=velrange, ewwidth=ewwidth,
+                            plot=False, verbose=verbose)
+        result = {
+                 'EW': res['EW'],
+                 'EW sig': res['EW sig'],
+                 'norm_method':res['norm_method'],
+                 'norm': res['norm'],
+                 'cog_method':res['cog_method'],
+                 'cog': res['cog'],
+                 'int. range start': lineRange[0],
+                 'int. range end': lineRange[1]
+                  }
         
         if plot: # make a custom plot for the spectrum ew (in wavelength units)
             fig, ax = plt.subplots(figsize=(10, 4))
-            ax.errorbar(profU.vel/c*wlCenter+wlCenter, profU.specI,
+            ax.errorbar(profU.vel/c_kms*wlCenter+wlCenter, profU.specI,
                         yerr=profU.specSigI, fmt='o', ms=3, ecolor='0.5', c='k')
-            ax.plot(prof.vel/c*wlCenter+wlCenter, prof.specI,
+            ax.plot(prof.vel/c_kms*wlCenter+wlCenter, prof.specI,
                     'o', ms=3, c='lightgrey')
-            ax.fill_between(profU.vel/c*wlCenter+wlCenter, profU.specI,
-                            np.ones(len(profU.vel))*cont,
+            ax.fill_between(profU.vel/c_kms*wlCenter+wlCenter, profU.specI,
+                            np.ones(len(profU.vel))*res['norm'],
                             where=(profU.vel >= velrange[0]) & (profU.vel <= velrange[1]),
                             alpha=0.1, color='k')
-            ax.axvline(lineRange[0], color='tab:blue', ls='--', label='lineRange')
-            ax.axvline(lineRange[1], color='tab:blue', ls='--')
-            ax.axhline(cont, color='pink', ls='--', label='norm')
+            ax.axvline(lineRange[0], color='tab:blue', ls=':', label='lineRange')
+            ax.axvline(lineRange[1], color='tab:blue', ls=':')
+            ax.axhline(res['norm'], color='pink', ls='--', label='norm')
             ax.set_ylabel('I/Ic')
             ax.set_xlabel('Wavelength')
             plt.legend()
-            rvals += (fig,)
-        
-        return rvals
+            return result, fig
+        return result
 
 
 def read_spectrum(fname, trimBadPix=False, sortByWavelength=False):

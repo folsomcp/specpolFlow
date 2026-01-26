@@ -12,6 +12,7 @@ import scipy.special as specialf
 from scipy.optimize import curve_fit
 
 from .obsSpec import Spectrum, read_spectrum
+from .utils import c_kms
 
 # use a version dependent name for trapezoidal integration,
 # since Numpy 2.0 changed names (this could also be a try except)
@@ -1126,7 +1127,7 @@ class LSD:
             return False
 
     def calc_ew(self, cog='I', norm='auto', lambda0=None, velrange=None, 
-                ewwidth=None, fullOutput=False, plot=True, verbose=False):
+                ewwidth=None, plot=True, verbose=False):
         '''
         Calculate the equivalent width, of Stokes I, for this LSD profile.
 
@@ -1161,16 +1162,13 @@ class LSD:
                     One element = same on each side of line center.
                     Two elements = left and right of line center.
                     Not given (default): instead use velrange for this.
-        :param fullOutput: If True, return the continuum level, along with
-                    the equivalent width and its uncertainty, as 3 values.
-                    If False (default) return just the equivalent width
-                    and uncertainty.
         :param plot: If True, return a matplotlib figure of the line profile
                     and velocity ranges used, as the last returned value.
         :param verbose: If True print some extra diagnostic information.
         
-        :return: the equivalent width, the uncertainty, optionally
-                 the continuum level and optionally a figure.
+        :return: A dictionary containing the equivalent width, its uncertainty,
+                 the continuum level, and some other diagnostic information.
+                 If plot=True a matplotlib figure is also returned.
                  The equivalent width is in the wavelength units of lambda0,
                  or if lambda0 is not provided it is in velocity units.
         '''
@@ -1245,6 +1243,7 @@ class LSD:
                 print('no ewwidth or velrange defined, using full velocity '
                       'range to calculate EW')
             lsd_ew = copy.copy(lsd_in)
+            p_ewwidth = [lsd_ew.vel[0], lsd_ew.vel[-1]]
         else:
             # Check whether ewwidth is a list or tuple (or array?)
             if (isinstance(ewwidth, list) or isinstance(ewwidth, tuple)
@@ -1273,8 +1272,20 @@ class LSD:
         
         if lambda0 is not None:
             # convert to wavelength units using lambda0
-            EW = EW*lambda0/2.99792458e5
-            EWSig = EWSig*lambda0/2.99792458e5
+            EW = EW*lambda0/c_kms
+            EWSig = EWSig*lambda0/c_kms
+
+
+        result = {
+                 'EW': EW,
+                 'EW sig': EWSig,
+                 'norm_method':norm,
+                 'norm': norm_val,
+                 'cog_method':cog,
+                 'cog': cog_val,
+                 'int. range start': p_ewwidth[0],
+                 'int. range end': p_ewwidth[1]
+                  }
 
         #Optionally return the EW and its error 
         if plot == True:
@@ -1282,19 +1293,12 @@ class LSD:
                          [lsd_ew.vel[0], lsd_ew.vel[-1]],
                          [lsd_ew.vel[0], lsd_ew.vel[-1]],
                          cog_val, EW=True)
-            if fullOutput == True:
-                return EW, EWSig, norm_val, fig
-            else:
-                return EW, EWSig, fig
-        else:
-            if fullOutput == True:
-                return EW, EWSig, norm_val
-            else:
-                return EW, EWSig
+            return result, fig
+        return result
 
     
     def calc_V_R(self, cog='I', norm='auto', velrange=None, ewwidth=None, 
-                 fullOutput=False, plot=True, verbose=False):
+                 plot=True, verbose=False):
         '''
         Calculate the V/R ratio of Stokes I for, this LSD profile.
 
@@ -1329,15 +1333,13 @@ class LSD:
                     One element = same on each side of line center.
                     Two elements = left and right of line center.
                     Not given (default): instead use velrange for this.
-        :param fullOutput: If True, return the V/R value, its uncertainty,
-                    and the continuum level as 3 values. If False (default)
-                    return just the V/R and uncertainty.
         :param plot: If True, return a matplotlib figure of the line profile
                     and velocity ranges used, as the last returned value.
         :param verbose: If True print some extra diagnostic information.
                         
-        :return: the V/R ratio, the uncertainty, optionally the continuum
-                 level, optionally a matplotlib figure
+        :return: a dictionary with the V/R ratio, the uncertainty, the continuum
+                 level, the center of gravity, and velocity ranges used.
+                 If plot=True a matplotlib figure is also returned.
         '''
         
         if velrange is not None:
@@ -1429,32 +1431,37 @@ class LSD:
         p_Vrange = [cog_val - Vwidth[0], cog_val + Vwidth[1]]
         p_Rrange = [cog_val - Rwidth[0], cog_val + Rwidth[1]]
         
-        Vew, VSig = self.calc_ew(cog=cog_val, norm=norm_val,
-                                 velrange=velrange, ewwidth=Vwidth,
-                                 fullOutput=False, plot=False)
+        Vres = self.calc_ew(cog=cog_val, norm=norm_val,
+                            velrange=velrange, ewwidth=Vwidth, plot=False)
         
-        Rew, RSig = self.calc_ew(cog=cog_val, norm=norm_val, 
-                                 velrange=velrange, ewwidth=Rwidth,
-                                 fullOutput=False, plot=False)
+        Rres = self.calc_ew(cog=cog_val, norm=norm_val,
+                            velrange=velrange, ewwidth=Rwidth, plot=False)
 
-        V_R = Vew/Rew #calculate V/R (unitless)
+        V_R = Vres['EW']/Rres['EW'] #calculate V/R (unitless)
 
         # Estimate the associated uncertainty (unitless)
-        V_RSig = np.sqrt(((1.0/Rew)*VSig)**2 + ((Vew/Rew**2)*RSig)**2 )
+        V_RSig = np.sqrt(((1.0/Rres['EW'])*Vres['EW sig'])**2
+                         + ((Vres['EW']/Rres['EW']**2)*Rres['EW sig'])**2 )
 
+        result = {
+                 'V_R': V_R,
+                 'V_R sig': V_RSig,
+                 'norm_method':norm,
+                 'norm': norm_val,
+                 'cog_method':cog,
+                 'cog': cog_val,
+                 'int. V range start': p_Vrange[0],
+                 'int. V range end': p_Vrange[1],
+                 'int. R range start': p_Rrange[0],
+                 'int. R range end': p_Rrange[1]
+                  }
+        
         # return V/R and optionally its uncertainty or a figure 
         if plot == True:
             fig=_plot_ew(self, norm_val, p_velrange, p_Vrange, p_Rrange,
                          cog_val, EW=False)
-            if fullOutput == True:
-                return V_R, V_RSig, norm_val, fig
-            else:
-                return V_R, V_RSig, fig
-        else:
-            if fullOutput == True:
-                return V_R, V_RSig, norm_val
-            else:
-                return V_R, V_RSig
+            return result, fig
+        return result
 
 ##################
 
@@ -1535,7 +1542,7 @@ def _integrate_bz(vel, spec, specSig, geff, lambda0, cog_val,
     # Lambda_B = constant * lambda0**2 B
     # lambda_B_constant = e/(4*pi*m_e*c) = 4.668644778304102e-05 in cgs units
     lambda_B_constant = 4.668644778304102e-12 #to match/cancel lambda0 in nm
-    cvel = 2.99792458e5 #c in km/s to match/cancel the LSD profile velocities
+    # use c in km/s to match/cancel the LSD profile velocities
     
     # Calculation of the integral in the numerator of the Bz function
     # with a trapezoidal numerical integral
@@ -1547,7 +1554,7 @@ def _integrate_bz(vel, spec, specSig, geff, lambda0, cog_val,
     
     # Make the actual Bz calculation.
     # for the units to work out, lambda0 should be in nm
-    bl = -1*fnum / (ri0v*geff*lambda0*cvel*lambda_B_constant)
+    bl = -1*fnum / (ri0v*geff*lambda0*c_kms*lambda_B_constant)
     blSig = np.abs(bl * np.sqrt((sfnum/fnum)**2 + (si0v/ri0v)**2))
     return bl, blSig
 
@@ -1832,12 +1839,11 @@ def run_lsdpy(obs, mask, outLSDName=None,
     # Make a default calculation for the pixel spacing if not user-defined
     if velPixel is None:
         #Get average observed wavelength spacing
-        cvel = 2.99792458e5 #c in km/s
         obsSp = read_spectrum(obs)
         wlStep = obsSp.wl[1:] - obsSp.wl[:-1]
-        medianVelPix = np.median(wlStep/obsSp.wl[:-1]*cvel)
+        medianVelPix = np.median(wlStep/obsSp.wl[:-1]*c_kms)
         #indWlSteps = ((wlStep > 0.) & (wlStep < 0.5))
-        #meanVelPix = np.average(wlStep[indWlSteps]/obsSp.wl[:-1][indWlSteps]*cvel)        
+        #meanVelPix = np.average(wlStep[indWlSteps]/obsSp.wl[:-1][indWlSteps]*c_kms)
         velPixel = round(medianVelPix, ndigits=2)
 
     # Set the controls to the call to LSDpy for saving the files if needed.

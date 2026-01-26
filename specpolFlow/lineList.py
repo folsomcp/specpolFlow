@@ -4,7 +4,10 @@ Includes tools for reading and parsing VALD version 3 line lists
 (typically 'long format', 'extract stellar' requests).
 """
 
+import copy
+import warnings
 import numpy as np
+from . import utils
 
 ###################################
 
@@ -203,7 +206,60 @@ class LineList:
         fOut.write(str(self)+'\n')
         fOut.close()
         return
+
+    def doppler_shift(self, velocity):
+        '''
+        Doppler shift the line list by the input radial velocity (in km/s)
+        and return the modified line list.
+
+        :param velocity: the radial velocity in km/s
+        :rtype: LineList
+        '''
+        _llist = copy.deepcopy(self)
+        _llist.wl = utils.doppler_shift_kms(_llist.wl, velocity)
+        return _llist
+
+    def vacuum_to_air(self):
+        '''
+        Convert the line list from wavelength in vacuum to wavelength in air
+        (assuming dry air at 15 C and 1 atmosphere of pressure)
+        and return the modified line list.
+        
+        This function requires the LineList to have wavelengths in angstroms.
+        
+        :rtype: LineList
+        '''
+        _llist = copy.deepcopy(self)
+        if _llist.wl[0] < 2500.:
+            warnings.warn('\nin LineList.vacuum_to_air: '
+                          'This function requires wavelengths in units of '
+                          'angstroms.\nIf you are using UV lines you can '
+                          'disregard this warning, otherwise check the units.',
+                          stacklevel=2)
+        _llist.wl = utils.vacuum_to_air(_llist.wl)
+        return _llist
     
+    def air_to_vacuum(self):
+        '''
+        Convert the line list from wavelength in air to wavelength in vacuum
+        (assuming dry air at 15 C and 1 atmosphere of pressure)
+        and return the modified line list.
+        
+        This function requires the LineList to have wavelengths in angstroms.
+        
+        :rtype: LineList
+        '''
+        _llist = copy.deepcopy(self)
+        if _llist.wl[0] < 2500.:
+            warnings.warn('\nin LineList.air_to_vacuum: '
+                          'This function requires wavelengths in units of '
+                          'angstroms.\nIf you are using UV lines you can '
+                          'disregard this warning, otherwise check the units.',
+                          stacklevel=2)
+        _llist.wl = utils.air_to_vacuum(_llist.wl)
+        return _llist
+
+
 def line_list_zeros(nLines):
     """
     Generate a line list of zeros and blank text.
@@ -230,7 +286,7 @@ def line_list_zeros(nLines):
     depth    = np.zeros(nLines)
     configLo = np.tile(np.array([''], dtype='U128'), nLines)
     configUp = np.tile(np.array([''], dtype='U128'), nLines)
-    refs = np.tile(np.array(['_          unknown source'],dtype='U180'), nLines)
+    refs = np.tile(np.array(['_          unknown source'],dtype='U256'), nLines)
     lList = LineList(ion, wl, loggf, Elo, Jlo, Eup, Jup, landeLo,
                      landeUp, landeEff, rad, stark, waals, depth,
                      configLo, configUp, refs)

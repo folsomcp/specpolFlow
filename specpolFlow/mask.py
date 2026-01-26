@@ -5,8 +5,11 @@ lines from the mask, managing regions to exclude from the mask,
 and interacively cleaning and tweaking.
 """
 
+import copy
 import numpy as np
 import warnings
+from . import utils
+from .utils import c_kms
 #from . import lineList as lineListLib #(moved inside some functions)
 
 ###################################
@@ -22,6 +25,7 @@ class Mask:
     * element - the element+ion code for the line
     * depth - the depth of the line
     * lande - the effective Lande factor of the line
+    * excite - the excitation energy of the lower level (in eV)
     * iuse - integer flag for whether the line is used
     """
     def __init__(self, wl, element, depth, excite, lande, iuse):
@@ -104,7 +108,58 @@ class Mask:
         weightI = self.depth / normDepth
         weightV = self.depth*self.wl*self.lande / (normDepth*normWave*normLande)
         return weightI, weightV
-    
+
+    def doppler_shift(self, velocity):
+        '''
+        Doppler shift the mask according to an input radial velocity.
+
+        :param velocity: the radial velocity in km/s
+        :rtype: Mask
+        '''
+        mask = copy.deepcopy(self)
+        mask.wl = utils.doppler_shift_kms(mask.wl, velocity)
+        return mask
+
+    def vacuum_to_air(self):
+        '''
+        Convert the mask from wavelength in vacuum to wavelength in air
+        (assuming dry air at 15 C and 1 atmosphere of pressure)
+        and return the modified mask.
+
+        This function requires the line mask to have wavelength in angstroms.
+        
+        :rtype: Mask
+        '''
+        mask = copy.deepcopy(self)
+        if mask.wl[0] < 2500.:
+            warnings.warn('\nin Mask.vacuum_to_air: '
+                          'This function requires wavelengths in units of '
+                          'angstroms.\nIf you are using UV lines you can '
+                          'disregard this warning, otherwise check the units.',
+                          stacklevel=2)
+        mask.wl = utils.vacuum_to_air(mask.wl)
+        return mask
+
+    def air_to_vacuum(self):
+        '''
+        Convert the mask from wavelength in air to wavelength in vacuum
+        (assuming dry air at 15 C and 1 atmosphere of pressure)
+        and return the modified mask.
+        
+        This function requires the line mask to have wavelength in angstroms.
+        
+        :rtype: Mask
+        '''
+        mask = copy.deepcopy(self)
+        if mask.wl[0] < 2500.:
+            warnings.warn('\nin Mask.air_to_vacuum: '
+                          'This function requires wavelengths in units of '
+                          'angstroms.\nIf you are using UV lines you can '
+                          'disregard this warning, otherwise check the units.',
+                          stacklevel=2)
+        mask.wl = utils.air_to_vacuum(mask.wl)
+        return mask
+
     def save(self, fname):
         """
         Save the line Mask to a text file, in Donati's and LSDpy format.
@@ -158,14 +213,6 @@ class Mask:
         :rtype: LineList
         """
         from . import lineList as lineListLib
-        elements=('H' ,'He','Li','Be','B' ,'C' ,'N' ,'O' ,'F' ,'Ne','Na','Mg',
-              'Al','Si','P' ,'S' ,'Cl','Ar','K' ,'Ca','Sc','Ti','V' ,'Cr',
-              'Mn','Fe','Co','Ni','Cu','Zn','Ga','Ge','As','Se','Br','Kr',
-              'Rb','Sr','Y' ,'Zr','Nb','Mo','Tc','Ru','Rh','Pd','Ag','Cd',
-              'In','Sn','Sb','Te','I' ,'Xe','Cs','Ba','La','Ce','Pr','Nd',
-              'Pm','Sm','Eu','Gd','Tb','Dy','Ho','Er','Tm','Yb','Lu','Hf',
-              'Ta','W' ,'Re','Os','Ir','Pt','Au','Hg','Tl','Pb','Bi','Po',
-              'At','Rn','Fr','Ra','Ac','Th','Pa','U' )
 
         if onlyFlaggedLines:
             mask = self[self.iuse != 0]
@@ -174,25 +221,14 @@ class Mask:
         
         nlines = len(mask.wl)
         llist = lineListLib.line_list_zeros(nlines)
+        llist.landeLo[:] = 99.0
+        llist.landeUp[:] = 99.0
         for i in range(nlines):
             llist.wl[i] = mask.wl[i]
             llist.depth[i] =  mask.depth[i]
             llist.Elo[i] = mask.excite[i]
             llist.landeEff[i] = mask.lande[i]
-
-            try:
-                if mask.element[i] < 1.0: raise ValueError
-                strIon = elements[int(mask.element[i]) - 1]
-                strIon = strIon + ' {:d}'.format(
-                    round(100.*(mask.element[i] % 1.0) + 1.0))
-            except:
-                warnings.warn('\nin Mask.convert_to_line_list(): Could not '
-                              'identify the element from the ion string,\n'
-                              'trying to just use the number '
-                              '{:.2f}'.format(mask.element[i]),
-                              stacklevel=2)
-                strIon = '{:.2f}'.format(mask.element[i])
-            llist.ion[i] = strIon
+            llist.ion[i] = utils.ion_number_to_symbol(mask.element[i])
         
         return llist
 
@@ -339,7 +375,7 @@ def read_exclude_mask_regions(fname):
     
     return ExcludeMaskRegions(start, stop, np.array(type, dtype=object))
 
-def get_Balmer_regions_default(velrange=500):
+def get_Balmer_regions_default(velrange=500.0):
     '''
     Generate an ExcludeMaskRegions object with regions around Balmer H-lines
     (alpha to epsilon) up to a given radial velocity,
@@ -350,7 +386,6 @@ def get_Balmer_regions_default(velrange=500):
     :rtype: ExcludeMaskRegions
     '''
 
-    c = 299792.458 # Speed of light in km/s
     # Mask should be in nm
     wavelengths = [
         656.281,
@@ -370,8 +405,8 @@ def get_Balmer_regions_default(velrange=500):
     start = []
     stop = []
     for w in wavelengths:
-        start.append(-1*velrange/c*w + w)
-        stop.append(velrange/c*w + w)
+        start.append(-1*velrange/c_kms*w + w)
+        stop.append(velrange/c_kms*w + w)
 
     # Adding the Balmer jump
     start.append(360.0)
@@ -484,14 +519,7 @@ def convert_list_to_mask(lineList, depthCutoff=0.0, atomsOnly = True,
     :rtype: Mask
     """
     from . import lineList as lineListLib
-    elements=('H' ,'He','Li','Be','B' ,'C' ,'N' ,'O' ,'F' ,'Ne','Na','Mg',
-              'Al','Si','P' ,'S' ,'Cl','Ar','K' ,'Ca','Sc','Ti','V' ,'Cr',
-              'Mn','Fe','Co','Ni','Cu','Zn','Ga','Ge','As','Se','Br','Kr',
-              'Rb','Sr','Y' ,'Zr','Nb','Mo','Tc','Ru','Rh','Pd','Ag','Cd',
-              'In','Sn','Sb','Te','I' ,'Xe','Cs','Ba','La','Ce','Pr','Nd',
-              'Pm','Sm','Eu','Gd','Tb','Dy','Ho','Er','Tm','Yb','Lu','Hf',
-              'Ta','W' ,'Re','Os','Ir','Pt','Au','Hg','Tl','Pb','Bi','Po',
-              'At','Rn','Fr','Ra','Ac','Th','Pa','U' )
+    elements = utils._atomicSym
     nLines = lineList.nLines
     mask = Mask(np.zeros(nLines), np.zeros(nLines), np.zeros(nLines),
                 np.zeros(nLines), np.zeros(nLines),
@@ -504,7 +532,6 @@ def convert_list_to_mask(lineList, depthCutoff=0.0, atomsOnly = True,
     #Loop through the line list making sure to use good data
     for i in range(lineList.nLines):
         element = lineList.ion[i].split()[0]
-        ion = lineList.ion[i].split()[1]
 
         if (lineList.depth[i] >= depthCutoff) and (
             (atomsOnly == False) or (element in elements and element != 'H')):
@@ -539,11 +566,7 @@ def convert_list_to_mask(lineList, depthCutoff=0.0, atomsOnly = True,
                 mask.iuse[j]   = 1
                 #The element code here is the atomic number plus 
                 #the ionization state/100, so Fe II becomes 26.01
-                try:
-                    mask.element[j] = float(elements.index(element)+1) \
-                        + (float(ion)-1)*0.01
-                except ValueError:
-                    mask.element[j] = 0.00
+                mask.element[j] = utils.ion_symbol_to_number(lineList.ion[i])
                 
                 j += 1
             else:
@@ -607,15 +630,6 @@ def filter_mask(mask, depthCutoff = 0.0, wlStart = None, wlEnd = None,
     :rtype: Mask
     """
     
-    elements=('H' ,'He','Li','Be','B' ,'C' ,'N' ,'O' ,'F' ,'Ne','Na','Mg',
-              'Al','Si','P' ,'S' ,'Cl','Ar','K' ,'Ca','Sc','Ti','V' ,'Cr',
-              'Mn','Fe','Co','Ni','Cu','Zn','Ga','Ge','As','Se','Br','Kr',
-              'Rb','Sr','Y' ,'Zr','Nb','Mo','Tc','Ru','Rh','Pd','Ag','Cd',
-              'In','Sn','Sb','Te','I' ,'Xe','Cs','Ba','La','Ce','Pr','Nd',
-              'Pm','Sm','Eu','Gd','Tb','Dy','Ho','Er','Tm','Yb','Lu','Hf',
-              'Ta','W' ,'Re','Os','Ir','Pt','Au','Hg','Tl','Pb','Bi','Po',
-              'At','Rn','Fr','Ra','Ac','Th','Pa','U' )
-
     if wlStart is None: wlStart = 0.0
     if wlEnd is None: wlEnd = 1e10
     if landeStart is None: landeStart = -1e10
@@ -632,10 +646,7 @@ def filter_mask(mask, depthCutoff = 0.0, wlStart = None, wlEnd = None,
         indKeep = np.zeros_like(mask.iuse, dtype=bool)
         #Set a flag to only keep elements in the requested list
         for elUse in elementsUsed:
-            try: #get the atomic number for this element
-                elNumber = elements.index(elUse.strip())+1
-            except ValueError:
-                raise ValueError('Unrecognized element {:} in elementsUsed'.format(elUse))
+            elNumber = utils.atomic_symbol_to_number(elUse)
             indKeep = indKeep | (mask.element.astype(int) == elNumber)
         indRemove = indRemove | np.logical_not(indKeep)
     
@@ -647,10 +658,7 @@ def filter_mask(mask, depthCutoff = 0.0, wlStart = None, wlEnd = None,
         indExclude = np.zeros_like(mask.iuse, dtype=bool)
         #Set a flag to remove elements in the exclude list
         for elCut in elementsExclude:
-            try: #get the atomic number for this element
-                elNumber = elements.index(elCut.strip())+1
-            except ValueError:
-                raise ValueError('Unrecognized element {:} in elementsExclude'.format(elUse))
+            elNumber = utils.atomic_symbol_to_number(elCut)
             indExclude = indExclude | (mask.element.astype(int) == elNumber)
         indRemove = indRemove | indExclude
     
