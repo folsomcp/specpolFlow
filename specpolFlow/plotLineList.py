@@ -433,27 +433,27 @@ def plot_lineList(llist, depthCut=0.0, maxLabels=None,
     return fig, ax
 
 
-def plot_elementsChart(mask, wmin, wmax, plotStyle='pie', sort='Z', treshold=None):
+def plot_elementsChart(mask, wmin, wmax, plotStyle='pie', sort='Z', threshold=None, ax=None):
     """
     Pie chart showing the distribution of elements in the given mask
     within the specified wavelength range [wmin, wmax].
 
     :param mask: mask object 
-    :param wmin: (float) Minimum wavelength for pruning.
-    :param wmax: (float) Maximum wavelength for pruning.
+    :param wmin: (float) Minimum wavelength.
+    :param wmax: (float) Maximum wavelength.
     :param plotStyle: (str) Type of plot to generate. 
                 The choices are:
                 'pie': pie chart
-                'bar': bar chart (not implemented yet).
+                'bar': bar chart.
     :param sort: (str) Sorting method for elements. 
                 The choices are:
                 'Z' or 'atomic': atomic number sorting, 
                 'A' or 'ascending': ascending order for the number of lines, 
                 'D' or 'descending': descending order for the number of lines. 
-    :param treshold: (float or None) Minimum fractional contribution for an element to be included in the pie chart.
+    :param threshold: (float or None) Minimum fractional contribution for an element to be included in the pie chart.
                       If None, all elements are included.
-
-    :
+    :param ax: the matplotlib axes object to use for plotting. If None,
+               then a new figure and axes are created.
     """
 
     # Get the elements and their line counts within the specified wavelength range
@@ -474,17 +474,17 @@ def plot_elementsChart(mask, wmin, wmax, plotStyle='pie', sort='Z', treshold=Non
     counts = counts[sorted_indices] 
 
     # Apply treshold cut if specified
-    if treshold is not None:
-        if treshold > 1:
-            treshold = treshold / 100.0  # Convert percentage to fraction 
+    if threshold is not None:
+        if threshold > 1:
+            threshold = threshold / 100.0  # Convert percentage to fraction 
 
         total_counts = np.sum(counts)
         fractional_counts = counts / total_counts
-        valid_indices = fractional_counts >= treshold
+        valid_indices = fractional_counts >= threshold
         
-        # Check if any elements remain after applying the treshold
+        # Check if any elements remain after applying the threshold
         if np.sum(valid_indices) == 0:
-            raise ValueError("Treshold too high, no elements to display.")
+            raise ValueError("threshold too high, no elements to display.")
 
         # Add an 'Other' category if some elements were excluded
         if np.sum(~valid_indices) > 0:
@@ -505,7 +505,10 @@ def plot_elementsChart(mask, wmin, wmax, plotStyle='pie', sort='Z', treshold=Non
     sns.set_palette("tab20")
 
     if ax is None:
-        fig, ax = plt.subplots(figsize=(4,4), layout='constrained')
+        if plotStyle == 'pie':
+            fig, ax = plt.subplots(figsize=(4,4), layout='constrained')
+        elif plotStyle == 'bar':
+            fig, ax = plt.subplots(figsize=(6,4))
     else:
         fig = ax.get_figure()
     
@@ -513,12 +516,18 @@ def plot_elementsChart(mask, wmin, wmax, plotStyle='pie', sort='Z', treshold=Non
         # Create the pie chart
         ax.pie(counts, labels=elements, autopct='%1.1f%%', 
                 startangle=90, labeldistance=1.05, pctdistance=0.85)
+        # Ensure the circle is drawn as a circle
+        ax.axis('equal')
+    elif plotStyle == 'bar':
+        ax.bar(elements, counts, color=sns.color_palette("tab20", len(elements)))
+        ax.set_ylabel('Number of lines')
+        ax.set_xticklabels(elements, rotation=0, ha='center')
+        ax.set_ylim(0, max(counts)*1.1)
     else:
-        raise NotImplementedError("Currently only 'pie' plotStyle is implemented.")
+        raise NotImplementedError("Currently only 'pie' and 'bar' plot styles are implemented.")
+    
     # Add a title to the chart
-    ax.set_title('Distribution of elements within [{}, {}]nm'.format(wmin, wmax))
-    # Ensure the circle is drawn as a circle
-    ax.axis('equal')
+    ax.set_title('Distribution of elements within [{}, {}] nm'.format(wmin, wmax))
     
     return fig, ax
 
