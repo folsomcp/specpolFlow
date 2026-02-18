@@ -35,6 +35,8 @@ def spirou(flist, flistout=None, ftype=None, nanTreatment='replace',
     being normalized by the intensity spectrum (e.g. V/I) to being normalized
     by the continuum (e.g. V/Ic, like I/Ic).
 
+    Compressed files in fits.gz fits.zip and fits.b2z formats can also be used.
+
     :param flist: .fits file name or list filenames (a string or list of strings)
     :param flistout: optional, an output filename or list of filenames.
                      If this is not provided output names will be generated
@@ -96,16 +98,20 @@ def spirou(flist, flistout=None, ftype=None, nanTreatment='replace',
         else:
             outname = flistout[i]
         #If no file type is given, try guessing from the file name
+        _ftype = ftype
         if ftype is None:
-            if len(fname) > 6:
-                if fname[-6:] == 'p.fits':
-                    _ftype = 'p'
-                elif fname[-6:] == 'e.fits':
-                    _ftype = 'e'
-                elif fname[-6:] == 't.fits':
-                    _ftype = 't'
-        else:
-            _ftype = ftype
+            lname = fname.lower()
+            if lname.endswith(('p.fits', 'p.fits.gz', 'p.fits.gzip',
+                               'p.fits.zip', 'p.fits.bz2')):
+                _ftype = 'p'
+            elif lname.endswith(('e.fits', 'e.fits.gz', 'e.fits.gzip',
+                                 'e.fits.zip', 'e.fits.bz2')):
+                _ftype = 'e'
+            elif lname.endswith(('t.fits', 't.fits.gz', 't.fits.gzip',
+                                 't.fits.zip', 't.fits.bz2')):
+                _ftype = 't'
+            else:
+                print('Warning: failed to infer file type from name:', fname)
         
         if _ftype == 'p':
             spec = spirou_p(fname, outname, nanTreatment=nanTreatment,
@@ -126,8 +132,8 @@ def spirou(flist, flistout=None, ftype=None, nanTreatment='replace',
                             saveFitsHeader=saveFitsHeader,
                             writeSpecHeader=writeSpecHeader)
         else:
-            raise ValueError('in spirou(), unrecognized ftype: '
-                             '{:} (only can use: p t e)'.format(ftype))
+            raise ValueError("in spirou(), unrecognized file type flag ftype: "
+                             "{:} (set ftype = 'p' 't' or 'e')".format(ftype))
 
         speclist += [spec]
     return speclist
@@ -191,14 +197,15 @@ def spirou_p(fname, outname=None, nanTreatment='replace',
                           ' at a time, not a list of files!')
     elif not isinstance(fname, str):
         raise  ValueError('in spirou_p(), file name must be a string!')
-    if outname is None:
-        outname = fname+'.s'
-        if outname[-7:-2].lower() == '.fits': outname = outname[:-7]+'.s'
-    print('converting', fname, 'to', outname)
     if (nanTreatment != 'remove' and nanTreatment != 'replace'
         and nanTreatment != 'keep'):
         raise ValueError('in spirou_p(), unrecognized nanTreatment '
                          'value: {:}'.format(nanTreatment))
+    if outname is None:
+        ind_fits = fname.lower().rfind('.fits')
+        if ind_fits < 1: ind_fits = len(fname)
+        outname = fname[:ind_fits]+'.s'
+    print('converting', fname, 'to', outname)
     # read the fits file
     fitsSpec = fits.open(fname)
     header = fitsSpec[0].header
@@ -293,7 +300,7 @@ def spirou_p(fname, outname=None, nanTreatment='replace',
     # add a header and save the result
     spec.header = '***Reduced spectrum {:} {:} {:}\n'.format(target, dateUTC, timeUTC)
     spec.save(outname, saveHeader=writeSpecHeader)
-    
+
     if saveFitsHeader:
         outname2 = outname+'.out'
         if outname2[-6:-4] == '.s': outname2 = outname2[:-6]+'.out'
@@ -366,14 +373,15 @@ def spirou_e(fname, outname=None, nanTreatment='replace',
                           ' at a time, not a list of files!')
     elif not isinstance(fname, str):
         raise  ValueError('in spirou_e(), file name must be a string!')
-    if outname is None:
-        outname = fname+'.s'
-        if outname[-7:-2].lower() == '.fits': outname = outname[:-7]+'.s'
-    print('converting', fname, 'to', outname)
     if (nanTreatment != 'remove' and nanTreatment != 'replace'
         and nanTreatment != 'keep'):
         raise ValueError('in spirou_e(), unrecognized nanTreatment '
                          'value: {:}'.format(nanTreatment))
+    if outname is None:
+        ind_fits = fname.lower().rfind('.fits')
+        if ind_fits < 1: ind_fits = len(fname)
+        outname = fname[:ind_fits]+'.s'
+    print('converting', fname, 'to', outname)
     # read the fits file
     fitsSpec = fits.open(fname)
     header = fitsSpec[0].header
@@ -554,14 +562,15 @@ def spirou_t(fname, outname=None, nanTreatment='replace',
                           ' at a time, not a list of files!')
     elif not isinstance(fname, str):
         raise  ValueError('in spirou_t(), file name must be a string!')
-    if outname is None:
-        outname = fname+'.s'
-        if outname[-7:-2].lower() == '.fits': outname = outname[:-7]+'.s'
-    print('converting', fname, 'to', outname, 'and', outname+'.telluric')
     if (nanTreatment != 'remove' and nanTreatment != 'replace'
         and nanTreatment != 'keep'):
         raise ValueError('in spirou_t(), unrecognized nanTreatment '
                          'value: {:}'.format(nanTreatment))
+    if outname is None:
+        ind_fits = fname.lower().rfind('.fits')
+        if ind_fits < 1: ind_fits = len(fname)
+        outname = fname[:ind_fits]+'.s'
+    print('converting', fname, 'to', outname, 'and', outname+'.telluric')
     # read the fits file
     fitsSpec = fits.open(fname)
     header = fitsSpec[0].header

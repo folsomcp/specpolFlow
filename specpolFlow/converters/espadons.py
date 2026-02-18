@@ -36,6 +36,8 @@ def espadons(flist, flistout=None, ftype=None, writeSpecHeader=False):
     saved at that path with that rootname, and 'n.s' and 'u.s' appended to
     the filename root.
 
+    Compressed files in fits.gz fits.zip and fits.b2z formats can also be used.
+
     :param flist: (list of strings) a list of ESPaDOnS filenames
     :param flistout: (list of strings) optional, list of output file rootnames.
                      If this is not given output file names will be based on
@@ -78,13 +80,15 @@ def espadons(flist, flistout=None, ftype=None, writeSpecHeader=False):
         #If no file type is given, try guessing from the file name
         _ftype = ftype
         if ftype is None:
-            if len(fname) > 6:
-                if fname[-6:] == 'p.fits':
-                    _ftype = 'p'
-                elif fname[-6:] == 'i.fits':
-                    _ftype = 'i'
-                else:
-                    print('Warning: failed to infer file type from name:', fname)
+            lname = fname.lower()
+            if lname.endswith(('p.fits', 'p.fits.gz', 'p.fits.gzip',
+                               'p.fits.zip', 'p.fits.bz2')):
+                _ftype = 'p'
+            elif lname.endswith(('i.fits', 'i.fits.gz', 'i.fits.gzip',
+                                 'i.fits.zip', 'i.fits.bz2')):
+                _ftype = 'i'
+            else:
+                print('Warning: failed to infer file type from name:', fname)
 
         if _ftype == 'p':
             spec_n, spec_u = espadons_p(fname, fnameOut,
@@ -93,9 +97,9 @@ def espadons(flist, flistout=None, ftype=None, writeSpecHeader=False):
             spec_n, spec_u = espadons_i(fname, fnameOut,
                                         writeSpecHeader=writeSpecHeader)
         else:
-            raise ValueError('in espadons(), unrecognized ftype: '
-                             '{:} (only can use: i or p)'.format(ftype))
-           
+            raise ValueError("in espadons(), unrecognized file type flag ftype: "
+                             "{:} (set ftype = 'i' or 'p')".format(ftype))
+
         speclist_n += spec_n
         speclist_u += spec_u
     return speclist_n, speclist_u
@@ -153,10 +157,9 @@ def espadons_p(flist, flistout=None, writeSpecHeader=False):
             # striping of white spaces
             fnameOut = fname.strip()
             # removing the '.fits' from the end of the string, 
-            # to create the root name for the output files. 
-            if len(fnameOut) > 5:
-                if fnameOut[-5:] == '.fits' or fnameOut[-5:] == '.FITS':
-                    fnameOut = fnameOut[:-5]
+            # to create the root name for the output files.
+            ind_fits = fnameOut.lower().rfind('.fits')
+            if ind_fits > 0: fnameOut = fnameOut[:ind_fits]
         else:
             fnameOut = flistout[i]
         # open the fits file with astropy
@@ -288,9 +291,8 @@ def espadons_i(flist, flistout=None, writeSpecHeader=False):
             fnameOut = fname.strip()
             # removing the '.fits' from the end of the string, 
             # to create the root name for the output files.
-            if len(fnameOut) > 5:
-                if fnameOut[-5:] == '.fits' or fnameOut[-5:] == '.FITS':
-                    fnameOut = fnameOut[:-5]
+            ind_fits = fnameOut.lower().rfind('.fits')
+            if ind_fits > 0: fnameOut = fnameOut[:ind_fits]
         else:
             fnameOut = flistout[i]
         # open the fits file with astropy

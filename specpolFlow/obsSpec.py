@@ -706,17 +706,34 @@ class Spectrum:
         return result
 
 
-def read_spectrum(fname, trimBadPix=False, sortByWavelength=False):
+def read_spectrum(fname, usecols=None, trimBadPix=False, sortByWavelength=False):
     """
     Read in the observed spectrum and save it.
     
     This follows the .s format from Donati's LibreESPRIT.
     Files can either have two lines of header or no header.
     This supports 6 column spectropolarimetric files
-    (wavelength, I, V|Q|U, null1, null2, errors),
-    and also 3 column spectra (wavelength, I, errors).
+    (wavelength, Stokes I, Stokes V|Q|U, null1, null2, errors),
+    3 column spectra (wavelength, flux (Stokes I), errors), and
+    2 column spectra (wavelength, flux (Stokes I)).
 
     :param fname: the name of the file to read.
+    :param usecols: optional, tuple or list, explicitly define the columns to
+                    use from the file (similar to the numpy.loadtxt() usecols
+                    argument). This is only useful if the file is not in a
+                    standard 2, 3, or 6 column format.  The order of entries in
+                    the tuple corresponds to wavelength, Stokes I, Stokes V,
+                    N1, N2, and errors.  Columns numbers start at 0.
+                    If a negative value is given, then nothing is read for that
+                    parameter and it is set to 0.
+                    E.g.: usecols=(0, 2) reads wavelength from the 1st column
+                    and flux (Stokes I) from the 3rd column.
+                    usecols=(0, 1, 2, 4, 4, 3) reads wavelength, I, and V as
+                    usual, uses the 5th column for N1 and re-uses it for N2,
+                    and uses the 4th column for errors.
+                    usecols=(0, 1, -1, -1, -1, 3) uses the 1st and 2nd columns
+                    for wavelength and flux, then uses no values for V, N1,
+                    or N2, and uses the 4th column for errors.
     :param trimBadPix: optionally remove the more obviously bad pixels if True.
                        Removes pixels with negative flux or error bars of zero,
                        pixels with flux within 3sigma of zero (large errors),
@@ -730,23 +747,25 @@ def read_spectrum(fname, trimBadPix=False, sortByWavelength=False):
                              Spectrum.merge_orders() after reading the file.
     :rtype: Spectrum
     """
-    # Reading manually is often faster than np.loadtxt for a large files
+    # Reading manually is often faster than older versions of np.loadtxt
+    # (version < 1.23) for a large files, assuming a more recent version here.
     fObs = open(fname, 'r')
-    #Check if the file starts with data or a header (assume 2 lines of header)
+    # Get the number of data columns in the file
+    # assume at least the 3rd line contains real data (2 lines of header)
     line1 = fObs.readline()
     line2 = fObs.readline()
     line3 = fObs.readline()
-    #assume at least the 3rd line contains real data
     ncolumns = len(line3.split())
-    if ncolumns != 6 and ncolumns != 3 and ncolumns != 2:
+    if ncolumns != 6 and ncolumns != 3 and ncolumns != 2 and usecols is None:
         print('{:} column spectrum: unknown format!\n'.format(ncolumns))
         raise ValueError(('Reading {:} as an {:} column spectrum: '
                           'unknown format!').format(fname, ncolumns))
-    
+
+    # Check if there are header lines in the file
     if len(line1.split()) == ncolumns and len(line2.split()) == ncolumns:
         #If the column counts are consistent there may be no header
         try:
-            #and if the first line starts with numbers, probably no header
+            #and if the first 2 lines start with numbers, probably no header
             float(line1.split()[0])
             float(line1.split()[1])
             float(line2.split()[0])
@@ -762,46 +781,48 @@ def read_spectrum(fname, trimBadPix=False, sortByWavelength=False):
     else:
         obs_header = line1
         nHeader = 2
-
-    #Get the number of lines of data in the file
-    nLines = 3 - nHeader #we've already read 3 lines
-    for line in fObs:
-        words = line.split()
-        if len(words) == ncolumns:
-            nLines += 1
-        else:
-            print('ERROR: reading observation, '
-                  +'line {:}, {:} columns :\n{:}'.format(
-                      nLines, len(words), line))
-
-    obs = Spectrum(np.zeros(nLines), np.zeros(nLines), np.zeros(nLines),
-                   np.zeros(nLines), np.zeros(nLines), np.zeros(nLines),
-                   header=obs_header)
-    
-    #Rewind to start then advance the file pointer 2 lines
-    fObs.seek(0)
-    if obs_header is not None:
-        fObs.readline()
-        fObs.readline()
-    #Then read the actual data of the file
-    for i, line in enumerate(fObs):
-        words = line.split()
-        if (len(words) == ncolumns and ncolumns == 6):
-            obs.wl[i] = float(words[0])
-            obs.specI[i] = float(words[1])
-            obs.specV[i] = float(words[2])
-            obs.specN1[i] = float(words[3])
-            obs.specN2[i] = float(words[4])
-            obs.specSig[i] = float(words[5])
-        elif (len(words) == ncolumns and ncolumns == 3):
-            obs.wl[i] = float(words[0])
-            obs.specI[i] = float(words[1])
-            obs.specSig[i] = float(words[2])
-        elif (len(words) == ncolumns and ncolumns == 2):
-            obs.wl[i] = float(words[0])
-            obs.specI[i] = float(words[1])
-            
     fObs.close()
+
+    # check that usecols is consistent with the read number of columns
+    if usecols is not None:
+        _usecols = usecols
+        if not isinstance(usecols, (list, tuple, np.ndarray)):
+            raise TypeError('In read_spectrum, usecols should be a list or '
+                            'tuple')
+        if np.max(usecols) >= ncolumns:
+            raise ValueError(('Requesting column number {:} but only found '
+                              'column number up to {:} (total {:} columns) '
+                              'in {:}').format(np.max(usecols), ncolumns-1,
+                                               ncolumns, fname))
+        if np.min(usecols) < -ncolumns:
+            _usecols = [max(x, -ncolumns) for x in usecols]
+        if len(usecols) > 6:
+            warnings.warn("\nIn read_spectrum, usecols specifies more columns "
+                          "than can be stored in a Spectrum. Values after the "
+                          "6th entry in usecols will be ignored.", stacklevel=2)
+
+    # Read the file with numpy (efficent in numpy version >= 1.23)
+    elif ncolumns == 2:
+        _usecols = (0,1)
+    elif ncolumns == 3:
+        _usecols = (0,1,2)
+    elif ncolumns == 6:
+        _usecols = (0,1,2,3,4,5)
+    data = np.loadtxt(fname, skiprows=nHeader, usecols=_usecols, unpack=True)
+
+    # Store the data in a Spectrum
+    nLines = data.shape[1]
+    obs = Spectrum(np.zeros(nLines), np.zeros(nLines), np.zeros(nLines),
+                    np.zeros(nLines), np.zeros(nLines), np.zeros(nLines),
+                    header=obs_header)
+    for ii, colval in enumerate(_usecols):
+        if colval < 0: continue
+        if ii == 0: obs.wl = data[ii]
+        if ii == 1: obs.specI = data[ii]
+        if ii == 2: obs.specV = data[ii]
+        if ii == 3: obs.specN1 = data[ii]
+        if ii == 4: obs.specN2 = data[ii]
+        if ii == 5: obs.specSig = data[ii]
 
     #Optionally, remove bad pixels.
     if trimBadPix:

@@ -101,7 +101,12 @@ def plot_obs_lines(spectra=[], lineList=[], depthCut=0.0, maxLabels=100,
             obsU = copy.deepcopy(obs)
             obsName = '{:}'.format(i)
         elif isinstance(obs, str):
-            obsU = read_spectrum(obs)
+            try:
+                obsU = read_spectrum(obs)
+            except ValueError:
+                print('Could not recognize type of spectrum file  {:} '
+                      ' trying to just read the first two columns'.format(obs))
+                obsU = read_spectrum(obs, usecols=(0,1))
             obsName = obs
         else:
             raise TypeError('in plot_obs_lines() spectra must contain '
