@@ -7,6 +7,7 @@ parts:
   - caption: About SpecpolFlow
     chapters:
     - file: About/Highlights.md
+    - file: About/Available_Polarimeters_and_Adpating_SPF.md 
     - file: About/Credits.md
   - caption: Getting Started
     chapters:
