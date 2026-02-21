@@ -7,6 +7,7 @@ parts:
   - caption: About SpecpolFlow
     chapters:
     - file: About/Highlights.md
+    - file: About/ReleaseNotes.md
     - file: About/Credits.md
   - caption: Getting Started
     chapters:
