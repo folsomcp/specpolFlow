@@ -1,4 +1,4 @@
-# General Comments on Compatibilities
+# Compatibilities
 
 SpecpolFlow is generally compatible with data in the [LibreESPRIT](https://www.cfht.hawaii.edu/Instruments/Spectroscopy/Espadons/Espadons_esprit.html) format. 
 This is usually a text file with columns for wavelength, intensity, polarization, two polarimetric nulls, and uncertainties.
