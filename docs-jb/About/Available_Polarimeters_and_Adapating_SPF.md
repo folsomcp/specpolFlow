@@ -1,17 +1,11 @@
 # Compatibilities
 
 SpecpolFlow is generally compatible with data in the [LibreESPRIT](https://www.cfht.hawaii.edu/Instruments/Spectroscopy/Espadons/Espadons_esprit.html) format. 
-This is usually a text file with columns for wavelength, intensity, polarization, two polarimetric nulls, and uncertainties.
+For spectropolarimetric data, this is usually a text file with columns for wavelength, intensity, polarization, two polarimetric nulls, and uncertainties.
 
-For spectra in a text file with columns for wavelength, intensity, and uncertainties, the polarization and polarimetric null columns can be set to zeros, for example: 
+For intensity spectra (with no polarization) this is a text tile with column for wavelength, intensity, and uncertainties.
 
-```
-# Text file has columns wavelength, intensity, uncertainty
-emptyarr = np.zeros_like(wavelength) # Arrays need to have the same length
-spf_spectrum = pol.Spectrum(wavelength,intensity,emptyarr,emptyarr,emptyarr,uncertainty)
-```
-
-Additional details can be found in our tutorials. The [How to use Spectrum objects](../Tutorials/10-SpectrumClass_Tutorial.ipynb) or [How to use the LSD objects](../Tutorials/11-HowToLSD_Tutorial.ipynb) tutorials may be good places to start.
+Additional details can be found in the [converting to .s files](../Tutorials/1-ConvertToSFiles_Tutorial.ipynb) and [spectrum objects](../Tutorials/10-SpectrumClass_Tutorial.ipynb) tutorials, which use the [read_spectrum](read_spectrum) function.  
 
 
 ## Available Converters
@@ -27,11 +21,14 @@ The current version of SpecpolFlow includes converters for the following spectro
 
 Narval observations are already in the correct format for SpecpolFlow. ESPaDOnS observations acquired from the PolarBase archive are also in the correct format.
 
-For more details on converting observations, please refer to the [tutorial on converting to .s files](../Tutorials/1-ConvertToSFiles_Tutorial.ipynb). 
+For more details on converting observations, please refer to the [tutorial on converting to .s files](../Tutorials/1-ConvertToSFiles_Tutorial.ipynb).
+
+If you are interested in developing a converter for another instrument, you are welcome to contact us, or check the [contributing](../Contributing/Contributing.md) page.
+
 
 ## Using SpecpolFlow in Spectroscopic Analyses 
 
-SpecpolFlow can be used for any kind of spectroscopic data that fits the format described above. It has functions for 
+SpecpolFlow can be used for any kind of spectroscopic data that fits the format described above. The SpecpolFlow tools will generally work with echelle spectra and single order spectra. Although observations with no formal uncertainty may cause problems in some functions, and result in bad uncertainty estimates. It has functions for: 
 
 * Normalizing spectra
 * Coadding observations
