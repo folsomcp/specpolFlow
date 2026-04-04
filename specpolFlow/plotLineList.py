@@ -434,15 +434,15 @@ def plot_lineList(llist, depthCut=0.0, maxLabels=None,
     return fig, ax
 
 
-def plot_elementsChart(mask, wmin, wmax, plotStyle='pie', sort='Z',
-                       threshold=None, ax=None):
+def plot_elementsChart(mask, wmin=-np.inf, wmax=np.inf, plotStyle='pie',
+                       sort='Z', threshold=None, ax=None):
     """
-    Pie or bar chart showing the distribution of elements in the given mask
-    for lines within a specified wavelength range [wmin, wmax].
+    Pie or bar chart showing the distribution of elements in the given mask,
+    optionally for lines within a specified wavelength range [wmin, wmax].
 
     :param mask: mask object containing the lines to plot
-    :param wmin: (float) minimum wavelength
-    :param wmax: (float) maximum wavelength
+    :param wmin: (float) minimum wavelength (defaults to the full mask)
+    :param wmax: (float) maximum wavelength (defaults to the full mask)
     :param plotStyle: (str) type of plot to generate.
                 The choices are:
                 'pie': pie chart
@@ -532,7 +532,10 @@ def plot_elementsChart(mask, wmin, wmax, plotStyle='pie', sort='Z',
         raise NotImplementedError("Currently only 'pie' and 'bar' plot styles are implemented.")
 
     # Add a title to the chart
-    ax.set_title('Distribution of elements within [{}, {}] nm'.format(wmin, wmax))
+    if wmin > -np.inf or wmax < np.inf:
+        ax.set_title('Distribution of elements within [{}, {}] nm'.format(wmin, wmax))
+    else:
+        ax.set_title('Distribution of elements')
 
     return fig, ax
 
