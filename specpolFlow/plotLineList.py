@@ -435,7 +435,7 @@ def plot_lineList(llist, depthCut=0.0, maxLabels=None,
 
 
 def plot_elementsChart(mask, wmin=-np.inf, wmax=np.inf, plotStyle='pie',
-                       sort='Z', threshold=None, ax=None):
+                       sort='Z', threshold=None, colors=None, ax=None):
     """
     Pie or bar chart showing the distribution of elements in the given mask,
     optionally for lines within a specified wavelength range [wmin, wmax].
@@ -445,16 +445,21 @@ def plot_elementsChart(mask, wmin=-np.inf, wmax=np.inf, plotStyle='pie',
     :param wmax: (float) maximum wavelength (defaults to the full mask)
     :param plotStyle: (str) type of plot to generate.
                 The choices are:
-                'pie': pie chart
-                'bar': bar chart.
+                'pie' - pie chart,
+                'bar' - bar chart.
     :param sort: (str) sorting method for elements.
-                The choices are:
-                'Z' or 'atomic': atomic number sorting, 
-                'A' or 'ascending': ascending order for the number of lines, 
-                'D' or 'descending': descending order for the number of lines. 
+                 The choices are:
+                 'Z' or 'atomic' - atomic number sorting,
+                 'A' or 'ascending' - ascending order for the number of lines,
+                 'D' or 'descending' - descending order for the number of lines.
     :param threshold: (float or None) minimum fractional contribution for
                       an element to be included in the pie chart.
                       By default, all elements are included.
+    :param colors: a list of colors recognized by matplotlib.
+                   For one of matplotlib's color sequences, this can be like:
+                   ``colors=mpl.color_sequences['tab20c']``
+                   or for a matplotlib colormap, this can be like:
+                   ``colors=mpl.colormaps['plasma'](np.linspace(0, 1, 20))``
     :param ax: the matplotlib axes object to use for plotting. If None,
                then a new figure and axes are created.
     :return: a matplotlib figure object, and an axes object
@@ -481,7 +486,7 @@ def plot_elementsChart(mask, wmin=-np.inf, wmax=np.inf, plotStyle='pie',
     # Apply threshold cut if specified
     if threshold is not None:
         if threshold > 1.0:
-            threshold = threshold / 100.0  # Convert percentage to fraction 
+            threshold = threshold / 100.0  # Convert percentage to fraction
 
         total_counts = np.sum(counts)
         fractional_counts = counts / total_counts
@@ -498,17 +503,18 @@ def plot_elementsChart(mask, wmin=-np.inf, wmax=np.inf, plotStyle='pie',
             Z = Z[valid_indices]
             elements = elements[valid_indices]
             counts = counts[valid_indices]
-            # Append 'Other' category -- Note: 'Other' will always be last item
-            #                    in the plot, regardless of the sorting method.
+            # Append 'Other' category -- Note: 'Other' will always be last
+            #    item in the plot, regardless of the sorting method.
             elements = np.append(elements, 'Other')
             counts = np.append(counts, other_count)
 
     ## PLOTTING THE PIE CHART ##
     # set the colormap
-    if plotStyle == 'pie':
-        colors = mpl.color_sequences['tab10']
-    else:
-        colors = mpl.color_sequences['tab20']
+    if colors is None:
+        if plotStyle == 'pie':
+            colors = mpl.color_sequences['tab10']
+        else:
+            colors = mpl.color_sequences['tab20']
 
     if ax is None:
         if plotStyle == 'pie':
@@ -529,11 +535,13 @@ def plot_elementsChart(mask, wmin=-np.inf, wmax=np.inf, plotStyle='pie',
         ax.set_ylabel('Number of lines')
         ax.set_ylim(0, max(counts)*1.1)
     else:
-        raise NotImplementedError("Currently only 'pie' and 'bar' plot styles are implemented.")
+        raise NotImplementedError("Currently only 'pie' and 'bar' plot styles "
+                                  "are implemented.")
 
     # Add a title to the chart
     if wmin > -np.inf or wmax < np.inf:
-        ax.set_title('Distribution of elements within [{}, {}] nm'.format(wmin, wmax))
+        ax.set_title('Distribution of elements within [{}, {}] nm'.format(
+            wmin, wmax))
     else:
         ax.set_title('Distribution of elements')
 
@@ -1043,7 +1051,7 @@ def _get_elements_in_wavelength_range(mask, wmin, wmax):
               'At','Rn','Fr','Ra','Ac','Th','Pa','U' )
     # Prune the mask to only include lines within the wavelength range
     mask_clean_prune = mask[(mask.wl>=wmin) & (mask.wl<=wmax)]
-    # List of atomic numbers of unique elements present in the specified wavelength range
+    # List of atomic numbers of unique elements present
     Z = np.unique(np.round(mask_clean_prune.element).astype(int))
     # List of element symbols corresponding to the atomic numbers in Z
     elements = np.array([labels[int(el) - 1] for el in Z])
