@@ -1,5 +1,6 @@
 import copy
 import numpy as np
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
 # for the plot_obs_lines() function we also need:
@@ -433,27 +434,31 @@ def plot_lineList(llist, depthCut=0.0, maxLabels=None,
     return fig, ax
 
 
-def plot_elementsChart(mask, wmin, wmax, plotStyle='pie', sort='Z', threshold=None, ax=None):
+def plot_elementsChart(mask, wmin, wmax, plotStyle='pie', sort='Z',
+                       threshold=None, ax=None):
     """
-    Pie chart showing the distribution of elements in the given mask
-    within the specified wavelength range [wmin, wmax].
+    Pie or bar chart showing the distribution of elements in the given mask
+    for lines within a specified wavelength range [wmin, wmax].
 
-    :param mask: mask object 
-    :param wmin: (float) Minimum wavelength.
-    :param wmax: (float) Maximum wavelength.
-    :param plotStyle: (str) Type of plot to generate. 
+    :param mask: mask object containing the lines to plot
+    :param wmin: (float) minimum wavelength
+    :param wmax: (float) maximum wavelength
+    :param plotStyle: (str) type of plot to generate.
                 The choices are:
                 'pie': pie chart
                 'bar': bar chart.
-    :param sort: (str) Sorting method for elements. 
+    :param sort: (str) sorting method for elements.
                 The choices are:
                 'Z' or 'atomic': atomic number sorting, 
                 'A' or 'ascending': ascending order for the number of lines, 
                 'D' or 'descending': descending order for the number of lines. 
-    :param threshold: (float or None) Minimum fractional contribution for an element to be included in the pie chart.
-                      If None, all elements are included.
+    :param threshold: (float or None) minimum fractional contribution for
+                      an element to be included in the pie chart.
+                      By default, all elements are included.
     :param ax: the matplotlib axes object to use for plotting. If None,
                then a new figure and axes are created.
+    :return: a matplotlib figure object, and an axes object
+             containing the plot.
     """
 
     # Get the elements and their line counts within the specified wavelength range
@@ -473,9 +478,9 @@ def plot_elementsChart(mask, wmin, wmax, plotStyle='pie', sort='Z', threshold=No
     elements = elements[sorted_indices]
     counts = counts[sorted_indices] 
 
-    # Apply treshold cut if specified
+    # Apply threshold cut if specified
     if threshold is not None:
-        if threshold > 1:
+        if threshold > 1.0:
             threshold = threshold / 100.0  # Convert percentage to fraction 
 
         total_counts = np.sum(counts)
@@ -493,43 +498,44 @@ def plot_elementsChart(mask, wmin, wmax, plotStyle='pie', sort='Z', threshold=No
             Z = Z[valid_indices]
             elements = elements[valid_indices]
             counts = counts[valid_indices]
-            # Append 'Other' category -- Note: 'Other' will always be last item in the plot, 
-            #                                  regardless of the sorting method.
+            # Append 'Other' category -- Note: 'Other' will always be last item
+            #                    in the plot, regardless of the sorting method.
             elements = np.append(elements, 'Other')
             counts = np.append(counts, other_count)
 
-
     ## PLOTTING THE PIE CHART ##
     # set the colormap
-    import seaborn as sns
-    sns.set_palette("tab20")
+    if plotStyle == 'pie':
+        colors = mpl.color_sequences['tab10']
+    else:
+        colors = mpl.color_sequences['tab20']
 
     if ax is None:
         if plotStyle == 'pie':
             fig, ax = plt.subplots(figsize=(4,4), layout='constrained')
         elif plotStyle == 'bar':
-            fig, ax = plt.subplots(figsize=(6,4))
+            fig, ax = plt.subplots(figsize=(6,4), layout='constrained')
     else:
         fig = ax.get_figure()
     
     if plotStyle == 'pie':
         # Create the pie chart
-        ax.pie(counts, labels=elements, autopct='%1.1f%%', 
+        ax.pie(counts, labels=elements, autopct='%1.1f%%', colors=colors,
                 startangle=90, labeldistance=1.05, pctdistance=0.85)
         # Ensure the circle is drawn as a circle
         ax.axis('equal')
     elif plotStyle == 'bar':
-        ax.bar(elements, counts, color=sns.color_palette("tab20", len(elements)))
+        ax.bar(elements, counts, color=colors)
         ax.set_ylabel('Number of lines')
-        ax.set_xticklabels(elements, rotation=0, ha='center')
         ax.set_ylim(0, max(counts)*1.1)
     else:
         raise NotImplementedError("Currently only 'pie' and 'bar' plot styles are implemented.")
-    
+
     # Add a title to the chart
     ax.set_title('Distribution of elements within [{}, {}] nm'.format(wmin, wmax))
-    
+
     return fig, ax
+
 
 class _updateLinesPlot:
     '''
@@ -1010,16 +1016,19 @@ def _set_label_pos(fig, ax, llabels2d, llist_labels, padding, vpadding, redraw=T
     
     return labelWls, labelFlx
 
+
 def _get_elements_in_wavelength_range(mask, wmin, wmax):
     """
-    Get statistics of elements present in the mask within the specified wavelength range [wmin, wmax].
+    Get the number of lines of an element present in the mask, for each element,
+    within the specified wavelength range [wmin, wmax].
 
-    :param mask: Mask object.
-    :param wmin: (float) Minimum wavelength for pruning.
-    :param wmax: (float) Maximum wavelength for pruning.
+    :param mask: Mask object
+    :param wmin: (float) Minimum wavelength for pruning
+    :param wmax: (float) Maximum wavelength for pruning
     
-    :rtype: (arrays) Z, elements, counts.
-    """    
+    :return: (arrays) Z (atomic numbers), elements (element strings),
+             counts (number of lines for each element).
+    """
     # List of element symbols corresponding to atomic numbers 
     labels=('H' ,'He','Li','Be','B' ,'C' ,'N' ,'O' ,'F' ,'Ne','Na','Mg',
               'Al','Si','P' ,'S' ,'Cl','Ar','K' ,'Ca','Sc','Ti','V' ,'Cr',
