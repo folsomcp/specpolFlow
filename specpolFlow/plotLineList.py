@@ -511,10 +511,7 @@ def plot_elementsChart(mask, wmin=-np.inf, wmax=np.inf, plotStyle='pie',
     ## PLOTTING THE PIE CHART ##
     # set the colormap
     if colors is None:
-        if plotStyle == 'pie':
-            colors = mpl.color_sequences['tab10']
-        else:
-            colors = mpl.color_sequences['tab20']
+        colors = mpl.color_sequences['tab20']
 
     if ax is None:
         if plotStyle == 'pie':
