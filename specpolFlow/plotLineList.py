@@ -6,6 +6,7 @@ from matplotlib.collections import LineCollection
 # for the plot_obs_lines() function we also need:
 from .obsSpec import Spectrum, read_spectrum
 from .lineList import LineList, read_VALD, line_list_zeros
+from .utils import atomic_number_to_symbol
 
 def plot_obs_lines(spectra=[], lineList=[], depthCut=0.0, maxLabels=100,
                    velSpec=0.0, velLines=0.0,
@@ -1042,21 +1043,13 @@ def _get_elements_in_wavelength_range(mask, wmin, wmax):
     :return: (arrays) Z (atomic numbers), elements (element strings),
              counts (number of lines for each element).
     """
-    # List of element symbols corresponding to atomic numbers 
-    labels=('H' ,'He','Li','Be','B' ,'C' ,'N' ,'O' ,'F' ,'Ne','Na','Mg',
-              'Al','Si','P' ,'S' ,'Cl','Ar','K' ,'Ca','Sc','Ti','V' ,'Cr',
-              'Mn','Fe','Co','Ni','Cu','Zn','Ga','Ge','As','Se','Br','Kr',
-              'Rb','Sr','Y' ,'Zr','Nb','Mo','Tc','Ru','Rh','Pd','Ag','Cd',
-              'In','Sn','Sb','Te','I' ,'Xe','Cs','Ba','La','Ce','Pr','Nd',
-              'Pm','Sm','Eu','Gd','Tb','Dy','Ho','Er','Tm','Yb','Lu','Hf',
-              'Ta','W' ,'Re','Os','Ir','Pt','Au','Hg','Tl','Pb','Bi','Po',
-              'At','Rn','Fr','Ra','Ac','Th','Pa','U' )
-    # Prune the mask to only include lines within the wavelength range
-    mask_clean_prune = mask[(mask.wl>=wmin) & (mask.wl<=wmax)]
+    # Slice the mask to only include lines within the wavelength range
+    mask_slice = mask[(mask.wl>=wmin) & (mask.wl<=wmax)]
     # List of atomic numbers of unique elements present
-    Z = np.unique(np.round(mask_clean_prune.element).astype(int))
+    maskZs = np.round(mask_slice.element).astype(int)
+    Z = np.unique(maskZs)
     # List of element symbols corresponding to the atomic numbers in Z
-    elements = np.array([labels[int(el) - 1] for el in Z])
+    elements = np.array([atomic_number_to_symbol(el) for el in Z])
     # List with the number of lines for each element in Z
-    counts = np.array([len(mask_clean_prune[np.round(mask_clean_prune.element).astype(int) == el]) for el in Z])
+    counts = np.array([len(mask_slice[maskZs == el]) for el in Z])
     return Z, elements, counts
