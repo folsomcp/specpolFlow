@@ -805,7 +805,7 @@ def read_spectrum(fname, usecols=None, trimBadPix=False, sortByWavelength=False)
     elif ncolumns == 2:
         _usecols = (0,1)
     elif ncolumns == 3:
-        _usecols = (0,1,2)
+        _usecols = (0,1,-1,-1,-1,2)
     elif ncolumns == 6:
         _usecols = (0,1,2,3,4,5)
     data = np.loadtxt(fname, skiprows=nHeader, usecols=_usecols, unpack=True)
