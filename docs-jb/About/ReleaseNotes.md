@@ -8,7 +8,7 @@ Version 1.1, released on 1 May, 2026
     * Plot spectra and line lists with the `plot_obs_lines` function, which can label lines from the list, and can plot Stokes I, V, null, or both I and V spectra, described in the [Plotting Spectra with Line Lists](../Tutorials/PlotLinesSpectra_Tutorial.ipynb) tutorial.
     * Plot line lists and labels with flexible formatting with the `plot_lineList` function.
     * Command line plotting tool for spectra and line lists `spf-plotspec`, as an easy 'quick look' tool.
-    * Plot a breakdown of the number of lines from different elements in a Mask with the new `plot_elementsChart` function.
+    * Plot a breakdown of the number of lines from different elements in a Mask with the new `plot_elementsChart` function.  This is described <a href='../Tutorials/3-MaskClass_Tutorial.html#plotting-elements-in-a-mask'>inside the Mask tutorial</a>
     * Tools for converting between wavelengths in air and vacuum for the Spectrum, LineList, and Mask classes, with the `vacuum_to_air` and `air_to_vacuum` functions.
     * Tools for Doppler shifting the Spectrum, LineList, and Mask classes, with the `doppler_shift` functions.
     * Function to convert Mask objects back into LineList objects using the `Mask.convert_to_line_list` function (complimenting the `make_mask` and `convert_list_to_mask` functions)
@@ -21,7 +21,7 @@ Version 1.1, released on 1 May, 2026
 * New tutorials
     * [Measuring equivalent widths](../Tutorials/12-EquivalentWidth_Tutorial.ipynb)
     * [Plotting Spectra with Line Lists](../Tutorials/PlotLinesSpectra_Tutorial.ipynb)
-    * [Pie charts for the elements in a line list](../Tutorials/PlotElementsPieChart_Tutorial.ipynb)
+    * <a href='../Tutorials/3-MaskClass_Tutorial.html#plotting-elements-in-a-mask'>Pie charts for the elements in a line list</a>
 
 ## SpecpolFlow 1.0 (2025 July 13)
 Version 1.0, released on 13 July, 2025.
