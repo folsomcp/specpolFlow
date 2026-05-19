@@ -35,6 +35,12 @@ For a developer, it is also possible to install the development version from the
 pip install "git+https://github.com/folsomcp/LSDpy"
 pip install "git+https://github.com/folsomcp/specpolFlow"
 ```
+To install a development version that is not on the main branch in Github, you can install from a specified branch like:
+```
+pip install "git+https://github.com/folsomcp/specpolFlow@dev-v1.2"
+```
+where the branch name is given after the `@` symbol, `dev-v1.2` in this example.  You can check the [SpecpolFlow Github page](https://github.com/folsomcp/specpolFlow) to see what branches currently exist.  
+
 This needs a relatively recent version of pip to work properly.  Version 24 or later is recommended (`pip install --upgrade pip`).
 
 
