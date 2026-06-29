@@ -127,22 +127,22 @@ def plot_obs_lines(spectra=[], lineList=[], depthCut=0.0, maxLabels=100,
 
         # generate the plot
         if stokes == 'I':
-            plt.errorbar(obsU.wl, obsU.specI, yerr=err, label=obsName)
+            ax.errorbar(obsU.wl, obsU.specI, yerr=err, label=obsName)
         elif stokes == 'V':
-            plt.errorbar(obsU.wl, obsU.specV, yerr=err, label=obsName)
-            plt.plot(obsU.wl, np.zeros_like(obsU.wl), 'k--', zorder=2.5)
+            ax.errorbar(obsU.wl, obsU.specV, yerr=err, label=obsName)
+            ax.plot(obsU.wl, np.zeros_like(obsU.wl), 'k--', zorder=2.5)
         elif stokes == 'N1' or stokes == 'N':
-            plt.errorbar(obsU.wl, obsU.specN1, yerr=err, label=obsName)
-            plt.plot(obsU.wl, np.zeros_like(obsU.wl), 'k--', zorder=2.5)
+            ax.errorbar(obsU.wl, obsU.specN1, yerr=err, label=obsName)
+            ax.plot(obsU.wl, np.zeros_like(obsU.wl), 'k--', zorder=2.5)
         elif stokes == 'N2':
-            plt.errorbar(obsU.wl, obsU.specN2, yerr=err, label=obsName)
-            plt.plot(obsU.wl, np.zeros_like(obsU.wl), 'k--', zorder=2.5)
+            ax.errorbar(obsU.wl, obsU.specN2, yerr=err, label=obsName)
+            ax.plot(obsU.wl, np.zeros_like(obsU.wl), 'k--', zorder=2.5)
         elif stokes == 'IV':
             shiftV = 1.05
             color = colors_list[i % (len(colors_list))]
-            plt.errorbar(obsU.wl, obsU.specI, yerr=err, color=color, label=obsName)
-            plt.errorbar(obsU.wl, obsU.specV + shiftV, color=color, yerr=err)
-            plt.plot(obsU.wl, np.zeros_like(obsU.wl) + shiftV, 'k--', zorder=2.5)
+            ax.errorbar(obsU.wl, obsU.specI, yerr=err, color=color, label=obsName)
+            ax.errorbar(obsU.wl, obsU.specV + shiftV, color=color, yerr=err)
+            ax.plot(obsU.wl, np.zeros_like(obsU.wl) + shiftV, 'k--', zorder=2.5)
         else:
             raise ValueError("in plot_obs_lines() unrecognized stokes flag "
                              "(use 'I', 'V', 'N1' 'N2', or 'IV'")
