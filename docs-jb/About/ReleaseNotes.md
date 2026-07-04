@@ -1,7 +1,7 @@
 # Release Notes
 
-## SpecpolFlow 1.1 (2026 May 1)
-Version 1.1, released on 1 May, 2026
+## SpecpolFlow 1.1 (2026 July 5)
+Version 1.1, released on 5 July, 2026
 * New functions
     * Equivalent widths and V/R ratios can now be calculated using the [`calc_ew`](Spectrum.calc_ew) function from the [`Spectrum`](Spectrum) class or the [`calc_ew`](LSD.calc_ew) function from the [`LSD`](LSD) class. Use cases are demonstrated in the subject [Measuring equivalent widths](../Tutorials/12-EquivalentWidth_Tutorial.ipynb) tutorial.
     * V/R ratios (ratio of the equivalent width of the violet side of a line to the red side of a line) can now be calculated using the [`calc_V_R`](LSD.calc_V_R) functions from the [`LSD`](LSD) class.
