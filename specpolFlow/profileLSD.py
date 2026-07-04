@@ -12,6 +12,7 @@ import scipy.special as specialf
 from scipy.optimize import curve_fit
 
 from .obsSpec import Spectrum, read_spectrum
+from .utils import c_kms
 
 # use a version dependent name for trapezoidal integration,
 # since Numpy 2.0 changed names (this could also be a try except)
@@ -159,7 +160,7 @@ class LSD:
         """
         
         oFile = open(fname, 'w')
-        if self.header != None:
+        if self.header is not None:
             if self.header == "":
                 #For blank headers include some placeholder text
                 oFile.write('#LSD profile\n')
@@ -399,7 +400,7 @@ class LSD:
         npar = self.numParam
 
         firstPlt = True
-        if fig == None:
+        if fig is None:
             fig, ax = plt.subplots(npar, 1, figsize=figsize, sharex=True)
         else:
             ax = fig.axes
@@ -463,9 +464,10 @@ class LSD:
                  amplitude & error, and width & error
         """
 
-        if velrange == None:
+        if velrange is None:
             velrange = (self.vel[1], self.vel[-2])
-        elif not(isinstance(velrange, list) or isinstance(velrange, tuple)):
+        elif not(isinstance(velrange, list) or isinstance(velrange, tuple)
+                 or isinstance(velrange, np.ndarray)):
             raise TypeError('velrange in fitGaussianRV should be a list or '
                             +'tuple, with two elements')
         indVelUse = (self.vel >= velrange[0]) & (self.vel <= velrange[1])
@@ -534,7 +536,8 @@ class LSD:
         :return:  the velocity of the center of gravity, and its uncertainty
         '''
         #Error checking on velrange
-        if not (isinstance(velrange, list) or isinstance(velrange, tuple)):
+        if not (isinstance(velrange, list) or isinstance(velrange, tuple)
+                or isinstance(velrange, np.ndarray)):
             raise TypeError('LSD.cog_rv: velrange must be a list (or tuple) '
                              'with two values!')
         if len(velrange) < 2:
@@ -565,58 +568,80 @@ class LSD:
 
         :param Ic: the continuum level to use the the COG calculation
                    (float, default=1.0)
-        :param fullOutput: If True, return the error of the velocity
-                            of the center of gravity
-        :return: the velocity of the center of gravity, optionally also its error
+        :param fullOutput: If True, return the uncertainty on the velocity
+                           of the center of gravity
+        :return: the velocity of the center of gravity, optionally also its
+                 uncertainty
         '''
         # Computes the velocity of the center of gravity
-        numerator = _trapezoid(self.vel * (Ic - self.specI), x=self.vel)
-        denominator = _trapezoid(Ic - self.specI, x=self.vel)
-        rv = numerator/denominator
+        # Also propagate errors through the trapezoidal integration, 
+        # with uneven pixel spacing.
+        numer, numerSig = _moment(self.vel, Ic - self.specI, self.specSigI,
+                                  0.0, 1)
+        denom, denomSig = _moment(self.vel, Ic - self.specI, self.specSigI,
+                                  0.0, 0)
+        rv = numer/denom
         
         if fullOutput == True:
-            #Propagate errors through the trapezoidal integration, with uneven 
-            #pixel spacing, using the same math as _integrate_bz()
-            deltav_arr = self.vel[1:] - self.vel[:-1]
-            err_scale = deltav_arr[:-1] + deltav_arr[1:]
-            err_scale = 0.5*np.concatenate((deltav_arr[:1], err_scale, deltav_arr[-1:]))
-            
-            numeratorSig = np.sqrt(np.sum((self.vel * self.specSigI * err_scale)**2))
-            denominatorSig = np.sqrt(np.sum((self.specSigI * err_scale)**2))
-            #Note, this bit of linear error propagation, assuming independent
-            #uncertainties isn't quite perfect, since the numerator and denominator
-            #depend on the same specSigI.  But the numerator dominates the total
-            #uncertainty, so treatment of the denominator isn't really important.
-            rvSig = np.abs(rv) * np.sqrt((numeratorSig/numerator)**2
-                                         + (denominatorSig/denominator)**2)
+            # Note, this bit of linear error propagation, assuming independent
+            # uncertainties isn't quite perfect, since the numerator and 
+            # denominator depend on the same specSigI.  But the numerator 
+            # dominates the total uncertainty, so treatment of the denominator
+            # isn't really important.
+            rvSig = np.abs(rv) * np.sqrt((numerSig/numer)**2
+                    + (denomSig/denom)**2)
             return rv, rvSig
         return rv
 
-    def cog_IV(self, Ic=1.0):
+    def cog_IV(self, Ic=1.0, fullOutput=False):
         '''
         Helper function to return the center of gravity of (Stokes I)*(Stoke V)
         for the LSD profile, for a given continuum level.
 
         :param Ic: the continnum level to use the the COG calculation
                    (float, default=1.0)
-        :return: the velocity of the center of gravity
+        :param fullOutput: If True, return the uncertainty on the velocity
+                           of the center of gravity
+        :return: the velocity of the center of gravity, optionally also its
+                 uncertainty
         '''
-        numerator = _trapezoid(self.vel * np.abs(self.specV * (Ic-self.specI)),
-                             x=self.vel)
-        denominator = _trapezoid(np.abs(self.specV * (Ic-self.specI)),
-                               x=self.vel)
-        return numerator/denominator
+        numer, numerSig = _moment(self.vel, np.abs(self.specV*(Ic-self.specI)),
+                                  np.sqrt((self.specSigV*(Ic-self.specI))**2
+                                           + (self.specSigI*self.specV)**2),
+                                  0.0, 1)
+        denom, denomSig = _moment(self.vel, np.abs(self.specV*(Ic-self.specI)),
+                                  np.sqrt((self.specSigV*(Ic-self.specI))**2
+                                           + (self.specSigI*self.specV)**2),
+                                  0.0, 0)
+        rv = numer/denom
+        
+        if fullOutput == True:
+            rvSig = np.abs(rv) * np.sqrt((numerSig/numer)**2
+                    + (denomSig/denom)**2)
+            return rv, rvSig
+        return rv
 
-    def cog_V(self):
+    def cog_V(self, fullOutput=False):
         '''
         Helper function to return the center of gravity of the Stokes V
         LSD profile.
         
-        :return: the velocity of the center of gravity
+        :param fullOutput: If True, return the uncertainty on the velocity
+                           of the center of gravity
+        :return: the velocity of the center of gravity, optionally also its
+                 uncertainty
         '''
-        numerator = _trapezoid(self.vel * np.abs(self.specV), x=self.vel)
-        denominator = _trapezoid(np.abs(self.specV), x=self.vel)
-        return(numerator/denominator)        
+        numer, numerSig = _moment(self.vel, np.abs(self.specV), self.specSigV,
+                                  0.0, 1)
+        denom, denomSig = _moment(self.vel, np.abs(self.specV), self.specSigV,
+                                  0.0, 0)
+        rv = numer/denom
+        
+        if fullOutput == True:
+            rvSig = np.abs(rv) * np.sqrt((numerSig/numer)**2
+                    + (denomSig/denom)**2)
+            return rv, rvSig
+        return rv
 
     def cog_min(self):
         '''
@@ -671,7 +696,8 @@ class LSD:
         return(probV, probN1, probN2)
 
     def calc_bz(self, cog='I', norm='auto', lambda0=500., geff=1.2,
-                velrange=None, bzwidth=None, plot=True, **kwargs):
+                velrange=None, bzwidth=None, plot=True, plotAllCOG=True,
+                verbose=False, **kwargs):
         '''Calculate the Bz of an LSD profile
         
         :param cog: The value or calculation method for the center of gravity.
@@ -692,7 +718,8 @@ class LSD:
                     For an LSD profile, this is the geff value the LSD profile
                     shape was scaled with.
         :param velrange: range of velocity to use for the determination of the
-                    line center and the continuum. If bzwidth is not given,
+                    line center and the continuum. This should be a list 
+                    or array with two values. If bzwidth is not given,
                     this range will also be used for the integration range
                     in the Bz calculation. 
                     If not given, the whole LSD profile will be used. 
@@ -702,6 +729,10 @@ class LSD:
                     Two elements = left and right of line center.
                     Not given (default): instead use velrange for this.
         :param plot: whether or not a graph is generated and returned.
+        :param plotAllCOG: whether to include all the center of gravity
+                    possibilities in the plot (True) or only the COG that is
+                    actually used in the calculation (False, the default).
+        :param verbose: if True print some extra diagnostic information.
         :param kwargs: additional keyword arguments are passed to the
                    matplotlib plotting routines, if a plot is generated.
         :return: a dictionary with Bz (in G) and FAP calculations,
@@ -713,7 +744,7 @@ class LSD:
         # of the continuum.
         # If velrange is not defined, it will use the whole range.
         # The range for calculating Bz itself is controlled by bzwidth below
-        if velrange != None:
+        if velrange is not None:
             inside = np.logical_and(self.vel>=velrange[0], self.vel<=velrange[1])
             lsd_in = self[inside]
             lsd_out = self[np.logical_not(inside)]
@@ -722,17 +753,19 @@ class LSD:
         
         # Check if norm is a string.
         if isinstance(norm, str):
-            print('using AUTO method for the normalization')
-            if velrange != None:
-                print('  using the median of the continuum outside of the line')
+            if verbose: print('using AUTO method for the normalization')
+            if velrange is not None:
                 norm_val = np.median(lsd_out.specI)
+                if verbose: print('  using the median of the continuum outside '
+                                  'of the line: {:}'.format(norm_val))
             else:
-                print('  no range in velocity given, using the median '
-                      +'of the whole specI to determine continuum')
                 norm_val = np.median(lsd_in.specI)
+                if verbose: print('  no range in velocity given, using the '
+                                  +'median of the whole specI to determine '
+                                  +'continuum: {:}'.format(norm_val))
         else:
             norm_val = copy.copy(norm)
-            print('using given norm value')
+            if verbose: print('using given norm value {:}'.format(norm_val))
 
         # Check if cog is a string.
         if isinstance(cog, str):
@@ -746,27 +779,30 @@ class LSD:
             elif cog == 'V':
                 cog_val = lsd_in.cog_V()
             else:
-                raise ValueError('calcBz got unrecognized value for cog: '
+                raise ValueError('calc_bz got unrecognized value for cog: '
                                  +'{:}'.format(cog))
         else:
             cog_val=copy.copy(cog)
         
         # Now we define the position of the line for the Bz calculation itself.
         # If the keyword bzwidth is defined, we use that range from the chosen cog.
-        if bzwidth == None:
+        if bzwidth is None:
             # No bzwidth. using vrange if defined
-            if velrange != None:
-                print('no bzwidth defined, using velrange to calculate Bz')
+            if velrange is not None:
+                if verbose: print('no bzwidth defined, using velrange to '
+                                  'calculate Bz')
                 lsd_bz = copy.copy(lsd_in)
                 # saving the range for plotting later.
                 p_bzwidth = np.copy(velrange)
             else:
-                print('no bzwidth nor velrange defined, using full range to calculate Bz')
+                print('no bzwidth nor velrange defined, using full range to '
+                      'calculate Bz')
                 p_bzwidth = [self.vel.min(), self.vel.max()]
                 lsd_bz = copy.copy(self)
         else:
             # Check whether it is a numpy array
-            if isinstance(bzwidth, list) or isinstance(bzwidth, tuple):
+            if (isinstance(bzwidth, list) or isinstance(bzwidth, tuple)
+                or isinstance(bzwidth, np.ndarray)):
                 if len(bzwidth) == 1:
                     # keeping the actual bz calculation range for plotting later.
                     p_bzwidth = [cog_val-bzwidth, cog_val+bzwidth]
@@ -797,7 +833,6 @@ class LSD:
                           "you want -- merge orders before running calc_bz()!",
                           stacklevel=2)
             lsd_bz = lsd_bz._sortvel()
-            #deltav_array = lsd_bz.vel[1:]-lsd_bz.vel[:-1]
 
         # Actual calculation of the Bz:
 
@@ -836,7 +871,8 @@ class LSD:
 
         if plot:
             fig  = _plot_bz_calc(self, lsd_in, lsd_bz, velrange,
-                            p_bzwidth, norm_val, cog_val, cog, **kwargs)
+                                 p_bzwidth, norm_val, cog_val, cog,
+                                 plotAllCOG, **kwargs)
             return result,fig
         else:
             return result
@@ -859,7 +895,7 @@ class LSD:
                     or a float: a user defined value in km/s.
         :param biswidth: Distance from the line center for the BIS calculation.
                     One element = same on each side of line center.
-                    Two elements, left and right of line center.
+                    Two elements = left and right of line center.
                     Not defined: using the entire profile.
         :param plotFit: If True, plot the bisector curve and the LSD profile
                         with matplotlib
@@ -896,7 +932,7 @@ class LSD:
             cog = 'fixed val.'
 
         # Get the velocity range
-        if biswidth == None:
+        if biswidth is None:
             print('no biswidth, using full velocity range to calculate BIS')
             velrange = (lsd.vel[1], lsd.vel[-2])
         else:
@@ -905,7 +941,7 @@ class LSD:
                 if len(biswidth) == 1:
                     # keeping the actual bis calculation range for plotting later.
                     velrange = (cog_val-biswidth[0], cog_val+biswidth[0])
-                elif len(bzwidth) == 2:
+                elif len(biswidth) == 2:
                     velrange = (cog_val-biswidth[0], cog_val+biswidth[1])
                 else:
                     print('biswidth has too many elements (need one or two)')
@@ -1089,7 +1125,344 @@ class LSD:
             return True
         else:
             return False
-##################
+
+    def calc_ew(self, cog='I', norm='auto', lambda0=None, velrange=None, 
+                ewwidth=None, plot=True, verbose=False):
+        '''
+        Calculate the equivalent width, of Stokes I, for this LSD profile.
+
+        This function can automatically estimate a continuum level and
+        a line center, or specific values can be given for either of those
+        parameters.
+
+        :param cog: The velocity value for the line center, or method for
+                    automatically estimating the center of gravity. 
+                    The choices are:
+                    'I': center of gravity of I,
+                    'min': velocity of the minimum of I,
+                    or a float: a user defined value in km/s.
+        :param norm: calculation method for the continuum. The choices are:
+                    'auto': the median of I outside of velrange (if defined)
+                    or the full range (if velrange is not defined),
+                    or float: a user defined value to use for Ic.
+        :param lambda0: wavelength of the line center, used for calculating
+                    equivalent width in appropriate wavelength units. 
+                    For an LSD profile, this is the normalizing wavelength 
+                    the LSD profile shape was scaled with.
+                    If not provided (or None) then the equivalent width is
+                    in velocity units (km/s).
+        :param velrange: range of velocity to use for determining the
+                    the continuum level and line center.  This should be 
+                    a list or array with two values. The continuum is
+                    estimated from points outside velrange. The line center
+                    is estimated from points inside velrange. If not defined, 
+                    the whole profile will be used. 
+        :param ewwidth: distance from the line center used as the integration
+                    range in the EW calculation, in velocity.
+                    One element = same on each side of line center.
+                    Two elements = left and right of line center.
+                    Not given (default): instead use velrange for this.
+        :param plot: If True, return a matplotlib figure of the line profile
+                    and velocity ranges used, as the last returned value.
+        :param verbose: If True print some extra diagnostic information.
+        
+        :return: A dictionary containing the equivalent width, its uncertainty,
+                 the continuum level, and some other diagnostic information.
+                 If plot=True a matplotlib figure is also returned.
+                 The equivalent width is in the wavelength units of lambda0,
+                 or if lambda0 is not provided it is in velocity units.
+        '''
+        # velrange is used to identify the position of the line,
+        # for calculating the cog, and for calculating the position
+        # of the continuum.
+        # If velrange is not defined, it will use the whole range.
+        # The range for calculating EW itself is controlled by ewwidth below
+        if velrange is not None:
+            inside = np.logical_and(self.vel>=velrange[0], self.vel<=velrange[1])
+            lsd_in = self[inside]
+            lsd_out = self[np.logical_not(inside)]
+            # saving the range for plotting later.
+            p_velrange = np.copy(velrange)
+        else:
+            lsd_in=copy.deepcopy(self)
+            p_velrange = [self.vel.min(), self.vel.max()]
+
+        # Check if norm is a string.
+        if isinstance(norm, str):
+            if verbose: print('using AUTO method for the normalization')
+            if velrange is not None:
+                norm_val = np.median(lsd_out.specI)
+                if verbose: print('  using the median of the continuum outside '
+                                  'of the line: {:}'.format(norm_val))
+            else:
+                norm_val = np.median(lsd_in.specI)
+                if verbose: print('  no range in velocity given, using the '
+                                  'median of the whole specI to determine '
+                                  'continuum: {:}'.format(norm_val))
+        else:
+            norm_val = copy.copy(norm)
+            if verbose: print('using given norm value: {:}'.format(norm_val))
+
+        # Check for order overlap, and raise a warning
+        flagSortVel = False
+        deltav_array = self.vel[1:] - self.vel[:-1]
+        if np.any(deltav_array < 0.0):
+            warnings.warn("\n In calc_ew(): There appears to be order overlap "
+                    "in the observation used.\n The velocity array is not "
+                    "monotonically increasing.\n calc_ew will sort the LSD "
+                    "profile in velocity order. \n Make sure this is what "
+                    "you want -- merge orders before running calc_ew()!",
+                    stacklevel=2)
+            lsd_in = lsd_in._sortvel()
+            flagSortVel = True
+        
+        # Check if cog is a string.
+        if isinstance(cog, str):
+            # calculate the cog for the chosen method
+            if cog == 'I':
+                cog_val = lsd_in.cog_I(norm_val)
+            elif cog == 'min':
+                cog_val = lsd_in.cog_min()
+            elif cog == 'IV':
+                cog_val = lsd_in.cog_IV(norm_val)
+            elif cog == 'V':
+                cog_val = lsd_in.cog_V()
+            else:
+                raise ValueError('calc_ew got unrecognized value for cog: '
+                                 +'{:}'.format(cog))
+        else:
+            cog_val=copy.copy(cog)
+
+        # Now we define the position of the line for the EW calculation itself.
+        # If the keyword ewwidth is defined, we use that range from the chosen cog.
+        if ewwidth is None:
+            # Using vrange, if defined
+            if velrange is not None:
+                if verbose: print('using velrange to calculate EW')
+            else:
+                print('no ewwidth or velrange defined, using full velocity '
+                      'range to calculate EW')
+            lsd_ew = copy.copy(lsd_in)
+            p_ewwidth = [lsd_ew.vel[0], lsd_ew.vel[-1]]
+        else:
+            # Check whether ewwidth is a list or tuple (or array?)
+            if (isinstance(ewwidth, list) or isinstance(ewwidth, tuple)
+                or isinstance(ewwidth, np.ndarray)):
+                if len(ewwidth) == 1:
+                    # keeping the actual EW calculation range for plotting later.
+                    p_ewwidth = [cog_val - ewwidth, cog_val + ewwidth]
+                    lsd_ew = self[np.logical_and(self.vel >= p_ewwidth[0],
+                                                 self.vel <= p_ewwidth[1])]
+                elif len(ewwidth) == 2:
+                    p_ewwidth = [cog_val - ewwidth[0], cog_val + ewwidth[1]]
+                    lsd_ew = self[np.logical_and(self.vel >= p_ewwidth[0],
+                                                 self.vel <= p_ewwidth[1])]
+                else:
+                    raise ValueError('ewwidth has too many elements '
+                                     +'{:} (need 1 or 2)'.format(len(ewwidth)))
+            else:
+                p_ewwidth = [cog_val - ewwidth, cog_val + ewwidth]
+                lsd_ew = self[np.logical_and(self.vel >= p_ewwidth[0],
+                                             self.vel <= p_ewwidth[1])]
+            if flagSortVel: lsd_ew = lsd_ew._sortvel()
+        
+        # Computes the equivalenth width (in velocity units)
+        EW, EWSig = _moment(lsd_ew.vel, norm_val - lsd_ew.specI,
+                            lsd_ew.specSigI, 0.0, 0)
+        
+        if lambda0 is not None:
+            # convert to wavelength units using lambda0
+            EW = EW*lambda0/c_kms
+            EWSig = EWSig*lambda0/c_kms
+
+
+        result = {
+                 'EW': EW,
+                 'EW sig': EWSig,
+                 'norm_method':norm,
+                 'norm': norm_val,
+                 'cog_method':cog,
+                 'cog': cog_val,
+                 'int. range start': p_ewwidth[0],
+                 'int. range end': p_ewwidth[1]
+                  }
+
+        #Optionally return the EW and its error 
+        if plot == True:
+            fig=_plot_ew(self, norm_val, p_velrange,
+                         [lsd_ew.vel[0], lsd_ew.vel[-1]],
+                         [lsd_ew.vel[0], lsd_ew.vel[-1]],
+                         cog_val, EW=True)
+            return result, fig
+        return result
+
+    
+    def calc_V_R(self, cog='I', norm='auto', velrange=None, ewwidth=None, 
+                 plot=True, verbose=False):
+        '''
+        Calculate the V/R ratio of Stokes I for, this LSD profile.
+
+        The V/R ratio is the ratio of the equivalent width for the violet half
+        (negative velocities from line center) of the line profile to the
+        equivalent width of the red half (positive velocities) of the line
+        profile.
+
+        This function can automatically estimate the line center and
+        continuum level, or specific values can be given for either of those
+        parameters.
+        
+        :param cog: The velocity value for the line center, or method for
+                    automatically estimating the center of gravity. 
+                    The choices are:
+                    'I': center of gravity of I,
+                    'min': velocity of the minimum of I,
+                    or a float: a user defined value in km/s.
+        :param norm: calculation method for the continuum. The choices are:
+                    'auto': the median of I outside of velrange (if defined)
+                    or the full range (if velrange is not defined),
+                    or float: a user defined value to use for Ic.
+        :param velrange: range of velocity to use for determining the
+                    the continuum level and line center. This should be 
+                    a list or array with two values. The continuum is
+                    estimated from points outside velrange. The line center
+                    is estimated from points inside velrange. If not defined, 
+                    the whole profile will be used. 
+        :param ewwidth: distance from the line center used as the integration
+                    range in the EW calculation, in velocity.
+                    This will be split into a red half and violet half.
+                    One element = same on each side of line center.
+                    Two elements = left and right of line center.
+                    Not given (default): instead use velrange for this.
+        :param plot: If True, return a matplotlib figure of the line profile
+                    and velocity ranges used, as the last returned value.
+        :param verbose: If True print some extra diagnostic information.
+                        
+        :return: a dictionary with the V/R ratio, the uncertainty, the continuum
+                 level, the center of gravity, and velocity ranges used.
+                 If plot=True a matplotlib figure is also returned.
+        '''
+        
+        if velrange is not None:
+            inside = np.logical_and(self.vel>=velrange[0], self.vel<=velrange[1])
+            lsd_in = self[inside]
+            lsd_out = self[np.logical_not(inside)]
+            # saving the range for plotting later.
+            p_velrange = np.copy(velrange)
+        else:
+            lsd_in=copy.deepcopy(self)
+            p_velrange = [self.vel.min(), self.vel.max()]
+
+        # Check if norm is a string.
+        if isinstance(norm, str):
+            if verbose: print('using AUTO method for the normalization')
+            if velrange is not None:
+                norm_val = np.median(lsd_out.specI)
+                if verbose: print('  using the median of the continuum outside '
+                                  'of the line: {:}'.format(norm_val))
+            else:
+                norm_val = np.median(lsd_in.specI)
+                if verbose: print('  no range in velocity given, using the '
+                                  'median of the whole specI to determine '
+                                  'continuum: {:}'.format(norm_val))
+        else:
+            norm_val = copy.copy(norm)
+            if verbose: print('using given norm value: {:}'.format(norm_val))
+
+        # Check if cog is a string.
+        if isinstance(cog, str):
+            # calculate the cog for the chosen method
+            if cog == 'I':
+                cog_val = lsd_in.cog_I(norm_val)
+            elif cog == 'min':
+                cog_val = lsd_in.cog_min()
+            elif cog == 'IV':
+                cog_val = lsd_in.cog_IV(norm_val)
+            elif cog == 'V':
+                cog_val = lsd_in.cog_V()
+            else:
+                raise ValueError('calc_V_R got unrecognized value for cog: '
+                                 +'{:}'.format(cog))
+            if verbose: print('  using calculated cog: {:}'.format(cog_val))
+        else:
+            cog_val=copy.copy(cog)
+
+        # start and end integration on the pixel closest to the COG
+        # (this could be a bit more precise by using fractions of a pixel
+        # on either side of the COG, but that adds some complication.)
+        cog_closest = self.vel[np.argmin(np.abs(self.vel - cog_val))]
+        diff_closest_cog = cog_closest - cog_val
+        # if this would end the integration before the COG, go up to the COG
+        # (include some padding for floating point errors)
+        widthVend = max(0.0, diff_closest_cog + 1e-6)
+        widthRstart = max(0.0, -diff_closest_cog + 1e-6)
+        
+        # set the integration ranges for the V and R halves of the line
+        if ewwidth is None:
+            # instead use vrange, if defined
+            if velrange is not None:
+                if verbose: print('using velrange to calculate V/R')
+                Vwidth=[cog_val - velrange[0], widthVend]
+                Rwidth=[widthRstart, velrange[1] - cog_val]
+            else:
+                print('no ewwidth or velrange defined, using full velocity '
+                      'range to calculate V/R')
+                Vwidth=[cog_val - self.vel.min(), widthVend]
+                Rwidth=[widthRstart, self.vel.max() - cog_val]
+        else:
+            # Check whether ewwidth is a list, tuple, or numpy array
+            if (isinstance(ewwidth, list) or isinstance(ewwidth, tuple)
+                or isinstance(ewwidth, np.ndarray)):
+                if len(ewwidth) == 1:
+                    # keeping the actual EW calculation range for plotting later.
+                    Vwidth=[ewwidth[0], widthVend]
+                    Rwidth=[widthRstart, ewwidth[0]]
+                elif len(ewwidth) == 2:
+                    Vwidth=[ewwidth[0], widthVend]
+                    Rwidth=[widthRstart, ewwidth[1]]
+                else:
+                    print('ewwidth has too many elements (need one or two)')
+                    raise ValueError('ewwidth has too many elements '
+                                     +'{:} (need 1 or 2)'.format(len(ewwidth)))
+            else:
+                Vwidth=[ewwidth, widthVend]
+                Rwidth=[widthRstart, ewwidth]
+        # get the (absolute) velocity ranges corresponding to
+        # Vwidth and Rwidth (which are relative to line center) for plotting
+        p_Vrange = [cog_val - Vwidth[0], cog_val + Vwidth[1]]
+        p_Rrange = [cog_val - Rwidth[0], cog_val + Rwidth[1]]
+        
+        Vres = self.calc_ew(cog=cog_val, norm=norm_val,
+                            velrange=velrange, ewwidth=Vwidth, plot=False)
+        
+        Rres = self.calc_ew(cog=cog_val, norm=norm_val,
+                            velrange=velrange, ewwidth=Rwidth, plot=False)
+
+        V_R = Vres['EW']/Rres['EW'] #calculate V/R (unitless)
+
+        # Estimate the associated uncertainty (unitless)
+        V_RSig = np.sqrt(((1.0/Rres['EW'])*Vres['EW sig'])**2
+                         + ((Vres['EW']/Rres['EW']**2)*Rres['EW sig'])**2 )
+
+        result = {
+                 'V_R': V_R,
+                 'V_R sig': V_RSig,
+                 'norm_method':norm,
+                 'norm': norm_val,
+                 'cog_method':cog,
+                 'cog': cog_val,
+                 'int. V range start': p_Vrange[0],
+                 'int. V range end': p_Vrange[1],
+                 'int. R range start': p_Rrange[0],
+                 'int. R range end': p_Rrange[1]
+                  }
+        
+        # return V/R and optionally its uncertainty or a figure 
+        if plot == True:
+            fig=_plot_ew(self, norm_val, p_velrange, p_Vrange, p_Rrange,
+                         cog_val, EW=False)
+            return result, fig
+        return result
+
 ##################
 
 def _gaussProf(x, cont, ampl, center, width):
@@ -1100,11 +1473,58 @@ def _gaussProf(x, cont, ampl, center, width):
     return y
 
 
+def _moment(x, y, dy, cog, n):
+    '''
+    Helper function that calculates the nth moment a line profile.
+
+    Uncertainties are calculated by standard error propagation.
+    Values are calculated relative to x =  cog (e.g. a rest velocity or center
+    of gravity).  These are unnormalized and not standardized,
+    specifically: integral y*(x - cog)**n dx
+    So n=0 is the area (e.g. equivalent width),
+    n=1 divided by n=0 is the mean (or center of gravity when cog=0),
+    n=2 divided by n=0 is the variance when cog is correct
+    (and square root of that is the standard deviation),
+    n=3 divided by n=0 is related to the skewness
+    (you may need to standardize, dividing by the variance to the 3/2 power).
+    Uses trapezoidal integration.  Mostly for internal use.
+    
+    :param x: array of x values (usually velocity for LSD profiles)
+    :param y: array of y values (usually Stokes I, V or nulls)
+    :param dy: array of uncertainties on y values
+    :param cog: float of the x value the calculation is relative to
+    :return: the nth moment, and the uncertainty on that value
+    '''
+    moment = _trapezoid((x - cog)**n * y, x=x - cog)
+    # Estimate the associated uncertainty, allowing for uneven pixel spacing
+    # Error propigation: for trapezoidal integration we use:
+    # A = sum of  0.5 [ x_(i+1) - x_(i) ]*[ Y_(i) + Y_(i+1) ] (from i=1 to i=N-1)
+    # If we define dx_i = x_(i+1) - x_(i) we can rewrite this as:
+    # A = sum of 0.5*dx_(i)*[ Y_(i) + Y_(i+1) ]  (from i=1 to i=N-1)
+    # if we expand the sum, and gather all of the Y_i together, we get:
+    # dx_1 Y_1 + [dx_1+dx_2]Y_2 + [dx_2+dx_3]Y_3 +
+    #      ... + [dx_{N-2}+dx_{N-1}]Y_{N-1} + dx_{N-1} Y_N
+    # Now, assuming uncertainties only on the Y_i, of s_i, the propagated error is
+    # error^2 = 0.5 * ( (dx_1 s_1)**2 + ([dx_1+dx_2]s_2)**2 + ([dx_2+dx_3]s_3)**2 +
+    #           ... +  ([dx_{N-2}+dx_{N-1}]*s_{N-1})**2 + (dx_{N-1} s_N)**2 )
+    # numerically, if we have: vel = [x_1, x_2, x_3, ..., x_n],
+    #              then: vel[1:]-vel[:-1] = [dx_1, dx_2, dx_3, ..., dx_{n-1}]
+    # adding a zero at each end: [0, dx1, dx2, dx3, ..., dx_(n-1), 0], and doing [1:]+[:-1] 
+    # will give us the array that we need to multiply with the s_i array.
+    # (There will be issues with order overlap if the function is used
+    # with an LSD object that was calculated with individual_line function. )
+    deltas = x[1:] - x[:-1]
+    err_scale = deltas[:-1] + deltas[1:]
+    err_scale = 0.5*np.concatenate((deltas[:1], err_scale, deltas[-1:]))
+    uncertainty = np.sqrt(np.sum(((x - cog)**n * dy * err_scale)**2))
+    return moment, uncertainty
+
+
 def _integrate_bz(vel, spec, specSig, geff, lambda0, cog_val,
                   specI, specSigI, norm_val):
     '''
-    Helper function that is used in the Bz calculations to integrate one Stokes parameter. 
-    Internal.
+    Helper function that is used in the Bz calculations to integrate 
+    one Stokes parameter. For internal use only.
 
     :param vel: (numpy array) the velocity array
     :param spec: (numpy array) the associated Stokes parameter array
@@ -1122,64 +1542,25 @@ def _integrate_bz(vel, spec, specSig, geff, lambda0, cog_val,
     # Lambda_B = constant * lambda0**2 B
     # lambda_B_constant = e/(4*pi*m_e*c) = 4.668644778304102e-05 in cgs units
     lambda_B_constant = 4.668644778304102e-12 #to match/cancel lambda0 in nm
-    cvel = 2.99792458e5 #c in km/s to match/cancel the LSD profile velocities
+    # use c in km/s to match/cancel the LSD profile velocities
     
-    # set the velocity step for error propagation
-    # (There might be some issues with order overlap if the function is used
-    # with an LSD object that was calculated with individual_line function. )
-    ###
-    # For trapezoidal integration
-    # A = sum of  0.5 [ x_(i+1) - x_(i) ]*[ Y_(i) + Y_(i+1) ] (from i=1 to i=N-1)
-    # If we define dx_i = x_(i+1) - x_(i) we can rewrite this as:
-    # A = sum of 0.5*dx_(i)*[ Y_(i) + Y_(i+1) ]  (from i=1 to i=N-1)
-    # if we expand the sum, and gather all of the Y_i together, we get:
-    # dx_1 Y_1 + [dx_1+dx_2]Y_2 + [dx_2+dx_3]Y_3 +
-    #      ... + [dx_{N-2}+dx_{N-1}]Y_{N-1} + dx_{N-1} Y_N
-    # Now, assuming uncertainties only on the Y_i, of s_i, the propagated error is
-    # error^2 = 0.5 * ( (dx_1 s_1)**2 + ([dx_1+dx_2]s_2)**2 + ([dx_2+dx_3]s_3)**2 +
-    #           ... +  ([dx_{N-2}+dx_{N-1}]*s_{N-1})**2 + (dx_{N-1} s_N)**2 )
-    # numerically, if we have: vel = [x_1, x_2, x_3, ..., x_n],
-    #              then: vel[1:]-vel[:-1] = [dx_1, dx_2, dx_3, ..., dx_{n-1}]
-    # adding a zero at each end: [0, dx1, dx2, dx3, ..., dx_(n-1), 0], and doing [1:]+[:-1] 
-    # will give us the array that we need to multiply with the s_i array. Et voila!
-    ###
-    #deltav_arr = vel[1:] - vel[:-1]
-    #dx = np.hstack([0., deltav_arr, 0.])
-    #err_scale = 0.5*(dx[:-1] + dx[1:])
-    # or more intuitively to Colin (and marginally faster):
-    deltav_arr = vel[1:] - vel[:-1]
-    err_scale = deltav_arr[:-1] + deltav_arr[1:]
-    err_scale = 0.5*np.concatenate((deltav_arr[:1], err_scale, deltav_arr[-1:]))
-
     # Calculation of the integral in the numerator of the Bz function
     # with a trapezoidal numerical integral
-    fnum = _trapezoid((vel - cog_val) * spec, x=vel-cog_val) #in (km/s)^2
-    sfnum = np.sqrt(np.sum(((vel - cog_val) * specSig * err_scale)**2))
-    # for a constant pixel spacing deltav (with the end points treated exactly)
-    #sfnumConst = np.sqrt((0.5*(vel[0] - cog_val)*specSig[0]*deltav)**2
-    #               + np.sum(((vel[1:-1] - cog_val)*specSig[1:-1])**2)*deltav**2
-    #               + (0.5*(vel[-1] - cog_val)*specSig[-1]*deltav)**2)
+    fnum, sfnum = _moment(vel, spec, specSig, cog_val, 1)
     
     # Calculation of the integral in the denominator of the Bz function
     # with a trapezoidal numerical integral
-    # For the square error calculation, we propagate like we would for
-    # summation in a numerical integral.
-    ri0v = _trapezoid(norm_val - specI, x=vel) # in km/s
-    si0v = np.sqrt(np.sum((specSigI * err_scale)**2)) # in km/s
-    # for a constant pixel spacing deltav (with the end points treated exactly)
-    #si0vConst = np.sqrt((0.5*specSigI[0]*deltav)**2
-    #                    + np.sum(specSigI[1:-1]**2)*deltav**2
-    #                    + (0.5*specSigI[-1]*deltav)**2)
+    ri0v, si0v = _moment(vel, norm_val - specI, specSigI, cog_val, 0)
     
     # Make the actual Bz calculation.
     # for the units to work out, lambda0 should be in nm
-    bl = -1*fnum / (ri0v*geff*lambda0*cvel*lambda_B_constant)
+    bl = -1*fnum / (ri0v*geff*lambda0*c_kms*lambda_B_constant)
     blSig = np.abs(bl * np.sqrt((sfnum/fnum)**2 + (si0v/ri0v)**2))
     return bl, blSig
 
 
-def _plot_bz_calc(lsd, lsd_in, lsd_bz, velrange, p_bzwidth, norm_val, cog_val, cog,
-                  **kwargs):
+def _plot_bz_calc(lsd, lsd_in, lsd_bz, velrange, p_bzwidth, norm_val, 
+                  cog_val, cog, plotAllCOG=True, **kwargs):
     """
     Generate a plot showing the center of gravity and integration ranges used
     in the calculation of Bz from an LSD profile.  Called by the calc_bz
@@ -1193,13 +1574,14 @@ def _plot_bz_calc(lsd, lsd_in, lsd_bz, velrange, p_bzwidth, norm_val, cog_val, c
     :param norm_val: the continuum level used for normalization
     :param cog_val: the final COG used for Bz calculation
     :param cog: the input COG flag/value given by the user
+    :param plotAllCOG: flag to plot all possible COGs or only the input COG
     :return: a matplotlib figure object
     """
     #This function relies on the plot method of the LSD profile class
     fig, ax = lsd.plot(sameYRange=False, **kwargs)
     
     for item in ax:
-        if velrange != None:
+        if velrange is not None:
             item.axvline(x=velrange[0], ls='--', label='velrange')
             item.axvline(x=velrange[1], ls='--')
         item.axvline(x=p_bzwidth[0], ls='dotted', label='bzwidth')
@@ -1210,12 +1592,17 @@ def _plot_bz_calc(lsd, lsd_in, lsd_bz, velrange, p_bzwidth, norm_val, cog_val, c
     # for the plot, calculate and display all of the possible methods
     # for calculating the cog.
     for item in ax:
-        item.axvline(x=lsd_in.cog_min(), label='cog min I', lw=3, alpha=0.5, c='blue')
-        item.axvline(x=lsd_in.cog_I(norm_val), label='cog I',lw=3, alpha=0.5, c='red')
-        item.axvline(x=lsd_in.cog_IV(norm_val), label='cog I*V',lw=3, alpha=0.5, c='orange')
-        item.axvline(x=lsd_in.cog_V(), label='cog V',lw=3, alpha=0.5, c='green')
+        if plotAllCOG:
+            item.axvline(x=lsd_in.cog_min(), label='cog min I',
+                         lw=3, alpha=0.5, c='blue')
+            item.axvline(x=lsd_in.cog_I(norm_val), label='cog I',
+                         lw=3, alpha=0.5, c='red')
+            item.axvline(x=lsd_in.cog_IV(norm_val), label='cog I*V',
+                         lw=3, alpha=0.5, c='orange')
+            item.axvline(x=lsd_in.cog_V(), label='cog V',
+                         lw=3, alpha=0.5, c='green')
         item.axvline(x=cog_val, label='chosen cog: {}'.format(cog), ls='--', c='k')
-       
+    
     ax[-1].legend(loc=0)
     
     red = lsd_bz.vel > cog_val
@@ -1231,6 +1618,56 @@ def _plot_bz_calc(lsd, lsd_in, lsd_bz, velrange, p_bzwidth, norm_val, cog_val, c
     
     return fig
 
+
+def _plot_ew(prof, norm, velrange, Vrange, Rrange, cog_val, EW):
+
+    """
+    Generate a plot showing the center of gravity and integration ranges used
+    in the calculation of EW or V/R from an LSD profile.  Called by the 
+    calc_ew and calc_V_R functions. Mostly just for internal use.
+
+    :param prof: the full LSD profile to plot
+    :param norm: the continuum level used for normalization
+    :param velrange: the velocity range used for COG calculation
+    :param Vrange: the velocity range used for integration of the violet half
+                   of the line
+    :param Rrange: the velocity range used for integration of the red half of
+                   the line
+    :param cog_val: the final COG used for Bz calculation
+    :param EW: True means the Rwidth and Vwidth are the same and shades the
+               entire ewwidth (used for EW plotting), False shades Rwidth and
+               Vwidth separately (used for V/R plotting)
+    :return: a matplotlib figure object
+    """
+
+    fig, ax = plt.subplots(figsize=(10, 4))
+
+    ax.errorbar(prof.vel, prof.specI, yerr=prof.specSigI,
+                xerr=None, fmt='o', ms=3, ecolor='0.5', c='k')
+    if EW==False:
+        ax.fill_between(prof.vel, prof.specI, np.ones(len(prof.vel))*norm,
+                        where=(prof.vel >= Rrange[0]) & (prof.vel <= Rrange[1]),
+                        alpha=0.1, color='r')
+        ax.fill_between(prof.vel, prof.specI, np.ones(len(prof.vel))*norm,
+                        where=(prof.vel >= Vrange[0]) & (prof.vel <= Vrange[1]),
+                        alpha=0.1, color='blue')
+    if EW==True:
+        ax.fill_between(prof.vel, prof.specI, np.ones(len(prof.vel))*norm,
+                        where=(prof.vel >= Vrange[0]) & (prof.vel <= Rrange[1]),
+                        alpha=0.1, color='k')
+    ax.axvline(cog_val, color='k', ls='--', label='cog')
+    ax.axvline(Vrange[0], color='tab:blue', ls=':', label='ewwidth')
+    ax.axvline(Rrange[1], color='tab:blue', ls=':')
+    ax.axvline(velrange[0], color='tab:blue', ls='--', label='velrange')
+    ax.axvline(velrange[1], color='tab:blue', ls='--')
+    ax.axhline(norm, color='pink', ls='--', label='norm')
+    ax.set_ylabel('I/Ic')
+    ax.set_xlabel('Velocity (km/s)')
+    plt.legend()
+
+    return fig
+
+###################################
 
 def read_lsd(fname):
     """
@@ -1402,12 +1839,11 @@ def run_lsdpy(obs, mask, outLSDName=None,
     # Make a default calculation for the pixel spacing if not user-defined
     if velPixel is None:
         #Get average observed wavelength spacing
-        cvel = 2.99792458e5 #c in km/s
         obsSp = read_spectrum(obs)
         wlStep = obsSp.wl[1:] - obsSp.wl[:-1]
-        medianVelPix = np.median(wlStep/obsSp.wl[:-1]*cvel)
+        medianVelPix = np.median(wlStep/obsSp.wl[:-1]*c_kms)
         #indWlSteps = ((wlStep > 0.) & (wlStep < 0.5))
-        #meanVelPix = np.average(wlStep[indWlSteps]/obsSp.wl[:-1][indWlSteps]*cvel)        
+        #meanVelPix = np.average(wlStep[indWlSteps]/obsSp.wl[:-1][indWlSteps]*c_kms)
         velPixel = round(medianVelPix, ndigits=2)
 
     # Set the controls to the call to LSDpy for saving the files if needed.

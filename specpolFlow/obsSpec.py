@@ -2,8 +2,19 @@
 Tools for manipulating spectra, typically spectropolarimetric observations.
 """
 
-import numpy as np
 import copy
+import warnings
+import numpy as np
+import matplotlib.pyplot as plt
+from . import utils
+from .utils import c_kms
+
+# use a version dependent name for trapezoidal integration,
+# since Numpy 2.0 changed names (this could also be a try except)
+if np.lib.NumpyVersion(np.__version__) >= '2.0.0':
+    from numpy import trapezoid as _trapezoid
+else:
+    from numpy import trapz as _trapezoid
 
 ###################################
 
@@ -105,7 +116,7 @@ class Spectrum:
                             cat_specN2, cat_specSig, header=cat_header)
         return cat_spec
 
-    def coadd(self, *args):
+    def coadd(self, *args, byOrders=True, mergeOrders='none'):
         """
         coadd this spectrum with other spectra
 
@@ -115,63 +126,166 @@ class Spectrum:
         by 1/sigma**2. This assumes the spectra are continuum normalized,
         and have reliable uncertainties.
 
-        Warning: regions with order overlap, or where wavelength goes backwards,
-        will produce incorrect results with this routine.  We strongly
-        recommend using the merge_orders function before using this routine.
+        Spectra can be split into individual spectral orders and then have each
+        order coadded (when byOrders=True) or the orders in the spectra can
+        be merged before coadding (when mergeOrders='trim' or ='coadd').
+        If neither option is used, and there are regions with order overlap,
+        or where wavelength goes backwards, will produce incorrect results
+        with this routine. 
         
         :param args: other Spectrum objects (or a list or tuple of them)
                      to coadd with this one
+        :param byOrders: flag for whether individual orders are coadded (True),
+                     or whole spectra are coadded at once assuming no overlap
+                     (False).  If this is False, orders should already be merged,
+                     or the mergeOrders flag should be set to 'trim' or 'coadd'.  
+        :param mergeOrders: optional method for merging spectral orders before
+                     coadding.  Options are 'trim', 'coadd', or 'none'.
+                     See the merge_orders function for details.  (If this is
+                     not 'trim' or 'coadd' no merging will be done.)
+                     If both this flag and byOrders=True are set, then orders
+                     are merged before coadding, effectively overriding
+                     byOrders=True.
         :rtype: Spectrum
         """
-        #Set up the weighted average using self as the first entry
-        #weight by 1/sigma**2, and save the sum of the weights
         spec = copy.deepcopy(self) #work on a copy (not self!)
-        weight = 1./self.specSig**2
-        spec.specI = self.specI*weight
-        spec.specV = self.specV*weight
-        spec.specN1 = self.specN1*weight
-        spec.specN2 = self.specN2*weight
-        totalWeight = weight.copy()
-
-        args2 = args
-        #Check if the user passed a list or tuple of spectra (unwrap it)
+        specList = list(args)
+        # Check if the user passed a list or tuple of spectra (unwrap it)
         if len(args) > 0:
             if isinstance(args[0], list) or isinstance(args[0], tuple):
                 if isinstance(args[0][0], Spectrum):
-                    args2 = args[0]
-        for arg in args2:
+                    specList = list(args[0])
+        # Type checking
+        for arg in specList:
             if not isinstance(arg, Spectrum):
                 raise ValueError('coadd can only use Spectrum objects!')
             if np.any(arg.specSig <= 0.0):
                 raise ValueError("coadd requires uncertainties "
                                  "(>0) for all points!")
-            if not np.all(np.diff(arg.wl) > 0):
-                print('Warning: in Spectrum.coadd, coadding spectra with order'
-                      ' overlap or decreasing wavelength.  This will cause'
-                      ' incorrect results in those regions.')
-            #Interpolate this spectrum onto the reference wavelengths
-            bspecI   = np.interp(spec.wl, arg.wl, arg.specI)
-            bspecV   = np.interp(spec.wl, arg.wl, arg.specV)
-            bspecN1  = np.interp(spec.wl, arg.wl, arg.specN1)
-            bspecN2  = np.interp(spec.wl, arg.wl, arg.specN2)
-            bspecSig = np.interp(spec.wl, arg.wl, arg.specSig)
 
-            #Add this spectrum to the weighted sums
-            weight = 1./bspecSig**2
-            spec.specI += bspecI*weight
-            spec.specV += bspecV*weight
-            spec.specN1 += bspecN1*weight
-            spec.specN2 += bspecN2*weight
-            totalWeight += weight
+        # Merge orders if requested
+        if mergeOrders == 'trim' or mergeOrders == 'coadd':
+            spec = spec.merge_orders(mode=mergeOrders)
+            for i, arg in enumerate(specList):
+                specList[i] = arg.merge_orders(mode=mergeOrders)
 
-        #Once all spectra have been added, complete the weighted average
-        spec.specI /= totalWeight
-        spec.specV /= totalWeight
-        spec.specN1 /= totalWeight
-        spec.specN2 /= totalWeight
-        spec.specSig = np.sqrt(1/totalWeight)
-        return spec
+        # Split orders if requested (ignore gaps, since only overlaps
+        # cause problems for the interpolation routine)
+        if byOrders:
+            specOrds = spec.get_orders(ignoreGaps=True)
+            norders = len(specOrds)
+            specListOrds = []
+            for arg in specList:
+                argOrds = arg.get_orders(ignoreGaps=True)
+                if len(argOrds) != norders:
+                    raise ValueError('in Spectrum.coadd(), when coadding by '
+                                     'orders, all spectra must have the same '
+                                     'number of orders!  ')
+                specListOrds += [argOrds]
+        else: # Wrap spectra in lists (1 element lists with the whole spectrum)
+            specOrds = [spec]
+            specListOrds = [[arg] for arg in specList]
+
+        # loop over orders adding spectra for each order
+        for i, spec in enumerate(specOrds):
+            #Set up the weighted average using self as the first entry
+            #weight by 1/sigma**2, and save the sum of the weights
+            weight = 1./spec.specSig**2
+            spec.specI = spec.specI*weight
+            spec.specV = spec.specV*weight
+            spec.specN1 = spec.specN1*weight
+            spec.specN2 = spec.specN2*weight
+            totalWeight = weight.copy()
             
+            for argOrds in specListOrds:
+                arg = argOrds[i] #get this order of this spectrum
+                if not np.all(np.diff(arg.wl) > 0):
+                    warnings.warn('\nin Spectrum.coadd: Using spectra '
+                        'with order overlap or a decreasing wavelength.\n'
+                        'Doing this will cause incorrect results in those '
+                        'regions!\n(You can try using the mergeOrders="trim" '
+                        'or  byOrders=True options to fix this.)',
+                        stacklevel=2)
+
+                #Interpolate this spectrum onto the reference wavelengths
+                bspecI   = np.interp(spec.wl, arg.wl, arg.specI)
+                bspecV   = np.interp(spec.wl, arg.wl, arg.specV)
+                bspecN1  = np.interp(spec.wl, arg.wl, arg.specN1)
+                bspecN2  = np.interp(spec.wl, arg.wl, arg.specN2)
+                bspecSig = np.interp(spec.wl, arg.wl, arg.specSig)
+
+                #Add this spectrum to the weighted sums
+                weight = 1./bspecSig**2
+                spec.specI += bspecI*weight
+                spec.specV += bspecV*weight
+                spec.specN1 += bspecN1*weight
+                spec.specN2 += bspecN2*weight
+                totalWeight += weight
+
+            #Once all spectra have been added, complete the weighted average
+            spec.specI /= totalWeight
+            spec.specV /= totalWeight
+            spec.specN1 /= totalWeight
+            spec.specN2 /= totalWeight
+            spec.specSig = np.sqrt(1/totalWeight)
+
+        #concatenate orders if necessary back into one Spectrum object
+        specOut = specOrds[0]
+        if len(specOrds) > 1:
+            specOut = specOrds[0].concatenate(specOrds[1:])
+        return specOut
+
+    def doppler_shift(self, velocity):
+        '''
+        Doppler shift the spectrum according to an input radial velocity.
+
+        :param velocity: the radial velocity in km/s
+        :rtype: Spectrum
+        '''
+        spec = copy.deepcopy(self) #work on a copy (not self!)
+        spec.wl = utils.doppler_shift_kms(spec.wl, velocity)
+        return spec
+
+    def vacuum_to_air(self):
+        '''
+        Convert the spectrum from wavelength in vacuum to wavelength in air
+        (assuming dry air at 15 C and 1 atmosphere of pressure)
+        and return the modified spectrum.
+
+        This function requires the Spectrum to have wavelength in angstroms.
+        
+        :rtype: Spectrum
+        '''
+        spec = copy.deepcopy(self)
+        if spec.wl[0] < 2500.:
+            warnings.warn('\nin Spectrum.vacuum_to_air: '
+                          'This function requires wavelengths in units of '
+                          'angstroms.\nIf you are using UV spectra you can '
+                          'disregard this warning, otherwise check the units.',
+                          stacklevel=2)
+        spec.wl = utils.vacuum_to_air(spec.wl)
+        return spec
+
+    def air_to_vacuum(self):
+        '''
+        Convert the spectrum from wavelength in air to wavelength in vacuum
+        (assuming dry air at 15 C and 1 atmosphere of pressure)
+        and return the modified spectrum.
+        
+        This function requires the Spectrum to have wavelength in angstroms.
+        
+        :rtype: Spectrum
+        '''
+        spec = copy.deepcopy(self)
+        if spec.wl[0] < 2500.:
+            warnings.warn('\nin Spectrum.air_to_vacuum: '
+                          'This function requires wavelengths in units of '
+                          'angstroms.\nIf you are using UV spectra you can '
+                          'disregard this warning, otherwise check the units.',
+                          stacklevel=2)
+        spec.wl = utils.air_to_vacuum(spec.wl)
+        return spec
+
     def individual_line(self, lambda0, lwidth):
         '''
         Select an individual line in the spectrum and return it
@@ -205,8 +319,7 @@ class Spectrum:
         obs_line = self[(self.wl >= p_lwidth[0]) & (self.wl <= p_lwidth[1])]
 
         # Now we convert wavelengths to velocity space
-        c = 299792.458  #speed of light in km/s
-        vel = c*(obs_line.wl-lambda0)/lambda0
+        vel = c_kms*(obs_line.wl-lambda0)/lambda0
 
         prof = LSD(vel, obs_line.specI, obs_line.specSig, obs_line.specV, 
                    obs_line.specSig, obs_line.specN1, obs_line.specSig,
@@ -274,9 +387,8 @@ class Spectrum:
         #or a step forward in velocity more than 10x the average velocity step size.
         #(use velocity rather than wavelength since pixel size in velocity is
         # more consistent across a spectrum)
-        c = 299792.458  #speed of light in km/s
         gapSize = 20.
-        velSteps = (self.wl[1:-1] - self.wl[0:-2])/self.wl[1:-1]*c
+        velSteps = (self.wl[1:-1] - self.wl[0:-2])/self.wl[1:-1]*c_kms
         meanVelStep = np.mean(velSteps)
         if ignoreGaps:
             orderEdges = velSteps < 0.
@@ -395,7 +507,8 @@ class Spectrum:
                     indO2[np.nonzero(np.logical_not(indO2))[0][0]] = True
                     
                     #coadd the region in the overlap
-                    ord1[indO1] = ord1[indO1].coadd(ord2[indO2])
+                    ord1[indO1] = ord1[indO1].coadd(ord2[indO2], byOrders=False,
+                                                    mergeOrders='none')
                     
                 #Save this order with coadded values,
                 #except for the overlap with the previous order
@@ -407,44 +520,252 @@ class Spectrum:
         else:
             raise ValueError("in merge_orders unrecognized mode '{:}'!".format(mode))
         return specM
-    
 
-def read_spectrum(fname, trimBadPix=False, sortByWavelength=False):
+    def convolveR(self, R):
+        """
+        Convolve the spectrum with a Gaussian instrumental profile
+        corresponding to a resolution R.  (R is the FWHM of the Gaussian)
+
+        Note: Uncertainties are not propagated in this routine.
+        The convolution operation introduces strong correlations into
+        the uncertainties for nearby pixels, which is requires careful
+        treatment. This routine should not be used for cases where statistics
+        or uncertainties are important.  
+        
+        :param R: the instrumental resolution, unit-less
+                  (in the form lambda/delta_lambda)
+        :rtype: Spectrum
+        """
+        if np.all(self.wl[1:] >= self.wl[:-1]):
+            specS = self
+        else:
+            print('Warning: order overlap in spectrum to be convolved!\n'
+                  'This will cause incorrect results around overlap regions.\n'
+                  '(Sorting pixels by wavelength before convolving.)\n'
+                  'Consider using merge_orders before running convolveR.')
+            indSort = np.argsort(self.wl)
+            specS = self[indSort]
+
+        # check if the polarization spectrum exists
+        doPol = (np.any(self.specV != 0.0) | np.any(self.specN1 != 0.0)
+                 | np.any(self.specN2 != 0.0))
+        
+        specC = copy.deepcopy(specS) #output a copy (not self!)
+        
+        sigmaIntRange = 4.0
+        # loop over the spectrum
+        for i in range(len(specS)):
+            # generate the instrumental profile in wavelength units,
+            # for this pixel's wavelength
+            fwhm = specS.wl[i]/R
+            sigma = fwhm/2.3548200450309493 # FWHM/(2*sqrt(2*log(2)))
+            # get the portion of the spectrum relevant for convolution
+            # for this pixel, i.e. within n*sigma of this pixel
+            ind0, ind1 = np.searchsorted(specS.wl,
+                                         [specS.wl[i] - sigmaIntRange*sigma,
+                                          specS.wl[i] + sigmaIntRange*sigma])
+            specT = specS[ind0:ind1]
+            specG = 1./(sigma*np.sqrt(2.*np.pi))*np.exp(-(specT.wl - specS.wl[i])**2/(2.*sigma**2))
+            #normG = _trapezoid(specG, wlG)
+            #in benchmarking this seems to be ~25% faster than numpy's trapz function
+            normG = np.sum((specG[:-1] + specG[1:])*0.5*(specT.wl[1:] - specT.wl[:-1]))
+            specG /= normG
+            
+            # evaluate the convolution for this point
+            #specC.specI[i] = _trapezoid(specT.specI*specG, specT.wl)
+            prod = specT.specI*specG
+            specC.specI[i] = np.sum((prod[:-1] + prod[1:])*0.5*(specT.wl[1:] - specT.wl[:-1]))
+            if doPol:
+                prod = specT.specV*specG
+                specC.specV[i] = np.sum((prod[:-1] + prod[1:])*0.5*(specT.wl[1:] - specT.wl[:-1]))
+                prod = specT.specN1*specG
+                specC.specN1[i] = np.sum((prod[:-1] + prod[1:])*0.5*(specT.wl[1:] - specT.wl[:-1]))
+                prod = specT.specN2*specG
+                specC.specN2[i] = np.sum((prod[:-1] + prod[1:])*0.5*(specT.wl[1:] - specT.wl[:-1]))
+        return specC
+
+    def calc_ew(self, lineRange, contRange=None, norm='auto',
+                plot=True, verbose=False):
+        '''
+        Calculate the equivalent width, of Stokes I, for a portion of this
+        spectrum.
+
+        This function can automatically estimate a continuum level, or a
+        specific value can be given.  
+        
+        This function is a convenience wrapper around Spectrum.individual_line()
+        and LSD.calc_ew()
+
+        :param lineRange: the wavelength range used for the equivalent width
+                    calculation. This should be 2 element list, tuple,
+                    or array with start and end values.
+        :param contRange: the wavelength range used to estimate the continuum
+                    level, using the median value, if norm='auto'.
+                    Multiple ranges can be used, with a list of
+                    lists (with the inner list containing start and end
+                    values), or an array of dimensions (nRanges, 2).
+                    The region inside lineRange is automatically
+                    excluded, so contRange can span lineRange.
+        :param norm: calculation method for the continuum. The choices are:
+                    'auto': the median of Stokes I outside of lineRange and
+                    inside contRange, or float: a user defined fixed value.
+        :param plot: If True, return a matplotlib figure of the line profile
+                    and velocity ranges used, as the last returned value.
+        :param verbose: If True print some extra diagnostic information,
+                    including the continuum level.
+        :return: A dictionary containing the equivalent width, its uncertainty,
+                 the continuum level, and some other diagnostic information.
+                 If plot=True a matplotlib figure is also returned.
+                 The equivalent width is in the wavelength units of lambda0,
+        '''
+        # Check input values are valid
+        if contRange is None:
+            if not isinstance(norm, float):
+                raise ValueError('Spectrum.calc_ew requires either contRange '
+                                 'to be specified, or norm to be a specified '
+                                 'continuum value')
+        elif not (isinstance(contRange, list) or isinstance(contRange, tuple)
+                  or isinstance(contRange, np.ndarray)):
+            raise TypeError('Spectrum.calc_ew requires contRange to be a '
+                            'list or tuple')
+        if not (isinstance(lineRange, list) or isinstance(lineRange, tuple)
+                  or isinstance(lineRange, np.ndarray)):
+            raise TypeError('Spectrum.calc_ew requires lineRange to be a '
+                            'list or tuple')
+
+        # Generate a 2D array with all the wavelength ranges of interest
+        aLineRange = np.array(lineRange)
+        if aLineRange.ndim != 1 or aLineRange.shape[0] != 2:
+            raise ValueError('In Spectrum.calc_ew, lineRange has invalid '
+                             'dimensions. It must contain only a start and '
+                             'end value.')
+        if contRange is not None:
+            aContRange = np.array(contRange)
+            if aContRange.ndim == 1:
+                aContRange = aContRange[np.newaxis, :]
+            if aContRange.shape[1] != 2:
+                raise ValueError('In Spectrum.calc_ew, contRange has invalid '
+                                 'dimensions.  It must be something that can be '
+                                 'converted to an array with shape (nRanges, 2).')
+            allRanges = np.concatenate((aLineRange[np.newaxis, :], aContRange),
+                                       axis=0)
+        else:
+            allRanges = aLineRange[np.newaxis, :]
+        
+        # Get the widest wavelength range needed for conversion to an LSD object
+        wlStart = np.min(allRanges)
+        wlEnd = np.max(allRanges)
+        wlCenter = (lineRange[0] + lineRange[1])*0.5
+
+        # Convert the spectrum to an LSD object, and use its calc_ew() function
+        prof = self.individual_line(wlCenter,
+                                    [wlCenter - wlStart, wlEnd - wlCenter])
+
+        # Remove the portions of the spectrum that we don't want to use
+        fuse = np.zeros_like(prof.vel, dtype=bool)
+        for i in range(allRanges.shape[0]):
+            fuse += ((prof.vel >= (allRanges[i, 0] - wlCenter)/wlCenter*c_kms)
+                    & (prof.vel <= (allRanges[i, 1] - wlCenter)/wlCenter*c_kms))
+        profU = prof[fuse]
+
+        # Calculate the EW
+        ewwidth = [(wlCenter - lineRange[0])/wlCenter*utils.c_kms,
+                   (lineRange[1] - wlCenter)/wlCenter*utils.c_kms]
+        velrange = [-ewwidth[0], ewwidth[1]]
+        res = profU.calc_ew(cog=0.0, norm=norm, lambda0=wlCenter,
+                            velrange=velrange, ewwidth=ewwidth,
+                            plot=False, verbose=verbose)
+        result = {
+                 'EW': res['EW'],
+                 'EW sig': res['EW sig'],
+                 'norm_method':res['norm_method'],
+                 'norm': res['norm'],
+                 'cog_method':res['cog_method'],
+                 'cog': res['cog'],
+                 'int. range start': lineRange[0],
+                 'int. range end': lineRange[1]
+                  }
+        
+        if plot: # make a custom plot for the spectrum ew (in wavelength units)
+            fig, ax = plt.subplots(figsize=(10, 4))
+            ax.errorbar(profU.vel/c_kms*wlCenter+wlCenter, profU.specI,
+                        yerr=profU.specSigI, fmt='o', ms=3, ecolor='0.5', c='k')
+            ax.plot(prof.vel/c_kms*wlCenter+wlCenter, prof.specI,
+                    'o', ms=3, c='lightgrey')
+            ax.fill_between(profU.vel/c_kms*wlCenter+wlCenter, profU.specI,
+                            np.ones(len(profU.vel))*res['norm'],
+                            where=(profU.vel >= velrange[0]) & (profU.vel <= velrange[1]),
+                            alpha=0.1, color='k')
+            ax.axvline(lineRange[0], color='tab:blue', ls=':', label='lineRange')
+            ax.axvline(lineRange[1], color='tab:blue', ls=':')
+            ax.axhline(res['norm'], color='pink', ls='--', label='norm')
+            ax.set_ylabel('I/Ic')
+            ax.set_xlabel('Wavelength')
+            plt.legend()
+            return result, fig
+        return result
+
+
+def read_spectrum(fname, usecols=None, trimBadPix=False, sortByWavelength=False):
     """
     Read in the observed spectrum and save it.
     
     This follows the .s format from Donati's LibreESPRIT.
     Files can either have two lines of header or no header.
     This supports 6 column spectropolarimetric files
-    (wavelength, I, V|Q|U, null1, null2, errors),
-    and also 3 column spectra (wavelength, I, errors).
+    (wavelength, Stokes I, Stokes V|Q|U, null1, null2, errors),
+    3 column spectra (wavelength, flux (Stokes I), errors), and
+    2 column spectra (wavelength, flux (Stokes I)).
 
     :param fname: the name of the file to read.
+    :param usecols: optional, tuple or list, explicitly define the columns to
+                    use from the file (similar to the numpy.loadtxt() usecols
+                    argument). This is only useful if the file is not in a
+                    standard 2, 3, or 6 column format.  The order of entries in
+                    the tuple corresponds to wavelength, Stokes I, Stokes V,
+                    N1, N2, and errors.  Columns numbers start at 0.
+                    If a negative value is given, then nothing is read for that
+                    parameter and it is set to 0.
+                    E.g.: usecols=(0, 2) reads wavelength from the 1st column
+                    and flux (Stokes I) from the 3rd column.
+                    usecols=(0, 1, 2, 4, 4, 3) reads wavelength, I, and V as
+                    usual, uses the 5th column for N1 and re-uses it for N2,
+                    and uses the 4th column for errors.
+                    usecols=(0, 1, -1, -1, -1, 3) uses the 1st and 2nd columns
+                    for wavelength and flux, then uses no values for V, N1,
+                    or N2, and uses the 4th column for errors.
     :param trimBadPix: optionally remove the more obviously bad pixels if True.
                        Removes pixels with negative flux or error bars of zero,
                        pixels with flux within 3sigma of zero (large errors),
                        and pixels with extremely large values.
     :param sortByWavelength: reorder the points in the spectrum to always
                              increase in wavelength, if set to True.
+                             Note: if there are multiple spectral orders this
+                             will will destroy information about order edges.
+                             If you want to merge orders, it is usually better
+                             to leave this False and then use
+                             Spectrum.merge_orders() after reading the file.
     :rtype: Spectrum
     """
-    # Reading manually is often faster than np.loadtxt for a large files
+    # Reading manually is often faster than older versions of np.loadtxt
+    # (version < 1.23) for a large files, assuming a more recent version here.
     fObs = open(fname, 'r')
-    #Check if the file starts with data or a header (assume 2 lines of header)
+    # Get the number of data columns in the file
+    # assume at least the 3rd line contains real data (2 lines of header)
     line1 = fObs.readline()
     line2 = fObs.readline()
     line3 = fObs.readline()
-    #assume at least the 3rd line contains real data
     ncolumns = len(line3.split())
-    if ncolumns != 6 and ncolumns != 3 and ncolumns != 2:
+    if ncolumns != 6 and ncolumns != 3 and ncolumns != 2 and usecols is None:
         print('{:} column spectrum: unknown format!\n'.format(ncolumns))
         raise ValueError(('Reading {:} as an {:} column spectrum: '
                           'unknown format!').format(fname, ncolumns))
-    
+
+    # Check if there are header lines in the file
     if len(line1.split()) == ncolumns and len(line2.split()) == ncolumns:
         #If the column counts are consistent there may be no header
         try:
-            #and if the first line starts with numbers, probably no header
+            #and if the first 2 lines start with numbers, probably no header
             float(line1.split()[0])
             float(line1.split()[1])
             float(line2.split()[0])
@@ -460,46 +781,48 @@ def read_spectrum(fname, trimBadPix=False, sortByWavelength=False):
     else:
         obs_header = line1
         nHeader = 2
-
-    #Get the number of lines of data in the file
-    nLines = 3 - nHeader #we've already read 3 lines
-    for line in fObs:
-        words = line.split()
-        if len(words) == ncolumns:
-            nLines += 1
-        else:
-            print('ERROR: reading observation, '
-                  +'line {:}, {:} columns :\n{:}'.format(
-                      nLines, len(words), line))
-
-    obs = Spectrum(np.zeros(nLines), np.zeros(nLines), np.zeros(nLines),
-                   np.zeros(nLines), np.zeros(nLines), np.zeros(nLines),
-                   header=obs_header)
-    
-    #Rewind to start then advance the file pointer 2 lines
-    fObs.seek(0)
-    if obs_header is not None:
-        fObs.readline()
-        fObs.readline()
-    #Then read the actual data of the file
-    for i, line in enumerate(fObs):
-        words = line.split()
-        if (len(words) == ncolumns and ncolumns == 6):
-            obs.wl[i] = float(words[0])
-            obs.specI[i] = float(words[1])
-            obs.specV[i] = float(words[2])
-            obs.specN1[i] = float(words[3])
-            obs.specN2[i] = float(words[4])
-            obs.specSig[i] = float(words[5])
-        elif (len(words) == ncolumns and ncolumns == 3):
-            obs.wl[i] = float(words[0])
-            obs.specI[i] = float(words[1])
-            obs.specSig[i] = float(words[2])
-        elif (len(words) == ncolumns and ncolumns == 2):
-            obs.wl[i] = float(words[0])
-            obs.specI[i] = float(words[1])
-            
     fObs.close()
+
+    # check that usecols is consistent with the read number of columns
+    if usecols is not None:
+        _usecols = usecols
+        if not isinstance(usecols, (list, tuple, np.ndarray)):
+            raise TypeError('In read_spectrum, usecols should be a list or '
+                            'tuple')
+        if np.max(usecols) >= ncolumns:
+            raise ValueError(('Requesting column number {:} but only found '
+                              'column number up to {:} (total {:} columns) '
+                              'in {:}').format(np.max(usecols), ncolumns-1,
+                                               ncolumns, fname))
+        if np.min(usecols) < -ncolumns:
+            _usecols = [max(x, -ncolumns) for x in usecols]
+        if len(usecols) > 6:
+            warnings.warn("\nIn read_spectrum, usecols specifies more columns "
+                          "than can be stored in a Spectrum. Values after the "
+                          "6th entry in usecols will be ignored.", stacklevel=2)
+
+    # Read the file with numpy (efficent in numpy version >= 1.23)
+    elif ncolumns == 2:
+        _usecols = (0,1)
+    elif ncolumns == 3:
+        _usecols = (0,1,-1,-1,-1,2)
+    elif ncolumns == 6:
+        _usecols = (0,1,2,3,4,5)
+    data = np.loadtxt(fname, skiprows=nHeader, usecols=_usecols, unpack=True)
+
+    # Store the data in a Spectrum
+    nLines = data.shape[1]
+    obs = Spectrum(np.zeros(nLines), np.zeros(nLines), np.zeros(nLines),
+                    np.zeros(nLines), np.zeros(nLines), np.zeros(nLines),
+                    header=obs_header)
+    for ii, colval in enumerate(_usecols):
+        if colval < 0: continue
+        if ii == 0: obs.wl = data[ii]
+        if ii == 1: obs.specI = data[ii]
+        if ii == 2: obs.specV = data[ii]
+        if ii == 3: obs.specN1 = data[ii]
+        if ii == 4: obs.specN2 = data[ii]
+        if ii == 5: obs.specSig = data[ii]
 
     #Optionally, remove bad pixels.
     if trimBadPix:
@@ -512,8 +835,34 @@ def read_spectrum(fname, trimBadPix=False, sortByWavelength=False):
     
     #Optionally, sort the observation so wavelength is always increasing
     if sortByWavelength:
-        obs_ind = np.argsort(obs.wl)
-        obs = obs[obs_ind]
+        # if the observation isn't already sorted
+        if not np.all(obs.wl[1:] >= obs.wl[:-1]):
+            obs_ind = np.argsort(obs.wl)   # then get indexes that sort it
+
+            # if the observation isn't simply reversed send a warning
+            if not np.all(obs.wl[1:] <= obs.wl[:-1]):
+                # check the number of orders with wavelength overlaps
+                ordersOverlapping = obs.get_orders(ignoreGaps=True)
+                norders = len(ordersOverlapping)
+                # if it looks like this will merge orders
+                if norders < 100 and norders > 1:
+                    warnings.warn("\nIn read_spectrum(..., sortByWavelength=True): "
+                                  "It looks like there are spectral orders, which "
+                                  "will be lost when this is done!\n"
+                                  "If you care about spectral orders use "
+                                  "sortByWavelength=False. If you don't care about "
+                                  "spectral orders, it is still usually better "
+                                  "to use sortByWavelength=False, and then use the "
+                                  "Spectrum.merge_orders() function. Using "
+                                  "sortByWavelength=True will effectively perform "
+                                  "a 'zipper merge', which is frequently not ideal.",
+                                  stacklevel=2)
+                else:
+                    print('reading spectrum and sorting pixels by wavelength')
+                    print('note this will destroy information about spectral '
+                          'orders, if separate orders are present')
+            # apply sorting
+            obs = obs[obs_ind]
     
     return obs
 

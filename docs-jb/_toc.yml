@@ -8,6 +8,7 @@ parts:
     chapters:
     - file: About/Highlights.md
     - file: About/Compatibilities_and_Instruments.md
+    - file: About/ReleaseNotes.md
     - file: About/Credits.md
   - caption: Getting Started
     chapters:
@@ -22,6 +23,7 @@ parts:
     - file: Tutorials/1-ConvertToSFiles_Tutorial.ipynb
     - file: Tutorials/2-Normalizing_Tutorial.md
     - file: Tutorials/10-SpectrumClass_Tutorial.ipynb
+    - file: Tutorials/PlotLinesSpectra_Tutorial.ipynb
     - file: Tutorials/3-MaskClass_Tutorial.ipynb
     - file: Tutorials/3b-MaskUI_Tutorial.md
     - file: Tutorials/4-ExcludeMaskRegionClass_Tutorial.ipynb
@@ -29,6 +31,7 @@ parts:
     - file: Tutorials/5-LSDClass_Tutorial.ipynb
     - file: Tutorials/6-CalculateBz_Tutorial.ipynb
     - file: Tutorials/7-IndividualLine_Tutorial.ipynb
+    - file: Tutorials/12-EquivalentWidth_Tutorial.ipynb
     - file: Tutorials/8-CalculateBisector_Tutorial.ipynb
   - caption: Contributing
     chapters:

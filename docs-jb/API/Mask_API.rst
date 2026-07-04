@@ -24,5 +24,6 @@ Mask and ExcludeMaskRegions classes and functions
 
 .. autofunction:: specpolFlow.filter_mask
 
-
 .. autofunction:: specpolFlow.cleanMaskUI
+
+.. autofunction:: specpolFlow.plot_elementsChart
