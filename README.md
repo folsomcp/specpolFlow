@@ -1,11 +1,9 @@
 # Welcome to SpecpolFlow!
 
-## NOTICE TO ALL USERS: 
-SpecpolFlow's beta release is live at:
+SpecpolFlow is live on PyPI at:
 ```
 pip install specpolFlow
 ```
-The code is still in active development, while the current modules are well tested, some details may change.
 
 Installing SpecpolFlow will automatically install [LSDpy](https://github.com/folsomcp/LSDpy/).
 
@@ -18,6 +16,7 @@ or NormPlot can be installed separately using:
 pip install normPlot
 ```
 
+Documentation is live on our website at: [folsomcp.github.io/specpolFlow/](https://folsomcp.github.io/specpolFlow/)
 
 ## About SpecpolFlow
 
@@ -29,6 +28,14 @@ We also maintain a series of detailed tutorials, with examples of how to constru
 These tutorials are in the form of Jupyter Notebooks, which can also be run using collaborative platforms such as Google Colab. 
 
 The full documentation can be found here: [folsomcp.github.io/specpolFlow/](https://folsomcp.github.io/specpolFlow/)
+
+
+## Citing
+
+If you use SpecpolFlow in your research, please cite our paper in the Journal of Open Source Software:
+[Folsom, Erba, et al., (2025). SpecpolFlow: a new software package for spectropolarimetry using Python. Journal of Open Source Software, 10(111), 7891](https://joss.theoj.org/papers/10.21105/joss.07891)
+
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.07891/status.svg)](https://doi.org/10.21105/joss.07891)
 
 ## Contact us!
 You can reach the SpF Development Team at: specpolflow@gmail.com
