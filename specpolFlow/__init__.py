@@ -5,5 +5,5 @@ from .lineList import *
 from .cleanMaskUI import cleanMaskUI
 from . import converters
 
-__version__ = "1.1.0a"
+__version__ = "1.1.0a1"
 
