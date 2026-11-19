@@ -17,7 +17,7 @@ from . import obsSpec
 ###################################
 
 def cleanMaskUI(maskName, obsName, outMaskName=None, inExcludeName=None,
-                outExcludeName='excludeRanges.dat', batchMode=False):
+                outExcludeName='excludeRanges.dat', batchMode=False,otherObsName=None,offset=0.0):
     """
     Run an interactive tool for LSD line mask cleaning.
 
@@ -42,6 +42,10 @@ def cleanMaskUI(maskName, obsName, outMaskName=None, inExcludeName=None,
     :param batchMode: Flag for skipping the GUI. False = open the GUI (the default).
                       True = skip the GUI, just read inExcludeName and apply 
                       those exclude regions.
+    :param otherobsName: Python List of file names for additional reference observations. 
+                         These observations are for comparison only and are not affected in any way.
+    :param offset: vertical offset for plotting additional reference observations. 
+                   Each additional observation is offset by this amount from the previous observation.
     :return: a Mask object with the cleaned mask,
              and an ExcludeMaskRegions with the selected exclude regions.
     """
@@ -83,6 +87,12 @@ def cleanMaskUI(maskName, obsName, outMaskName=None, inExcludeName=None,
         #Read the comparison observation
         obs = obsSpec.read_spectrum(obsName)
         
+        #Read in any additional comparison observations
+        if otherObsName is not None:
+            otherobs=[]
+            for i in range(len(otherObsName)):
+                otherobs.append(obsSpec.read_spectrum(otherObsName[i]))
+
         #Make an initial LSD model spectrum
         print('Generating test LSD profile...')
         lsdp = cleanSub.lsdParams(obsName, outMaskName)
@@ -102,6 +112,12 @@ def cleanMaskUI(maskName, obsName, outMaskName=None, inExcludeName=None,
         fig =  Figure()
         ax1 = fig.add_subplot(111)
         pltObsI = ax1.plot(obs.wl, obs.specI, 'k')
+
+        #overplot additional reference observations, vertically offset by the specified amount
+        if otherObsName is not None:
+            for i in range(len(otherObsName)):
+                ax1.plot(otherobs[i].wl,otherobs[i].specI+(i+1)*float(offset),'C{}'.format(i),zorder=-1)
+
         maskUsed = mask[mask.iuse == 1]
         maskNot = mask[mask.iuse == 0]
         pltMaskN = ax1.vlines(maskNot.wl, ymin=1.0-maskNot.depth, ymax=1.0,

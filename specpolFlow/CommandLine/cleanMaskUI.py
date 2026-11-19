@@ -24,6 +24,8 @@ def clean_mask_cli():
     parser.add_argument('outName', nargs='?', default=None, help='Optional name for the output cleaned line mask, defaults to [input_file_name].clean')
     parser.add_argument('-e', '--exclude', default='excludeRanges.dat', help='Optional, a file of wavelength ranges to exclude from the line mask.  If the file does not exist default initial values will be used.')
     parser.add_argument('-b', '--batch', action='store_true', help='Run in batch mode, just apply the exclude regions from file, skip the interactive UI and LSD calculations.')
+    parser.add_argument('-c', '--comparison', nargs='*', default=None, help='Optional, a list of filenames (with spaces in between) to overplot for comparison')
+    parser.add_argument('-o', '--offset',default=0.0, help='Optional, the vertial offset between comparison spectra')
     args = parser.parse_args()
 
     maskName = args.mask
@@ -31,12 +33,16 @@ def clean_mask_cli():
     outMaskName = args.outName
     excludeFileName = args.exclude
     batchMode = args.batch
+    otherObsName = args.comparison
+    offset = args.offset
     
     cleanMask, excludeRanges = pol.cleanMaskUI(maskName, obsName,
                                                outMaskName=outMaskName,
                                                inExcludeName=excludeFileName,
                                                outExcludeName=excludeFileName,
-                                               batchMode=batchMode)
+                                               batchMode=batchMode,
+                                               otherObsName=otherObsName,
+                                               offset=offset)
     return
 
 #For running this Python script as a terminal program

@@ -11,6 +11,8 @@ The `cleanMaskUI` function takes:
 - The file name of an observed spectrum '.s' file, for comparison and LSD calculations
 - The file name for saving the new cleaned mask (optional; if not specified it will use the input mask name with '.clean' added)
 - The exclude mask region file, which contains the set of regions to be excluded from the mask (optional)
+- A python list of additional file names of observed spectra for comparison (optional)
+- A vertical offset for plotting additional comparison spectra (optional)
 
 For running the tool from the terminal use:
 ```
@@ -284,3 +286,46 @@ After tweaking the depths of several more lines across the spectrum, we get an i
 ```
 
 When you are done, closing the window automatically saves modified mask with the final fit depths.  The output mask is saved using either the output name you provide, or using original mask name with '.clean' added to the end.
+
+
+## Overplotting Additionally Reference Spectra
+
+In some cases, it may be useful to view multiple reference spectra at once when cleaning or tweaking line masks. To do this you can pass a list additional reference observations into the `cleanMaskUI` function. 
+
+From a Jupyter notebook use:
+
+```
+pol.cleanMaskUI('input_mask_file', 'reference_observation.s', 'cleaned_mask_file',otherObsName=['reference_observation2.s','reference_observation3.s','reference_observation4.s'])
+```
+
+From the terminal use the `-c` flag with spaces between each additional reference observation:
+
+```
+spf-cleanmask input_mask_file reference_observation.s cleaned_mask_file -c reference_observation2.s reference_observation3.s reference_observation4.s
+```
+
+```{image} MaskUI_images/comparisonspectra_nooffset.png
+:alt: CleanMaskUI with additional reference observations
+:class: bg-primary mb-1
+:width: 600px
+:align: center
+```
+
+By default any additional reference obsevations are plotted behind the required reference observation, but for multiple observations this can be a bit messy. You can also pass an `offset` into `cleanMaskUI` which will vertically shift each reference observation by the specified amount. 
+
+From a Jupyter notebook use: 
+```
+pol.cleanMaskUI('input_mask_file', 'reference_observation.s', 'cleaned_mask_file',otherObsName=['reference_observation2.s','reference_observation3.s','reference_observation4.s'], offset=0.2)
+```
+
+From the terminal use the `-o` flag: 
+```
+spf-cleanmask input_mask_file reference_observation.s cleaned_mask_file -c reference_observation2.s reference_observation3.s reference_observation4.s -o 0.2
+```
+
+```{image} MaskUI_images/comparisonspectra_offset.png
+:alt: CleanMaskUI with additional reference observations vertically offset
+:class: bg-primary mb-1
+:width: 600px
+:align: center
+```

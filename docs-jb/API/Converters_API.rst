@@ -10,3 +10,5 @@ Converters
 .. autofunction:: specpolFlow.converters.spirou_e
 
 .. autofunction:: specpolFlow.converters.spirou_t
+
+.. autofunction:: specpolFlow.converters.fits1D
